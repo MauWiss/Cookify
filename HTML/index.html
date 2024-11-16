@@ -4,24 +4,25 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>My HTML Project</title>
-  <!-- Link to CSS stylesheets (optional) -->
-  <link rel="stylesheet" href="styles.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
-  <header>
-    <h1>Welcome to My HTML Project</h1>
-    <p>check</p>
-  </header>
   
   <main>
-    <p>This is the main content area. Add your content here.</p>
+    <div>
+      <input type="text" id= "counter" placeholder="enter counter" >
+      <input type="button" id= "initialize"   value="start">
+      <input type="button" id= "increment"   value="+">
+      <input type="button" id= "printNums" value="Go" >
+      <div id="numsGo"> </div> 
+    </div>
+
+    
   </main>
   
-  <footer>
-    <p>&copy; 2024 Your Name</p>
-  </footer>
 
   <!-- Link to JavaScript files (optional) -->
-  <script src="script.js"></script>
+  <script type="module" src="../JavaScript/main.js"></script>
 </body>
 </html>
