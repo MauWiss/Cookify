@@ -1,9 +1,64 @@
 import { Counter } from "./Counter.js";
 import { Clock } from "./Clock.js";
+import { Point } from "./Point.js";
+
+function ExistCord(pointArray, x, y) {
+    return pointArray.some(point => point.x === x && point.y === y);
+}
+
+function ExistPoint(pointArray, pCheck) {
+    return pointArray.some(point => point.equals(pCheck));
+}
+
+function calculateTotalDistance(pointArray) {
+    let totalDistance = 0;
+
+    for (let i = 0; i < pointArray.length - 1; i++) {
+        const dx = pointArray[i + 1].x - pointArray[i].x; // Difference in x-coordinates
+        const dy = pointArray[i + 1].y - pointArray[i].y; // Difference in y-coordinates
+        const distance = Math.sqrt(dx * dx + dy * dy); // Euclidean distance
+        totalDistance += distance; // Add to total distance
+    }
+
+    return totalDistance;
+}
+
 
 $(document).ready(function () {
     var count = new Counter();  // Create a new Counter instance
     var clockArray = []; // create new Clock array
+    const rawPoints = [
+        { x: 0, y: 0 },
+        { x:2, y: 2},
+        { x: 3, y: 4 },
+        { x: 6, y: 10 }
+    ];
+    
+    // Convert plain objects to Point instances
+    const points = rawPoints.map(({ x, y }) => new Point(x, y));
+
+    if (window.location.pathname.includes("point.html")) {
+
+        if (ExistCord(points, 2, 2)) {
+            console.log("cord");
+        }
+
+        if (ExistPoint(points, new Point(3, 4))) {
+            console.log("point");
+        }
+
+
+        // Generate the points display
+        const pointsHtml = points
+            .map(point => `(${point.x}, ${point.y})`) // Convert each point to a string
+            .join(" → "); // Join points with an arrow
+
+        // Calculate the total distance
+        const totalDistance = calculateTotalDistance(points);
+
+        // Set the content of the #pointRoute element
+        $("#pointRoute").text(`${pointsHtml} (Total Distance: ${totalDistance.toFixed(2)})`);
+    }
 
     // When the "initialize" button is clicked
     $("#initialize").click(function () {
@@ -46,8 +101,8 @@ $(document).ready(function () {
         clockArray.push(newClock);
 
         if (clockArray.length % 5 == 0) {
-            $("#infoDiv").append("<p> The country Name: " + newClock.countryName+ ". The time is: " + newClock.show()
-            +". The time is seconds is: " + newClock.ConverToSeconds() + "</p>");
+            $("#infoDiv").append("<p> The country Name: " + newClock.countryName + ". The time is: " + newClock.show()
+                + ". The time is seconds is: " + newClock.ConverToSeconds() + "</p>");
         }
 
         // Clear all input fields
@@ -59,3 +114,4 @@ $(document).ready(function () {
     })
 
 });
+
