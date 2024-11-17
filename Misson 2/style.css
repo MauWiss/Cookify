@@ -1,0 +1,68 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h2 {
+    color: #4CAF50;
+    margin-bottom: 20px;
+}
+
+form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    width: 400px;  /* הגברת רוחב הטופס */
+}
+
+label {
+    display: block;
+    margin: 10px 0 5px;
+    font-size: 16px;
+}
+
+input {
+    width: 100%;
+    padding: 12px;  /* הגדלת padding */
+    margin-bottom: 20px;  /* הגדלת הרווח בין השדות */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;  /* גודל גופן קטן יותר */
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;  /* גורם לכפתור להיות ברוחב מלא */
+    font-size: 16px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#duckDetails {
+    margin-top: 20px;
+    text-align: center;
+    padding: 20px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    width: 400px;  /* הגברת רוחב הצגת פרטי הברווז */
+}
+
+#duckDetails img {
+    width: 150px;  /* גודל התמונה קטן יותר */
+    height: auto;
+    border-radius: 10px;
+    border: 3px solid #ddd;  /* מסגרת דקה סביב התמונה */
+}
