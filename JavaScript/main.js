@@ -28,7 +28,7 @@ $(document).ready(function () {
     var count = new Counter();  // Create a new Counter instance
     var clockArray = []; // create new Clock array
     const rawPoints = [
-        { x: 0, y: 0 },
+        { x: 0, y: 5 },
         { x:2, y: 2},
         { x: 3, y: 4 },
         { x: 6, y: 10 }
@@ -50,7 +50,7 @@ $(document).ready(function () {
 
         // Generate the points display
         const pointsHtml = points
-            .map(point => `(${point.x}, ${point.y})`) // Convert each point to a string
+            .map(point => point.show()) // Convert each point to a string
             .join(" → "); // Join points with an arrow
 
         // Calculate the total distance
