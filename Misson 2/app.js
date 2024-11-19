@@ -107,17 +107,22 @@ function isValidHex(color) {
     return /^#[0-9A-Fa-f]{6}$/.test(color);
 }
 
-// טיפול באירוע שליחת הטופס
+// Update the color input's background when a new color is selected
+document.getElementById('color').addEventListener('input', function () {
+    this.style.backgroundColor = this.value;
+});
+
+// Form submission logic (already present)
 document.getElementById('duckForm').addEventListener('submit', function (e) {
     e.preventDefault();
 
-    // קריאת הערכים מהטופס
+    // Read values from the form
     const name = document.getElementById('name').value.trim();
     const color = document.getElementById('color').value;
     const age = parseInt(document.getElementById('age').value);
     const weight = parseFloat(document.getElementById('weight').value);
 
-    // בדיקת תקינות הקלטים
+    // Validate inputs
     if (!name) {
         alert("Please provide a valid name.");
         return;
@@ -138,16 +143,14 @@ document.getElementById('duckForm').addEventListener('submit', function (e) {
         return;
     }
 
-    // יצירת אובייקט הברווז
+    // Create Duck instance
     duck = new Duck(name, color, age, weight);
 
-    // הסתרת כפתור "צור ברווז"
+    // Hide "Create Duck" button and form
     document.getElementById('createDuckBtn').style.display = 'none';
-
-    // הסתרת ה-object של ה-SVG וה-DIV של פרטי הברווז
     document.getElementById('duckDetails').style.display = 'none';
 
-    // הצגת כפתורי Show ו-Quack
+    // Show action buttons
     document.getElementById('buttonsContainer').style.display = 'block';
 });
 
