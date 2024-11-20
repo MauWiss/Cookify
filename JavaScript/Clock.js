@@ -44,6 +44,7 @@ export class Clock {
         if (value >= 0 && value < 60) {
             this._seconds = value;
         } else {
+            console.log("Seconds must be between 0 and 59.")
             throw new Error("Seconds must be between 0 and 59.");
         }
     }

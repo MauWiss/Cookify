@@ -90,28 +90,30 @@ $(document).ready(function () {
         const minutes = $("#minutes").val();
         const seconds = $("#seconds").val();
         const country = $("#country").val();
-
-        const newClock = new Clock(
-            parseInt(hours, 10),
-            parseInt(minutes, 10),
-            parseInt(seconds, 10),
-            country
-        );
-
-        clockArray.push(newClock);
-
-        if (clockArray.length % 5 == 0) {
-            $("#infoDiv").append("<p> The country Name: " + newClock.countryName + ". The time is: " + newClock.show()
-                + ". The time is seconds is: " + newClock.ConverToSeconds() + "</p>");
+    
+        try {
+            const newClock = new Clock();
+            newClock.hours = parseInt(hours, 10);    // Using setter to validate hours
+            newClock.minutes = parseInt(minutes, 10); // Using setter to validate minutes
+            newClock.seconds = parseInt(seconds, 10); // Using setter to validate seconds
+            newClock.countryName = country;           // Using setter to validate country name
+    
+            clockArray.push(newClock);
+    
+            if (clockArray.length % 5 == 0) {
+                $("#infoDiv").append("<p> The country Name: " + newClock.countryName + ". The time is: " + newClock.show()
+                    + ". The time in seconds is: " + newClock.ConverToSeconds() + "</p>");
+            }
+    
+            // Clear all input fields
+            $("#hours").val('');
+            $("#minutes").val('');
+            $("#seconds").val('');
+            $("#country").val('');
+        } catch (error) {
+            // Handle validation errors, e.g., display a message to the user
+            alert(error.message);
         }
-
-        // Clear all input fields
-        $("#hours").val('');
-        $("#minutes").val('');
-        $("#seconds").val('');
-        $("#country").val('');
-
-    })
-
+    });
 });
 
