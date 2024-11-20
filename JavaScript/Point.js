@@ -10,7 +10,7 @@ export class Point {
     }
 
     equals(p) {
-        return p._x == this.x && p._y == this._y;
+        return p.x === this.x && p.y === this.y;
     }
 
     // Getter for x
