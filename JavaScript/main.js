@@ -99,10 +99,19 @@ $(document).ready(function () {
             newClock.countryName = country;           // Using setter to validate country name
     
             clockArray.push(newClock);
+
+                 // Display the size of the array
+            $("#counterDiv").text(`Number of countries: ${clockArray.length}`);
     
-            if (clockArray.length % 5 == 0) {
-                $("#infoDiv").append("<p> The country Name: " + newClock.countryName + ". The time is: " + newClock.show()
-                    + ". The time in seconds is: " + newClock.ConverToSeconds() + "</p>");
+            if (clockArray.length % 5 === 0) {
+                $("#infoDiv").empty(); // Clear the previous information
+    
+                // Use forEach to loop through all clocks in the array
+                clockArray.forEach((clock) => {
+                    $("#infoDiv").append("<p> The country Name: " + clock.countryName + 
+                                          ". The time is: " + clock.show() +
+                                          ". The time in seconds is: " + clock.ConverToSeconds() + "</p>");
+                });
             }
     
             // Clear all input fields
