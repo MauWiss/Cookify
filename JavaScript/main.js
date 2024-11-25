@@ -37,13 +37,13 @@ $(document).ready(function () {
   const points = rawPoints.map(({ x, y }) => new Point(x, y));
 
   if (window.location.pathname.includes("point.html")) {
-    console.log(ExistCord(points, 2, 2)); // true
-    console.log(ExistCord(points, 2, 3)); // false
+    console.log("ExistCord(points, 2, 2): " + ExistCord(points, 2, 2)); // true
+    console.log("ExistCord(points, 2, 3): " + ExistCord(points, 2, 3)); // false
 
     const p1 = new Point(3, 4);
     const p2 = new Point(4, 4);
-    console.log(ExistPoint(points, p1)); // true
-    console.log(ExistPoint(points, p2)); // false
+    console.log("ExistPoint(points, p1) //p1 is (3,4): " + ExistPoint(points, p1)); // true
+    console.log("ExistPoint(points, p2) //p2 in (4,4): " + ExistPoint(points, p2)); // false
 
     // Generate the points display
     const pointsHtml = points
