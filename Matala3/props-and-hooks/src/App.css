@@ -1,0 +1,146 @@
+body {
+  position: relative;
+  z-index: 1;
+  font-family: "Arial", sans-serif;
+  margin: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("C:\Users\hadma\Desktop\Matala3\props-and-hooks\public\background.jpg");
+  background-size: cover;
+  background-position: center center;
+  background-attachment: fixed;
+  filter: blur(4px); /* טשטוש הרקע */
+  z-index: -1; /* מוודא שה-overlay נמצא מתחת לתוכן */
+}
+
+/* שמירה על הטופס מעל התמונה */
+.container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2; /* לוודא שהטופס יהיה מעל לתמונה */
+}
+/* עיצוב כותרת ראשית */
+h1 {
+  font-family: "Arial", sans-serif;
+  color: #333;
+  font-size: 26px;
+  text-align: center; /* ממקם את הכותרת במרכז */
+  margin-top: 20px;
+  font-weight: bold;
+  letter-spacing: 2px; /* הוספת רווח בין האותיות */
+  text-transform: uppercase; /* הופך את הטקסט לאותיות גדולות */
+  text-shadow: none; /* מסיר את הצללית */
+  position: relative; /* מוודא שהכותרת תוצג מעל לתמונה */
+  z-index: 1; /* מוודא שהכותרת תוצג מעל לתמונה */
+}
+
+/* עיצוב כותרת "Register" */
+h2 {
+  font-family: "Arial", sans-serif;
+  font-size: 30px;
+  color: #4caf50; /* צבע ירוק */
+  text-align: center;
+  margin-bottom: 20px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease; /* הוספת אנימציה קלה כשיש אינטרקציה */
+}
+
+/* אפקט אנימציה על כותרת "Register" */
+h2:hover {
+  transform: translateY(-5px); /* הזזה קלה למעלה בעת ריחוף */
+  color: #45a049; /* שינוי צבע קל לירוק כהה יותר בעת ריחוף */
+}
+
+/* עיצוב הטופס */
+form {
+  background-color: rgba(255, 255, 255, 0.85); /* טופס עם רקע לבן ושקיפות */
+  padding: 30px;
+  border-radius: 15px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); /* צללית רכה */
+  width: 100%;
+  max-width: 400px;
+}
+h2 {
+  text-align: center;
+  color: #4caf50;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+/* עיצוב שדות קלט */
+input {
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #fafafa;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  border-color: #4caf50; /* גבול ירוק כשממוקדים בשדה */
+  outline: none;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049; /* שינוי צבע הכפתור בעת ריחוף */
+}
+
+/* עיצוב הודעות שגיאה */
+p {
+  color: red;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+/* עיצוב שדות קלט מכילים */
+input[type="file"] {
+  padding: 6px;
+  border: 1px solid #ddd;
+}
+
+/* עיצוב עבור טופס רספונסיבי */
+@media (max-width: 600px) {
+  form {
+    width: 90%;
+    padding: 15px;
+  }
+
+  h2 {
+    font-size: 20px;
+  }
+}
