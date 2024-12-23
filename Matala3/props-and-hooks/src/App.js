@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import "./App.css";
 import Register from "./components/Register";
+import Login from "./components/Login";
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -18,6 +19,7 @@ function App() {
     <div>
       <h1>User Management System</h1>
       <Register onRegister={handleRegister} />
+      <Login/>
       <div class="overlay"></div>
     </div>
   );
