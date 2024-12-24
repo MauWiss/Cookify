@@ -20,7 +20,7 @@ function App() {
       <h1>User Management System</h1>
       <Register onRegister={handleRegister} />
       <Login/>
-      <div class="overlay"></div>
+      <div className="overlay"></div>
     </div>
   );
 }
