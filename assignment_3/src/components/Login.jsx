@@ -28,14 +28,23 @@ export default function Login(props) {
     );
 
     if (userExists) {
-      // Update the current user in localStorage
+      // Update the current user in sessionStorage
       sessionStorage.setItem('loggedInUser', JSON.stringify(userExists));
+
+      setLogin({
+        username: '',
+        password: ''
+      });
 
       console.log('Login successful');
     } else {
       console.log('Login failed');
     }
   };
+
+  const logOutUser = () => {
+    sessionStorage.removeItem('loggedInUser'); 
+  } 
 
   const validateForm = () => {
     const newErrors = {};
@@ -96,6 +105,7 @@ export default function Login(props) {
       {errors.password && <p>{errors.password}</p>}
 
       <button type="submit">Login</button>
+      <button onClick={()=> {logOutUser()}} >Log Out</button>
     </form>
   );
 }
