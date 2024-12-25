@@ -1,5 +1,6 @@
 // App.js
-import React, { useState } from "react";
+import { useState} from "react";
+import {Routes, Route, Link } from "react-router-dom";
 import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -16,10 +17,16 @@ function App() {
   };
   
   return (
+    
     <div>
+      <nav>
+      <Link to="/Register">Register</Link> || <Link to="/Login">Login</Link>
+    </nav>
       <h1>User Management System</h1>
-      <Register onRegister={handleRegister} />
-      <Login/>
+      <Routes>
+      <Route path='/Register' element= {<Register onRegister={handleRegister} />}/>
+      <Route path='/Login'element= {<Login/>}/>
+      </Routes> 
       <div className="overlay"></div>
     </div>
   );

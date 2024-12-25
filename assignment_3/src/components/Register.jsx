@@ -75,7 +75,7 @@ function Register({ onRegister }) {
     }
 
     // Birth Date
-    if (new Date(form.birthDate) >= new Date()) {
+    if (new Date(form.birthDate) >= new Date() || 120 >= (new Date().getFullYear - new Date(form.birthDate).getFullYear) || 18 <=(new Date().getFullYear - new Date(form.birthDate).getFullYear) ) {
       newErrors.birthDate = "Birth date cannot be in the future.";
     }
 
