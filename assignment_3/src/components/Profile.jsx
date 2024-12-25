@@ -6,7 +6,7 @@ import {
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-export default function Profile({ logOutUser }) {
+export default function Profile(props) {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -23,8 +23,8 @@ export default function Profile({ logOutUser }) {
   }
 
   return (
-    <div className="userBlock">
-      <div className="userData">
+    <form className="card p-4">
+      <div className="card-body">
         <div className="userImage">
           {userData.image ? (
             <img
@@ -52,21 +52,21 @@ export default function Profile({ logOutUser }) {
           </p>
         </div>
       </div>
-      <div className="userActions">
-        <button
+      <div className="btn-group" role="group" >
+        <button className="btn btn-primary  m-1 "
           onClick={() => {
-            logOutUser();
+            props.logOutUser();
           }}
         >
           Log Out
         </button>
-        <button onClick={() => navigate("/EditProfile")}>Edit</button>
+        <button onClick={() => navigate("/EditProfile")} className="btn btn-primary m-1">Edit</button>
         <button
           onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
-        >
+          className="btn btn-primary  m-1">
           Favorite Game
         </button>
       </div>
-    </div>
+    </form>
   );
 }

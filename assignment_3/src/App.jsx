@@ -35,11 +35,33 @@ function App() {
   return (
     <div>
       {/* Show navigation links only if the user is not logged in */}
-      {!isLoggedIn && (
-        <nav>
-          <Link to="/Register">Register</Link> || <Link to="/Login">Login</Link>
-        </nav>
-      )}
+        {/* Navbar */}
+        <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <div className="container-fluid">
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span className="navbar-toggler-icon"></span>
+          </button>
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav">
+              {!isLoggedIn && (
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/Register">Register</Link>
+                  </li>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/Login">Login</Link>
+                  </li>
+                </>
+              )}
+              {isLoggedIn && (
+                <li className="nav-item">
+                  <Link className="nav-link" to="/Profile">Profile</Link>
+                </li>
+              )}
+            </ul>
+          </div>
+        </div>
+      </nav>
       <h1>User Management System</h1>
       <Routes>
         <Route path="/Register" element={<Register onRegister={handleRegister} />} />

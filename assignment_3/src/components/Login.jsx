@@ -85,29 +85,45 @@ export default function Login(props) {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <div>
-        <h1>User Name</h1>
+    <form className="card p-4" onSubmit={handleLogin}>
+    <div className="card-body">
+      <h2 className="card-title mb-4 text-center">Login</h2>
+      
+      {/* Username */}
+      <div className="mb-3">
+        <label htmlFor="username" className="form-label">User Name</label>
         <input
           type="text"
+          className="form-control"
+          id="username"
+          placeholder="Enter User Name"
           name="username"
           value={login.username}
           onChange={handleChange}
         />
+        {errors.username && <div className="text-danger mt-2">{errors.username}</div>}
       </div>
-      {errors.username && <p>{errors.username}</p>}
-      <div>
-        <h1>PassWord</h1>
+
+      {/* Password */}
+      <div className="mb-3">
+        <label htmlFor="password" className="form-label">Password</label>
         <input
           type="password"
+          className="form-control"
+          id="password"
+          placeholder="Enter Password"
           name="password"
           value={login.password}
           onChange={handleChange}
         />
+        {errors.password && <div className="text-danger mt-2">{errors.password}</div>}
       </div>
-      {errors.password && <p>{errors.password}</p>}
 
-      <button type="submit">Login</button>
-    </form>
+      {/* Submit Button */}
+      <div className="d-flex justify-content-center">
+        <button type="submit" className="btn btn-primary w-20">Login</button>
+      </div>
+    </div>
+  </form>
   );
 }
