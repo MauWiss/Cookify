@@ -5,7 +5,7 @@ import {
   MdDateRange,
 } from "react-icons/md";
 
-export default function Profile() {
+export default function Profile({ logOutUser }) {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
@@ -19,7 +19,6 @@ export default function Profile() {
   if (!userData) {
     return <p>Please log in to view your profile.</p>;
   }
-  console.log("Image Data:", userData.image);
 
   return (
     <div className="userBlock">
@@ -29,7 +28,7 @@ export default function Profile() {
             <img
               src={userData.image} // Base64 string or URL
               alt="User"
-              style={{ maxWidth: "100px", borderRadius: "50%" }}
+              style={{ maxWidth: "200px", borderRadius: "10%" }}
             />
           ) : (
             <p>No Image Available</p>
@@ -52,9 +51,19 @@ export default function Profile() {
         </div>
       </div>
       <div className="userActions">
-        <button>Log Out</button>
+        <button
+          onClick={() => {
+            logOutUser();
+          }}
+        >
+          Log Out
+        </button>
         <button>Edit</button>
-        <button>Favorite Game</button>
+        <button
+          onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
+        >
+          Favorite Game
+        </button>
       </div>
     </div>
   );

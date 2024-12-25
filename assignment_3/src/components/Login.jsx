@@ -108,7 +108,6 @@ export default function Login(props) {
       {errors.password && <p>{errors.password}</p>}
 
       <button type="submit">Login</button>
-      <button onClick={()=> {logOutUser()}} >Log Out</button>
     </form>
   );
 }
