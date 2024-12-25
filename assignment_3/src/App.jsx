@@ -4,6 +4,7 @@ import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -44,6 +45,7 @@ function App() {
         <Route path="/Register" element={<Register onRegister={handleRegister} />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/Profile" element={<Profile logOutUser={logOutUser} />} />
+        <Route path="/EditProfile" element={<EditProfile />} />
         <Route path="*" element={<Navigate to="/Login" />} /> {/* Default to Login */}
       </Routes>
       <div className="overlay"></div>

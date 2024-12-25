@@ -4,9 +4,11 @@ import {
   MdLocationOn,
   MdDateRange,
 } from "react-icons/md";
+import { useNavigate } from "react-router-dom";
 
 export default function Profile({ logOutUser }) {
   const [userData, setUserData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     // Retrieve the logged-in user's data from sessionStorage
@@ -58,7 +60,7 @@ export default function Profile({ logOutUser }) {
         >
           Log Out
         </button>
-        <button>Edit</button>
+        <button onClick={() => navigate("/EditProfile")}>Edit</button>
         <button
           onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
         >
