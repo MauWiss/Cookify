@@ -87,7 +87,7 @@ export default function Login(props) {
   };
 
   return (
-    <form className="card p-4" onSubmit={handleLogin}>
+    <form className="card p-4 mx-auto" onSubmit={handleLogin}>
     <div className="card-body">
       <h2 className="card-title mb-4 text-center">Login</h2>
       

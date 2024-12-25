@@ -29,7 +29,7 @@ export default function Profile() {
   }
 
   return (
-    <form className="card p-4">
+    <form className="card mx-auto">
       <div className="card-body">
         <div className="userImage">
           {userData.image ? (
@@ -43,30 +43,27 @@ export default function Profile() {
           )}
         </div>
         <div className="userInfo">
-          <p className="userName">
+          <p className="fs-2">
             {userData.firstName} {userData.lastName}
           </p>
-          <p>
+          <p className="fs-5">
             <MdOutlineMailOutline /> {userData.email}
           </p>
-          <p>
+          <p className="fs-5">
             <MdLocationOn /> {userData.street} {userData.number},{" "}
             {userData.city}
-          </p>
-          <p>
+          </p > 
+          <p className="fs-5">
             <MdDateRange /> {userData.birthDate}
           </p>
         </div>
       </div>
       <div className="btn-group" role="group">
         <button
-          className="btn btn-primary m-1"
-          onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
-            handleLogOut();
-          }}
+          onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
+          className="btn btn-success m-1"
         >
-          Log Out
+          Favorite Game
         </button>
         <button
           onClick={() => navigate("/EditProfile")}
@@ -74,11 +71,15 @@ export default function Profile() {
         >
           Edit
         </button>
+
         <button
-          onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
-          className="btn btn-primary m-1"
+          className="btn btn-danger m-1"
+          onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            handleLogOut();
+          }}
         >
-          Favorite Game
+          Log Out
         </button>
       </div>
     </form>

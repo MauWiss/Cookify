@@ -56,7 +56,7 @@ function App() {
       {/* Show navigation links only if the user is not logged in */}
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container-fluid">
+        <div className="container-fluid justify-content-center">
           <button
             className="navbar-toggler"
             type="button"
@@ -104,7 +104,7 @@ function App() {
           </div>
         </div>
       </nav>
-      <h1>User Management System</h1>
+      <h1 >User Management System</h1>
       <Routes>
         <Route path="/Register" element={<Register onRegister={handleRegister} />} />
         <Route path="/Login" element={<Login onLogin={setLoggedInUser} />} />

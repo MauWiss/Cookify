@@ -54,79 +54,86 @@ export default function EditProfile() {
   
 
   return (
-    <div className="editProfileBlock">
-      <h1>Edit Profile</h1>
-      <form>
-        <div>
+    <div className="card p-4 mx-auto">
+      <h1 className="card-title mb-4 text-center" >Edit Profile</h1>
+      <form className="card-body">
+        <div className="mb-3">
           <label>Username:</label>
           <input
             type="text"
             name="username"
+            className="form-control"
             value={form.username || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>First Name:</label>
           <input
             type="text"
             name="firstName"
+            className="form-control"
             value={form.firstName || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>Last Name:</label>
           <input
             type="text"
             name="lastName"
+            className="form-control"
             value={form.lastName || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3 ">
           <label>Email (Not Editable):</label>
           <p>{form.email}</p>
         </div>
-        <div>
+        <div className="mb-3">
           <label>Birth Date:</label>
           <input
             type="date"
             name="birthDate"
+            className="form-control"
             value={form.birthDate || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>City:</label>
           <input
             type="text"
             name="city"
+            className="form-control"
             value={form.city || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>Street:</label>
           <input
             type="text"
             name="street"
+            className="form-control"
             value={form.street || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>House Number:</label>
           <input
             type="number"
             name="number"
+            className="form-control"
             value={form.number || ""}
             onChange={handleChange}
           />
         </div>
-        <div>
+        <div className="mb-3">
           <label>Profile Image:</label>
-          <input type="file" accept="image/*" onChange={handleImageChange} />
+          <input type="file" accept="image/*" className="form-control" onChange={handleImageChange} />
           {form.image && (
             <img
               src={form.image}
@@ -135,10 +142,10 @@ export default function EditProfile() {
             />
           )}
         </div>
-        <button type="button" onClick={handleSave}>
+        <button  type="button"  className="btn btn-success m-1 w-20" onClick={handleSave}>
           Save
         </button>
-        <button type="button" onClick={() => navigate("/Profile")}>
+        <button type="button"  className="btn btn-danger  m-1 w-20" onClick={() => navigate("/Profile")}>
           Cancel
         </button>
       </form>
