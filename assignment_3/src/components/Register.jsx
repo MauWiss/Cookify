@@ -25,7 +25,14 @@ function Register({ onRegister }) {
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
-      setForm((prev) => ({ ...prev, image: file }));
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setForm((prev) => ({
+          ...prev,
+          image: event.target.result, // Store Base64 string
+        }));
+      };
+      reader.readAsDataURL(file); // Convert file to Base64 string
     } else {
       setErrors((prev) => ({
         ...prev,
@@ -33,6 +40,7 @@ function Register({ onRegister }) {
       }));
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {};

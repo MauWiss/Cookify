@@ -1,9 +1,9 @@
-// App.js
-import { useState} from "react";
-import {Routes, Route, Link } from "react-router-dom";
+import { useState } from "react";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import Profile from "./components/Profile";
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -11,22 +11,32 @@ function App() {
   const handleRegister = (newUser) => {
     setUsers((prevUsers) => {
       const updatedUsers = [...prevUsers, newUser];
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // שומר את המשתמשים ב-localStorage
+      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Store users in localStorage
       return updatedUsers;
     });
   };
-  
+
+  const isLoggedIn = !!sessionStorage.getItem("loggedInUser"); // Check if user is logged in
+
+  const ProtectedRoute = ({ element }) => {
+    return isLoggedIn ? element : <Navigate to="/Login" />;
+  };
+
   return (
-    
     <div>
-      <nav>
-      <Link to="/Register">Register</Link> || <Link to="/Login">Login</Link>
-    </nav>
-      <h1>User Management System</h1>
+      {/* Show navigation links only if the user is not logged in */}
+      {!isLoggedIn && (
+        <nav>
+          <Link to="/Register">Register</Link> || <Link to="/Login">Login</Link>
+          <h1>User Management System</h1>
+        </nav>
+      )}
       <Routes>
-      <Route path='/Register' element= {<Register onRegister={handleRegister} />}/>
-      <Route path='/Login'element= {<Login/>}/>
-      </Routes> 
+        <Route path="/Register" element={<Register onRegister={handleRegister} />} />
+        <Route path="/Login" element={<Login />} />
+        <Route path="/Profile" element={<ProtectedRoute element={<Profile />} />} />
+        <Route path="*" element={<Navigate to="/Login" />} /> {/* Default to Login */}
+      </Routes>
       <div className="overlay"></div>
     </div>
   );

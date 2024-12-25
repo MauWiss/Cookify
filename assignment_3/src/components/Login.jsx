@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from "react-router-dom";
 
 export default function Login(props) {
   const [login, setLogin] = useState({
@@ -7,6 +8,7 @@ export default function Login(props) {
   });
 
   const [errors, setErrors] = useState({}); // Object to store errors
+  const navigate = useNavigate(); // Hook for navigation
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -37,6 +39,7 @@ export default function Login(props) {
       });
 
       console.log('Login successful');
+      navigate("/Profile");
     } else {
       console.log('Login failed');
     }

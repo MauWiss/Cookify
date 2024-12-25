@@ -35,6 +35,7 @@ body {
   align-items: center;
   z-index: 2; /* לוודא שהטופס יהיה מעל לתמונה */
 }
+
 /* עיצוב כותרת ראשית */
 h1 {
   font-family: "Arial", sans-serif;
@@ -103,7 +104,7 @@ input:focus {
   outline: none;
 }
 
-button {
+/*button {
   width: 100%;
   padding: 10px;
   background-color: #4caf50;
@@ -113,20 +114,18 @@ button {
   font-size: 16px;
   cursor: pointer;
   transition: background-color 0.3s;
-}
-
-button:hover {
+}*/
+/*
+button:hover {}
   background-color: #45a049; /* שינוי צבע הכפתור בעת ריחוף */
-}
 
 /* עיצוב הודעות שגיאה */
-p {
+/*p {
   color: red;
   font-size: 12px;
   margin-top: 5px;
   text-align: center;
 }
-
 /* עיצוב שדות קלט מכילים */
 input[type="file"] {
   padding: 6px;
@@ -144,3 +143,105 @@ input[type="file"] {
     font-size: 20px;
   }
 }
+
+/*user Profile*/
+
+/* Overall block styling */
+.userBlock {
+  border: 2px dotted black;
+  padding: 30px;
+  width: 400px;
+  margin: auto;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Flexbox for image and info alignment */
+.userData {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px; /* Space below info */
+}
+
+/* Image styling */
+.userImage {
+  flex: 0 0 auto; /* Prevent image from shrinking */
+  margin-right: 20px; /* Space between image and info */
+  text-align: center;
+}
+
+.userImage img {
+  max-width: 80px;
+  border-radius: 50%;
+}
+
+/* Info styling */
+.userInfo {
+  flex: 1; /* Info takes remaining space */
+  text-align: left; /* Align text to the left */
+}
+
+.userInfo p {
+  margin: 5px 0; /* Space between info rows */
+  font-size: 14px;
+}
+
+/* Buttons styling */
+.userActions {
+  display: flex;
+  justify-content: center;
+  gap: 10px; /* Space between buttons */
+}
+
+.userActions button {
+  padding: 10px 15px;
+  font-size: 14px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.userActions button:hover {
+  opacity: 0.9;
+}
+
+/* Individual button colors */
+.userActions button:nth-child(1) {
+  background-color: #e74c3c; /* Red for log out */
+  color: white;
+}
+
+.userActions button:nth-child(2) {
+  background-color: #3498db; /* Blue for edit */
+  color: white;
+}
+
+.userActions button:nth-child(3) {
+  background-color: #f1c40f; /* Yellow for favorite game */
+  color: white;
+}
+
+.userName{
+  font-size: 30px;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .userData {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .userImage {
+    margin-right: 0;
+    margin-bottom: 15px;
+  }
+
+  .userActions {
+    flex-direction: column;
+  }
+}
+
