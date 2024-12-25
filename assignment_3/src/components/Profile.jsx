@@ -6,7 +6,7 @@ import {
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-export default function Profile() {
+export default function Profile({onLogout}) {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -19,9 +19,11 @@ export default function Profile() {
   }, []);
 
   const handleLogOut = () => {
-    sessionStorage.removeItem("loggedInUser"); // Remove user from sessionStorage
-    console.log("User logged out."); // Debug log
-    navigate("/Login"); // Redirect to Login page
+    // Call the logout function from App
+    onLogout();
+
+    // Optionally navigate to Login
+    navigate("/Login");
   };
 
   if (!userData) {
@@ -62,7 +64,7 @@ export default function Profile() {
         <button
           className="btn btn-primary m-1"
           onClick={(e) => {
-            e.preventDefault(); // Prevent form submission
+            e.preventDefault();
             handleLogOut();
           }}
         >

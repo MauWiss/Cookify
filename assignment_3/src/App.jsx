@@ -4,18 +4,22 @@ import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
-import Admin from "./components/Admin"; // Import Admin component
-import EditProfile from "./components/EditProfile"
+import Admin from "./components/Admin";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   const [users, setUsers] = useState([]);
   const [loggedInUser, setLoggedInUser] = useState(null);
-  const navigate = useNavigate(); // Hook for navigation
+  const navigate = useNavigate();
 
-  // Load users and logged-in user from localStorage/sessionStorage on component mount
+  // 1) Use loggedInUser state for isLoggedIn:
+  const isLoggedIn = !!loggedInUser; // <-- Instead of sessionStorage
+
+  // Load users and logged-in user from localStorage/sessionStorage on mount
   useEffect(() => {
     const storedUsers = JSON.parse(localStorage.getItem("users")) || [];
     const sessionUser = JSON.parse(sessionStorage.getItem("loggedInUser"));
+
     setUsers(storedUsers);
     setLoggedInUser(sessionUser);
   }, []);
@@ -24,36 +28,34 @@ function App() {
   const handleRegister = (newUser) => {
     setUsers((prevUsers) => {
       const updatedUsers = [...prevUsers, newUser];
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Store users in localStorage
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
   };
 
+  // Protected route logic
   const ProtectedRoute = ({ element, roles }) => {
-    const sessionUser = JSON.parse(sessionStorage.getItem("loggedInUser")); // Get user from sessionStorage
-    console.log("ProtectedRoute: Logged-in user from sessionStorage:", sessionUser);
-
-    if (!sessionUser) {
+    // Check using loggedInUser from state
+    if (!loggedInUser) {
       console.log("No user logged in. Redirecting to /Login.");
       return <Navigate to="/Login" />;
     }
 
-    if (roles && !roles.includes(sessionUser.role)) {
-      console.log(`User role (${sessionUser.role}) not authorized. Redirecting to /Login.`);
+    if (roles && !roles.includes(loggedInUser.role)) {
+      console.log(`User role (${loggedInUser.role}) not authorized. Redirecting to /Login.`);
       return <Navigate to="/Login" />;
     }
 
-    console.log("Access granted to the route.");
     return element;
   };
 
-  const isLoggedIn = !!sessionStorage.getItem("loggedInUser"); // Check if user is logged in
-
-
+  const handleLogout = () => {
+    sessionStorage.removeItem("loggedInUser"); // Clear storage
+    setLoggedInUser(null);                    // Update state so navbar re-renders
+  };
 
   return (
     <div>
-      {/* Show navigation links only if the user is not logged in */}
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container-fluid">
@@ -70,6 +72,7 @@ function App() {
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav">
+              {/* If NOT logged in, show Register/Login */}
               {!isLoggedIn && (
                 <>
                   <li className="nav-item">
@@ -84,6 +87,8 @@ function App() {
                   </li>
                 </>
               )}
+
+              {/* If logged in, show Profile and Admin (if role=admin) */}
               {isLoggedIn && (
                 <>
                   <li className="nav-item">
@@ -104,16 +109,48 @@ function App() {
           </div>
         </div>
       </nav>
+
       <h1>User Management System</h1>
+
       <Routes>
-        <Route path="/Register" element={<Register onRegister={handleRegister} />} />
-        <Route path="/Login" element={<Login onLogin={setLoggedInUser} />} />
-        <Route path="/Profile" element={<ProtectedRoute element={<Profile />} roles={["user", "admin"]} />} />
-        <Route path="/EditProfile" element={<EditProfile />} />
-        <Route path="/Admin" element={<ProtectedRoute element={<Admin />} roles={["admin"]} />} />
-        <Route path="*" element={<Navigate to={loggedInUser ? (loggedInUser.role === "admin" ? "/Admin" : "/Profile") : "/Login"} />} />
+        <Route
+          path="/Register"
+          element={<Register onRegister={handleRegister} />}
+        />
+        <Route
+          path="/Login"
+          element={<Login onLogin={setLoggedInUser} />}
+        />
+        <Route
+          path="/Profile"
+          element={<ProtectedRoute element={
+            <Profile onLogout={handleLogout} />
+          } roles={["user", "admin"]} />}
+        />
+        <Route
+          path="/EditProfile"
+          element={<EditProfile />}
+        />
+        <Route
+          path="/Admin"
+          element={<ProtectedRoute element={<Admin />} roles={["admin"]} />}
+        />
+        {/* Catch-all route */}
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={
+                loggedInUser
+                  ? loggedInUser.role === "admin"
+                    ? "/Admin"
+                    : "/Profile"
+                  : "/Login"
+              }
+            />
+          }
+        />
       </Routes>
-      <div className="overlay"></div>
     </div>
   );
 }

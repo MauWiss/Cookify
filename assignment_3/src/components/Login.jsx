@@ -30,7 +30,7 @@ export default function Login(props) {
     );
 
     if (userExists) {
-      // Assign role automatically behind the scenes if not already set
+      // Assign role automatically if not already set
       if (!userExists.role) {
         userExists.role = userExists.username === 'admin' ? 'admin' : 'user';
         const updatedUsers = users.map((user) =>
@@ -42,6 +42,9 @@ export default function Login(props) {
       // Update the current user in sessionStorage
       sessionStorage.setItem('loggedInUser', JSON.stringify(userExists));
 
+      // *** IMPORTANT: This line tells App.js about the logged-in user ***
+      props.onLogin(userExists);
+
       setLogin({
         username: '',
         password: ''
@@ -49,9 +52,8 @@ export default function Login(props) {
 
       console.log('Login successful');
 
-      // Navigate based on the role
+      // Navigate based on role
       if (userExists.role === "admin") {
-        
         console.log("Navigating to Admin");
         navigate("/Admin");
       } else {
@@ -88,44 +90,46 @@ export default function Login(props) {
 
   return (
     <form className="card p-4" onSubmit={handleLogin}>
-    <div className="card-body">
-      <h2 className="card-title mb-4 text-center">Login</h2>
-      
-      {/* Username */}
-      <div className="mb-3">
-        <label htmlFor="username" className="form-label">User Name</label>
-        <input
-          type="text"
-          className="form-control"
-          id="username"
-          name="username"
-          placeholder="Enter your username"
-          value={login.username}
-          onChange={handleChange}
-        />
-        {errors.username && <div className="text-danger mt-2">{errors.username}</div>}
-      </div>
+      <div className="card-body">
+        <h2 className="card-title mb-4 text-center">Login</h2>
+        
+        {/* Username */}
+        <div className="mb-3">
+          <label htmlFor="username" className="form-label">User Name</label>
+          <input
+            type="text"
+            className="form-control"
+            id="username"
+            name="username"
+            placeholder="Enter your username"
+            value={login.username}
+            onChange={handleChange}
+          />
+          {errors.username && <div className="text-danger mt-2">{errors.username}</div>}
+        </div>
 
-      {/* Password */}
-      <div className="mb-3">
-        <label htmlFor="password" className="form-label">Password</label>
-        <input
-          type="password"
-          className="form-control"
-          id="password"
-          placeholder="Enter Password"
-          name="password"
-          value={login.password}
-          onChange={handleChange}
-        />
-        {errors.password && <div className="text-danger mt-2">{errors.password}</div>}
-      </div>
+        {/* Password */}
+        <div className="mb-3">
+          <label htmlFor="password" className="form-label">Password</label>
+          <input
+            type="password"
+            className="form-control"
+            id="password"
+            placeholder="Enter Password"
+            name="password"
+            value={login.password}
+            onChange={handleChange}
+          />
+          {errors.password && <div className="text-danger mt-2">{errors.password}</div>}
+        </div>
 
-      {/* Submit Button */}
-      <div className="d-flex justify-content-center">
-        <button type="submit" className="btn btn-primary w-20">Login</button>
+        {/* Submit Button */}
+        {errors.general && <div className="text-danger mb-3">{errors.general}</div>}
+
+        <div className="d-flex justify-content-center">
+          <button type="submit" className="btn btn-primary w-20">Login</button>
+        </div>
       </div>
-    </div>
-  </form>
+    </form>
   );
 }
