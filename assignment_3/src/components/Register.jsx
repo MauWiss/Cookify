@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Register({ onRegister }) {
   const [form, setForm] = useState({
@@ -16,6 +17,7 @@ function Register({ onRegister }) {
   });
 
   const [errors, setErrors] = useState({}); // Object to store errors
+  const navigate = useNavigate(); // Hook for navigation
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,7 +42,6 @@ function Register({ onRegister }) {
       }));
     }
   };
-  
 
   const validateForm = () => {
     const newErrors = {};
@@ -61,15 +62,13 @@ function Register({ onRegister }) {
       newErrors.password = "Password must be between 7 and 12 characters.";
     }
     if (!/[A-Z]/.test(form.password)) {
-      newErrors.password =
-        "Password must contain at least one uppercase letter.";
+      newErrors.password = "Password must contain at least one uppercase letter.";
     }
     if (!/[0-9]/.test(form.password)) {
       newErrors.password = "Password must contain at least one number.";
     }
     if (!/[\W_]/.test(form.password)) {
-      newErrors.password =
-        "Password must contain at least one special character.";
+      newErrors.password = "Password must contain at least one special character.";
     }
 
     // Confirm Password
@@ -82,34 +81,30 @@ function Register({ onRegister }) {
       newErrors.email = "Email address is not valid.";
     }
 
-    // Birth Date
-    if (new Date(form.birthDate) >= new Date() || 120 >= (new Date().getFullYear - new Date(form.birthDate).getFullYear) || 18 <=(new Date().getFullYear - new Date(form.birthDate).getFullYear) ) {
-      newErrors.birthDate = "Birth date cannot be in the future.";
-    }
-
-    // City
-    if (!form.city) {
-      newErrors.city = "City is required.";
-    }
-
-    // Number (must be positive)
-    if (form.number && form.number < 0) {
-      newErrors.number = "Number cannot be negative.";
-    }
-
     setErrors(newErrors); // Update errors state
     return Object.keys(newErrors).length === 0; // Return true if no errors
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+  
     if (!validateForm()) {
       return; // If there are errors, do not submit the form
     }
-
-    // If no errors, submit the form
-    onRegister({ ...form });
+  
+    // Assign role based on username
+    const role = form.username === "admin" ? "admin" : "user";
+  
+    // Create the new user object with the role
+    const newUser = { ...form, role };
+  
+    // Update sessionStorage with the new user
+    sessionStorage.setItem("loggedInUser", JSON.stringify(newUser));
+  
+    // Call the onRegister function to update the user list
+    onRegister(newUser);
+  
+    // Reset the form
     setForm({
       username: "",
       password: "",
@@ -122,8 +117,14 @@ function Register({ onRegister }) {
       city: "",
       street: "",
       number: "",
-    }); // Reset the form
+    });
+  
+    console.log("Registration successful. User stored in sessionStorage.");
+    
+    // Navigate to the Profile page after successful registration
+    navigate("/Profile");
   };
+  
 
   return (
     <div>
@@ -155,8 +156,6 @@ function Register({ onRegister }) {
           onChange={handleChange}
         />
         {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
-
-
 
         <input type="file" name="image" onChange={handleImageChange} />
         {errors.image && <p>{errors.image}</p>}
