@@ -30,6 +30,15 @@ export default function Login(props) {
     );
 
     if (userExists) {
+      // Assign role automatically behind the scenes if not already set
+      if (!userExists.role) {
+        userExists.role = userExists.username === 'admin' ? 'admin' : 'user';
+        const updatedUsers = users.map((user) =>
+          user.username === userExists.username ? userExists : user
+        );
+        localStorage.setItem('users', JSON.stringify(updatedUsers));
+      }
+
       // Update the current user in sessionStorage
       sessionStorage.setItem('loggedInUser', JSON.stringify(userExists));
 
@@ -39,45 +48,38 @@ export default function Login(props) {
       });
 
       console.log('Login successful');
-      navigate("/Profile");
+
+      // Navigate based on the role
+      if (userExists.role === "admin") {
+        
+        console.log("Navigating to Admin");
+        navigate("/Admin");
+      } else {
+        console.log("Navigating to Profile");
+        navigate("/Profile");
+      }
     } else {
       console.log('Login failed');
+      setErrors({ general: 'Invalid username or password.' });
     }
   };
 
   const logOutUser = () => {
-    sessionStorage.removeItem('loggedInUser'); 
-  } 
+    sessionStorage.removeItem('loggedInUser');
+    console.log('User logged out successfully.');
+  };
 
   const validateForm = () => {
     const newErrors = {};
 
-    // Username
-    if (
-      !/^[A-Za-z0-9!@#$%^&*()_+={}\[\]:;"'<>,.?/\\|`~\-]*$/.test(login.username)
-    ) {
-      newErrors.username =
-        'Username can only contain English letters, numbers, and special characters.';
-    }
-    if (login.username.length > 60 || login.username === 0) {
-      newErrors.username =
-        'Username cannot be more than 60 characters and not empty';
+    // Validate username
+    if (!login.username.trim()) {
+      newErrors.username = 'Username is required.';
     }
 
-    // Password
-    if (login.password.length < 7 || login.password.length > 12) {
-      newErrors.password = 'Password must be between 7 and 12 characters.';
-    }
-    if (!/[A-Z]/.test(login.password)) {
-      newErrors.password =
-        'Password must contain at least one uppercase letter.';
-    }
-    if (!/[0-9]/.test(login.password)) {
-      newErrors.password = 'Password must contain at least one number.';
-    }
-    if (!/[\W_]/.test(login.password)) {
-      newErrors.password =
-        'Password must contain at least one special character.';
+    // Validate password
+    if (!login.password.trim()) {
+      newErrors.password = 'Password is required.';
     }
 
     setErrors(newErrors); // Update errors state
@@ -85,29 +87,46 @@ export default function Login(props) {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <div>
-        <h1>User Name</h1>
+    <form className="card p-4" onSubmit={handleLogin}>
+    <div className="card-body">
+      <h2 className="card-title mb-4 text-center">Login</h2>
+      
+      {/* Username */}
+      <div className="mb-3">
+        <label htmlFor="username" className="form-label">User Name</label>
         <input
           type="text"
+          className="form-control"
+          id="username"
+          placeholder="Enter User Name"
           name="username"
+          placeholder="Enter your username"
           value={login.username}
           onChange={handleChange}
         />
+        {errors.username && <div className="text-danger mt-2">{errors.username}</div>}
       </div>
-      {errors.username && <p>{errors.username}</p>}
-      <div>
-        <h1>PassWord</h1>
+
+      {/* Password */}
+      <div className="mb-3">
+        <label htmlFor="password" className="form-label">Password</label>
         <input
           type="password"
+          className="form-control"
+          id="password"
+          placeholder="Enter Password"
           name="password"
           value={login.password}
           onChange={handleChange}
         />
+        {errors.password && <div className="text-danger mt-2">{errors.password}</div>}
       </div>
-      {errors.password && <p>{errors.password}</p>}
 
-      <button type="submit">Login</button>
-    </form>
+      {/* Submit Button */}
+      <div className="d-flex justify-content-center">
+        <button type="submit" className="btn btn-primary w-20">Login</button>
+      </div>
+    </div>
+  </form>
   );
 }
