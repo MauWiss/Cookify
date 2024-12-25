@@ -98,7 +98,6 @@ export default function Login(props) {
           type="text"
           className="form-control"
           id="username"
-          placeholder="Enter User Name"
           name="username"
           placeholder="Enter your username"
           value={login.username}
