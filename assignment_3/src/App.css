@@ -6,7 +6,6 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
 }
 
 .overlay {
@@ -190,10 +189,13 @@ input[type="file"] {
 
 /* Buttons styling */
 .userActions {
-  display: flex;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Dynamic layout */
+  gap: 10px;
   justify-content: center;
-  gap: 10px; /* Space between buttons */
 }
+
+
 
 .userActions button {
   padding: 10px 15px;
@@ -225,7 +227,7 @@ input[type="file"] {
 }
 
 .userName{
-  font-size: 30px;
+  font-size: 25px !important;
   font-weight: bold;
 }
 
@@ -240,8 +242,26 @@ input[type="file"] {
     margin-bottom: 15px;
   }
 
-  .userActions {
-    flex-direction: column;
   }
-}
 
+  @media (max-width: 600px) {
+    .userActions {
+      grid-template-columns: 1fr; /* Buttons stacked vertically */
+      gap: 10px; /* Add space between buttons */
+    }
+  }
+
+  .userInfo input {
+    width: 100%;
+    padding: 8px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .userInfo input:focus {
+    border-color: #4caf50;
+    outline: none;
+  }
+  

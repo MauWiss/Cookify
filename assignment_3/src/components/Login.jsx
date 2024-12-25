@@ -87,36 +87,46 @@ export default function Login(props) {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <div>
-        <h1>Username</h1>
+    <form className="card p-4" onSubmit={handleLogin}>
+    <div className="card-body">
+      <h2 className="card-title mb-4 text-center">Login</h2>
+      
+      {/* Username */}
+      <div className="mb-3">
+        <label htmlFor="username" className="form-label">User Name</label>
         <input
           type="text"
+          className="form-control"
+          id="username"
+          placeholder="Enter User Name"
           name="username"
           placeholder="Enter your username"
           value={login.username}
           onChange={handleChange}
         />
+        {errors.username && <div className="text-danger mt-2">{errors.username}</div>}
       </div>
-      {errors.username && <p style={{ color: 'red' }}>{errors.username}</p>}
 
-      <div>
-        <h1>Password</h1>
+      {/* Password */}
+      <div className="mb-3">
+        <label htmlFor="password" className="form-label">Password</label>
         <input
           type="password"
+          className="form-control"
+          id="password"
+          placeholder="Enter Password"
           name="password"
-          placeholder="Enter your password"
           value={login.password}
           onChange={handleChange}
         />
+        {errors.password && <div className="text-danger mt-2">{errors.password}</div>}
       </div>
-      {errors.password && <p style={{ color: 'red' }}>{errors.password}</p>}
-      {errors.general && <p style={{ color: 'red' }}>{errors.general}</p>}
 
-      <button type="submit">Login</button>
-      <button type="button" onClick={logOutUser}>
-        Log Out
-      </button>
-    </form>
+      {/* Submit Button */}
+      <div className="d-flex justify-content-center">
+        <button type="submit" className="btn btn-primary w-20">Login</button>
+      </div>
+    </div>
+  </form>
   );
 }

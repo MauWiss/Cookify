@@ -128,10 +128,13 @@ function Register({ onRegister }) {
 
   return (
     <div>
-      <h2>Register</h2>
-      <form onSubmit={handleSubmit}>
+      <form className="card p-4" onSubmit={handleSubmit}>
+        <div className="card-body">
+        <h2 className="card-title mb-4 text-center" >Register</h2>
+
         <input
           type="text"
+          className="form-control"
           name="username"
           placeholder="Username"
           value={form.username}
@@ -141,6 +144,7 @@ function Register({ onRegister }) {
 
         <input
           type="password"
+          className="form-control"
           name="password"
           placeholder="Password"
           value={form.password}
@@ -150,6 +154,7 @@ function Register({ onRegister }) {
 
         <input
           type="password"
+          className="form-control"
           name="confirmPassword"
           placeholder="Confirm Password"
           value={form.confirmPassword}
@@ -157,11 +162,14 @@ function Register({ onRegister }) {
         />
         {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
 
-        <input type="file" name="image" onChange={handleImageChange} />
+
+
+        <input type="file" className="form-control"  name="image" onChange={handleImageChange} />
         {errors.image && <p>{errors.image}</p>}
 
         <input
           type="text"
+          className="form-control"
           name="firstName"
           placeholder="First Name"
           value={form.firstName}
@@ -170,6 +178,7 @@ function Register({ onRegister }) {
 
         <input
           type="text"
+          className="form-control"
           name="lastName"
           placeholder="Last Name"
           value={form.lastName}
@@ -178,6 +187,7 @@ function Register({ onRegister }) {
 
         <input
           type="email"
+          className="form-control"
           name="email"
           placeholder="Email"
           value={form.email}
@@ -187,6 +197,7 @@ function Register({ onRegister }) {
 
         <input
           type="date"
+          className="form-control"
           name="birthDate"
           value={form.birthDate}
           onChange={handleChange}
@@ -195,6 +206,7 @@ function Register({ onRegister }) {
 
         <input
           type="text"
+          className="form-control"
           name="city"
           placeholder="City"
           value={form.city}
@@ -204,6 +216,7 @@ function Register({ onRegister }) {
 
         <input
           type="text"
+          className="form-control"
           name="street"
           placeholder="Street"
           value={form.street}
@@ -212,6 +225,7 @@ function Register({ onRegister }) {
 
         <input
           type="number"
+          className="form-control"
           name="number"
           placeholder="Number"
           value={form.number}
@@ -219,7 +233,8 @@ function Register({ onRegister }) {
         />
         {errors.number && <p>{errors.number}</p>}
 
-        <button type="submit">Register</button>
+        <button type="submit" className="btn btn-primary w-20">Register</button>
+        </div>
       </form>
     </div>
   );
