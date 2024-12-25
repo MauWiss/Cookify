@@ -6,7 +6,7 @@ import {
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-export default function Profile({onLogout}) {
+export default function Profile({ onLogout }) {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -31,7 +31,7 @@ export default function Profile({onLogout}) {
   }
 
   return (
-    <form className="card p-4">
+    <form className="card mx-auto">
       <div className="card-body">
         <div className="userImage">
           {userData.image ? (
@@ -45,22 +45,35 @@ export default function Profile({onLogout}) {
           )}
         </div>
         <div className="userInfo">
-          <p className="userName">
+          <p className="fs-2">
             {userData.firstName} {userData.lastName}
           </p>
-          <p>
+          <p className="fs-5">
             <MdOutlineMailOutline /> {userData.email}
           </p>
-          <p>
+          <p className="fs-5">
             <MdLocationOn /> {userData.street} {userData.number},{" "}
             {userData.city}
-          </p>
-          <p>
+          </p >
+          <p className="fs-5">
             <MdDateRange /> {userData.birthDate}
           </p>
         </div>
       </div>
       <div className="btn-group" role="group">
+        <button
+          onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
+          className="btn btn-success m-1"
+        >
+          Favorite Game
+        </button>
+        <button
+          onClick={() => navigate("/EditProfile")}
+          className="btn btn-primary m-1"
+        >
+          Edit
+        </button>
+
         <button
           className="btn btn-primary m-1"
           onClick={(e) => {
@@ -69,18 +82,6 @@ export default function Profile({onLogout}) {
           }}
         >
           Log Out
-        </button>
-        <button
-          onClick={() => navigate("/EditProfile")}
-          className="btn btn-primary m-1"
-        >
-          Edit
-        </button>
-        <button
-          onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
-          className="btn btn-primary m-1"
-        >
-          Favorite Game
         </button>
       </div>
     </form>

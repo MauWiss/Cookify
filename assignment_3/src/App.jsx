@@ -58,7 +58,7 @@ function App() {
     <div>
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
-        <div className="container-fluid">
+        <div className="container-fluid justify-content-center">
           <button
             className="navbar-toggler"
             type="button"
