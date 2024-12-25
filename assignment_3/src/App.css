@@ -250,18 +250,4 @@ input[type="file"] {
       gap: 10px; /* Add space between buttons */
     }
   }
-
-  .userInfo input {
-    width: 100%;
-    padding: 8px;
-    margin: 5px 0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    font-size: 14px;
-  }
-  
-  .userInfo input:focus {
-    border-color: #4caf50;
-    outline: none;
-  }
   
