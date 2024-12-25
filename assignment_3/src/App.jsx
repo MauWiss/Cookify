@@ -5,6 +5,7 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import Profile from "./components/Profile";
 import Admin from "./components/Admin"; // Import Admin component
+import EditProfile from "./components/EditProfile"
 
 function App() {
   const [users, setUsers] = useState([]);
@@ -56,7 +57,15 @@ function App() {
       {/* Navbar */}
       <nav className="navbar navbar-expand-lg navbar-light bg-light">
         <div className="container-fluid">
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <button
+            className="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarNav"
+            aria-controls="navbarNav"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
             <span className="navbar-toggler-icon"></span>
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
@@ -64,17 +73,32 @@ function App() {
               {!isLoggedIn && (
                 <>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/Register">Register</Link>
+                    <Link className="nav-link" to="/Register">
+                      Register
+                    </Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/Login">Login</Link>
+                    <Link className="nav-link" to="/Login">
+                      Login
+                    </Link>
                   </li>
                 </>
               )}
               {isLoggedIn && (
-                <li className="nav-item">
-                  <Link className="nav-link" to="/Profile">Profile</Link>
-                </li>
+                <>
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/Profile">
+                      Profile
+                    </Link>
+                  </li>
+                  {loggedInUser && loggedInUser.role === "admin" && (
+                    <li className="nav-item">
+                      <Link className="nav-link" to="/Admin">
+                        Admin
+                      </Link>
+                    </li>
+                  )}
+                </>
               )}
             </ul>
           </div>
@@ -85,6 +109,7 @@ function App() {
         <Route path="/Register" element={<Register onRegister={handleRegister} />} />
         <Route path="/Login" element={<Login onLogin={setLoggedInUser} />} />
         <Route path="/Profile" element={<ProtectedRoute element={<Profile />} roles={["user", "admin"]} />} />
+        <Route path="/EditProfile" element={<EditProfile />} />
         <Route path="/Admin" element={<ProtectedRoute element={<Admin />} roles={["admin"]} />} />
         <Route path="*" element={<Navigate to={loggedInUser ? (loggedInUser.role === "admin" ? "/Admin" : "/Profile") : "/Login"} />} />
       </Routes>

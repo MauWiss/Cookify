@@ -6,7 +6,7 @@ import {
 } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 
-export default function Profile(props) {
+export default function Profile() {
   const [userData, setUserData] = useState(null);
   const navigate = useNavigate();
 
@@ -17,6 +17,12 @@ export default function Profile(props) {
       setUserData(JSON.parse(loggedInUser));
     }
   }, []);
+
+  const handleLogOut = () => {
+    sessionStorage.removeItem("loggedInUser"); // Remove user from sessionStorage
+    console.log("User logged out."); // Debug log
+    navigate("/Login"); // Redirect to Login page
+  };
 
   if (!userData) {
     return <p>Please log in to view your profile.</p>;
@@ -52,18 +58,26 @@ export default function Profile(props) {
           </p>
         </div>
       </div>
-      <div className="btn-group" role="group" >
-        <button className="btn btn-primary  m-1 "
-          onClick={() => {
-            props.logOutUser();
+      <div className="btn-group" role="group">
+        <button
+          className="btn btn-primary m-1"
+          onClick={(e) => {
+            e.preventDefault(); // Prevent form submission
+            handleLogOut();
           }}
         >
           Log Out
         </button>
-        <button onClick={() => navigate("/EditProfile")} className="btn btn-primary m-1">Edit</button>
+        <button
+          onClick={() => navigate("/EditProfile")}
+          className="btn btn-primary m-1"
+        >
+          Edit
+        </button>
         <button
           onClick={() => window.open("https://www.falafelgame.com/", "_blank")}
-          className="btn btn-primary  m-1">
+          className="btn btn-primary m-1"
+        >
           Favorite Game
         </button>
       </div>
