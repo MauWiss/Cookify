@@ -31,22 +31,23 @@ export default function EditProfile() {
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
-    if (file && file.type.startsWith("image/")) {
+    if (file && (file.type === "image/jpeg" || file.type === "image/jpg")) {
       const reader = new FileReader();
       reader.onload = (event) => {
         setForm((prev) => ({
           ...prev,
-          image: event.target.result,
+          image: event.target.result, // Store Base64 string
         }));
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(file); // Convert file to Base64 string
     } else {
       setErrors((prev) => ({
         ...prev,
-        image: "Please choose a valid image file.",
+        image: "Please choose a valid JPG or JPEG file.",
       }));
     }
   };
+  
 
   const validateForm = () => {
     const newErrors = {};
