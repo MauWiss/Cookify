@@ -127,7 +127,7 @@ function Register({ onRegister }) {
   
 
   return (
-    <div>
+    <div className="mx-auto">
       <form className="card p-4 mx-auto" onSubmit={handleSubmit}>
         <div className="card-body">
         <h2 className="card-title mb-4 text-center" >Register</h2>

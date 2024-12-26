@@ -94,9 +94,9 @@ export default function EditProfile() {
   };
 
   return (
-    <div className="card p-4 mx-auto">
+    <div className="card p-4">
       <h1 className="card-title mb-4 text-center">Edit Profile</h1>
-      <form className="card-body">
+      <form className="card-body mx-auto">
         {/* Username */}
         <div className="mb-3">
           <label>Username:</label>
