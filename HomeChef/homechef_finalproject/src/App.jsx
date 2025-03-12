@@ -18,7 +18,6 @@ function App() {
         <Link to="/add-recipe">Add Recipe</Link> |<Link to="/cooks">Cooks</Link>{" "}
         | <Link to="/login">Login</Link>
       </nav>
-
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/favorites" element={<Favorites />} />
