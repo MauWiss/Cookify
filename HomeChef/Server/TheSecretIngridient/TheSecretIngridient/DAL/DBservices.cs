@@ -26,7 +26,7 @@ namespace TheSecretIngridient.DAL
         string cStr = configuration.GetConnectionString("myProjDB");
         SqlConnection con = new SqlConnection(cStr);
         con.Open();
-        return con;
+        return con; 
     }
 
 
