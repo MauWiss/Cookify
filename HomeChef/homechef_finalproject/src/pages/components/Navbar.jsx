@@ -1,6 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Sun, Moon, Home, ChefHat } from "lucide-react";
+import { Sun, Moon, Home } from "lucide-react";
 
 export default function Navbar() {
   const [darkMode, setDarkMode] = useState(false);
@@ -19,19 +19,20 @@ export default function Navbar() {
   };
 
   const linkStyle =
-    "text-gray-700 dark:text-gray-100 hover:text-blue-500 dark:hover:text-cyan-400 transition";
+    "text-[#2E2E2E] dark:text-[#EAEAEA] hover:text-[#F38E82] dark:hover:text-[#F38E82] transition-colors font-medium";
 
   return (
-    <nav className="bg-white px-6 py-4 shadow dark:bg-[#0e1a23]">
+    <nav className="bg-[#FAFAFA] px-6 py-4 shadow-md dark:bg-[#1B1B1B]">
       <div className="container mx-auto flex items-center justify-between">
         <Link
           to="/"
-          className="flex items-center gap-2 text-2xl font-bold text-gray-800 dark:text-white"
+          className="flex items-center gap-2 text-2xl font-bold text-[#2E2E2E] dark:text-[#EAEAEA]"
         >
-          <Home className="h-6 w-6 text-blue-600 dark:text-cyan-400" />
-          <ChefHat className="h-6 w-6 text-yellow-500 dark:text-yellow-300" />
+          <Home className="h-6 w-6 text-[#F38E82]" />
+          <span className="text-3xl">👨‍🍳</span>
           HomeChef
         </Link>
+
         <div className="flex items-center gap-6">
           <NavLink to="/" className={linkStyle}>
             Home
@@ -51,11 +52,16 @@ export default function Navbar() {
           <NavLink to="/login" className={linkStyle}>
             Login
           </NavLink>
-          <button onClick={toggleTheme} className="text-xl">
+
+          <button
+            onClick={toggleTheme}
+            className="text-[#F38E82] transition-colors duration-300"
+            title="Toggle Dark Mode"
+          >
             {darkMode ? (
-              <Sun className="text-yellow-400" />
+              <Sun className="text-yellow-400 transition-transform hover:rotate-45" />
             ) : (
-              <Moon className="text-gray-300" />
+              <Moon className="text-gray-400 transition-transform hover:rotate-45" />
             )}
           </button>
         </div>
