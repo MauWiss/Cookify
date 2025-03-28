@@ -13,7 +13,7 @@ import Navbar from "./pages/components/Navbar";
 export default function App() {
   return (
     <Router>
-      <div className="flex min-h-screen flex-col bg-gray-50 text-gray-800 dark:bg-[#0c1f2d] dark:text-white">
+      <div className="flex min-h-screen flex-col bg-gray-50 text-[#2E2E2E] dark:bg-[#0c1f2d] dark:text-white">
         <Navbar />
         <main className="container mx-auto flex-grow px-4 py-6">
           <Routes>
