@@ -1,45 +1,34 @@
 import { useEffect, useState } from "react";
+import { api } from "../api";
 
 export default function HomePage() {
   const [recipes, setRecipes] = useState([]);
   const [search, setSearch] = useState("");
   const [filtered, setFiltered] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // נתוני דמו עם תמונות שנבדקו
-    const dummyRecipes = [
-      {
-        id: 1,
-        title: "Spaghetti Bolognese",
-        category: "Pasta",
-        image:
-          "https://images.immediate.co.uk/production/volatile/sites/30/2018/07/RedPepperAnchovySpaghetti-copy-1dec261.jpg",
-      },
-      {
-        id: 2,
-        title: "Avocado Toast",
-        category: "Breakfast",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRc9AIvAc6dkD5GTVhVASi91F4Jc4n7AbOFhw&s",
-      },
-      {
-        id: 3,
-        title: "Vegan Buddha Bowl",
-        category: "Vegan",
-        image:
-          "https://cdn.loveandlemons.com/wp-content/uploads/2020/06/IMG_25456.jpg",
-      },
-    ];
-    setRecipes(dummyRecipes);
-    setFiltered(dummyRecipes);
+    const fetchRecipes = async () => {
+      try {
+        const response = await api.get("/NewRecipes");
+        setRecipes(response.data);
+        setFiltered(response.data);
+      } catch (error) {
+        console.error("Error fetching recipes:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipes();
   }, []);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      const f = recipes.filter((r) =>
-        r.title.toLowerCase().includes(search.toLowerCase()),
+      const filteredRecipes = recipes.filter((recipe) =>
+        recipe.title.toLowerCase().includes(search.toLowerCase()),
       );
-      setFiltered(f);
+      setFiltered(filteredRecipes);
     }, 300);
     return () => clearTimeout(delay);
   }, [search, recipes]);
@@ -60,7 +49,22 @@ export default function HomePage() {
         />
       </div>
 
-      {filtered.length === 0 ? (
+      {loading ? (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
+          {[...Array(6)].map((_, index) => (
+            <div
+              key={index}
+              className="animate-pulse overflow-hidden rounded-2xl bg-gray-300 dark:bg-gray-700"
+            >
+              <div className="h-48 w-full bg-gray-400 dark:bg-gray-600"></div>
+              <div className="space-y-2 p-4">
+                <div className="h-6 w-3/4 rounded bg-gray-500 dark:bg-gray-600"></div>
+                <div className="h-4 rounded bg-gray-400 dark:bg-gray-500"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
         <p className="text-center text-gray-600 dark:text-gray-300">
           No recipes found. Try another search or add a new recipe.
         </p>
@@ -72,7 +76,10 @@ export default function HomePage() {
               className="overflow-hidden rounded-2xl bg-white shadow-lg transition hover:scale-[1.02] dark:bg-[#1d1d1d]"
             >
               <img
-                src={recipe.image}
+                src={
+                  recipe.imageUrl ||
+                  "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg"
+                }
                 alt={recipe.title}
                 className="h-48 w-full object-cover"
               />
@@ -83,6 +90,12 @@ export default function HomePage() {
                 <p className="text-sm text-gray-500 dark:text-gray-400">
                   Category: {recipe.category}
                 </p>
+                <a
+                  href={`/meal/${recipe.id}`}
+                  className="mt-3 inline-block font-semibold text-indigo-500 hover:text-indigo-700"
+                >
+                  View Recipe →
+                </a>
               </div>
             </div>
           ))}
