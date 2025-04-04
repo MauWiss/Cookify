@@ -46,35 +46,43 @@ export default function Homepage() {
       const res = await api.get("/favorites", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setFavorites(res.data.map((f) => f.recipeId));
+      setFavorites(res.data.map((fav) => fav.recipeId));
     } catch (err) {
-      console.error("Failed to load favorites", err);
+      console.error("Failed to fetch favorites", err);
     }
   };
 
-  const toggleFavorite = async (recipeId) => {
-    const isFav = favorites.includes(recipeId);
+  const addToFavorites = async (recipeId) => {
+    if (!recipeId) return;
     try {
-      if (isFav) {
-        await api.delete(`/favorites/${recipeId}/favorite`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFavorites((prev) => prev.filter((id) => id !== recipeId));
-        toast.info("Removed from favorites 💔");
-      } else {
-        await api.post(
-          `/favorites/${recipeId}/favorite`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        setFavorites((prev) => [...prev, recipeId]);
-        toast.success("Added to favorites ❤️");
-      }
+      await api.post(
+        `/favorites/${recipeId}/favorite`,
+        {}, // אין גוף
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+      setFavorites((prev) => [...prev, recipeId]);
+      toast.success("Added to favorites ❤️");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update favorites.");
+      toast.error("Failed to add to favorites.");
     }
   };
+
+  const removeFromFavorites = async (recipeId) => {
+    if (!recipeId) return;
+    try {
+      await api.delete(`/favorites/${recipeId}/favorite`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites((prev) => prev.filter((id) => id !== recipeId));
+      toast.success("Removed from favorites 💔");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove from favorites.");
+    }
+  };
+
+  const isFavorite = (recipeId) => favorites.includes(recipeId);
 
   useEffect(() => {
     fetchRecipes();
@@ -91,8 +99,6 @@ export default function Homepage() {
   return (
     <div className="px-6 py-8">
       <ToastContainer />
-
-      {/* חיפוש */}
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -143,14 +149,14 @@ export default function Homepage() {
                     {recipe.title}
                   </h3>
                   <button
-                    onClick={() => toggleFavorite(recipe.recipeId)}
+                    onClick={() =>
+                      isFavorite(recipe.recipeId)
+                        ? removeFromFavorites(recipe.recipeId)
+                        : addToFavorites(recipe.recipeId)
+                    }
                     className="text-red-500 transition hover:scale-110"
                   >
-                    {favorites.includes(recipe.recipeId) ? (
-                      <FaHeart />
-                    ) : (
-                      <FaRegHeart />
-                    )}
+                    {isFavorite(recipe.recipeId) ? <FaHeart /> : <FaRegHeart />}
                   </button>
                 </div>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
