@@ -81,8 +81,8 @@ namespace HomeChefServer.Controllers
             return Ok(results);
         }
         [HttpPost("add")]
-        
-        public async Task<IActionResult> AddRecipe([FromBody] CreateRecipeDTO recipe)
+        public async Task<IActionResult> AddRecipe(CreateRecipeDTO recipe)
+
         {
             // שליפת מזהה המשתמש מתוך הטוקן (JWT)
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
@@ -91,31 +91,53 @@ namespace HomeChefServer.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
+            int newRecipeId;
+
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand("sp_AddRecipe", conn)
+            // שלב ראשון: יצירת המתכון עצמו
+            using (var cmd = new SqlCommand("sp_AddRecipe", conn))
             {
-                CommandType = CommandType.StoredProcedure
-            };
+                cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.AddWithValue("@Title", recipe.Title);
-            cmd.Parameters.AddWithValue("@ImageUrl", recipe.ImageUrl);
-            cmd.Parameters.AddWithValue("@SourceUrl", recipe.SourceUrl);
-            cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
-            cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
-            cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
-            cmd.Parameters.AddWithValue("@CreatedByUserId", userId); // כאן אתה קושר את המשתמש
+                cmd.Parameters.AddWithValue("@Title", recipe.Title);
+                cmd.Parameters.AddWithValue("@ImageUrl", recipe.ImageUrl);
+                cmd.Parameters.AddWithValue("@SourceUrl", recipe.SourceUrl);
+                cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
+                cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
+                cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
+                cmd.Parameters.AddWithValue("@CreatedByUserId", userId);
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            if (await reader.ReadAsync())
-            {
-                int newId = Convert.ToInt32(reader["NewRecipeId"]);
-                return Ok(new { Id = newId });
+                using var reader = await cmd.ExecuteReaderAsync();
+                if (await reader.ReadAsync())
+                {
+                    newRecipeId = Convert.ToInt32(reader["NewRecipeId"]);
+                }
+                else
+                {
+                    return StatusCode(500, "Failed to create recipe.");
+                }
             }
 
-            return StatusCode(500, "Failed to create recipe.");
-        }
+            // שלב שני: הוספת מרכיבים למתכון
+            foreach (var ingredient in recipe.Ingredients)
+            {
+                using var cmd = new SqlCommand("sp_AddIngredientToRecipe", conn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                cmd.Parameters.AddWithValue("@RecipeId", newRecipeId);
+                cmd.Parameters.AddWithValue("@IngredientName", ingredient.Name);
+                cmd.Parameters.AddWithValue("@Quantity", ingredient.Quantity);
+                cmd.Parameters.AddWithValue("@Unit", ingredient.Unit);
+
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            return Ok(new { Id = newRecipeId });
+        } 
 
 
     }

@@ -8,6 +8,8 @@
         public int Servings { get; set; }
         public int CookingTime { get; set; }
         public int CategoryId { get; set; }
-        // לא צריך CreatedByUserId כאן כי נשלוף מהטוקן
+
+        // רשימת מרכיבים שמתווספים ביחד עם המתכון
+        public List<IngredientDTO> Ingredients { get; set; }
     }
 }
