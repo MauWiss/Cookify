@@ -19,6 +19,7 @@ export default function Homepage() {
 
   const token = localStorage.getItem("token");
 
+  // פונקציה לשליפת המתכונים
   const fetchRecipes = async (term = "") => {
     setLoading(true);
     try {
@@ -40,6 +41,7 @@ export default function Homepage() {
     }
   };
 
+  // פונקציה לשליפת המתכונים המועדפים
   const fetchFavorites = async () => {
     if (!token) return;
     try {
@@ -52,6 +54,7 @@ export default function Homepage() {
     }
   };
 
+  // פונקציה להוסיף למועדפים
   const addToFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
@@ -68,6 +71,7 @@ export default function Homepage() {
     }
   };
 
+  // פונקציה להסיר מהמועדפים
   const removeFromFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
@@ -82,6 +86,7 @@ export default function Homepage() {
     }
   };
 
+  // פונקציה לבדוק אם המתכון כבר במועדפים
   const isFavorite = (recipeId) => favorites.includes(recipeId);
 
   useEffect(() => {
@@ -92,7 +97,7 @@ export default function Homepage() {
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       fetchRecipes(searchTerm);
-    }, 500);
+    }, 500); // ממתין 0.5 שניות אחרי ההקלדה
     return () => clearTimeout(delayDebounce);
   }, [searchTerm]);
 
