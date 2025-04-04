@@ -76,11 +76,16 @@ namespace HomeChefServer.Controllers
                 if (result != 1)
                     return StatusCode(500, "Unknown error during registration.");
 
-                // התחברות אוטומטית לאחר ההרשמה
-                var newUser = await _authService.ValidateUserAsync(register.Email, hashedPassword);
-                var token = _authService.GenerateJwtToken(newUser);
+                // שליפה מחדש לפי אימייל בלבד
+                // במקום ValidateUserAsync...
+                var newUser = await _authService.GetUserByEmailAsync(register.Email);
+                if (newUser == null)
+                    return StatusCode(500, "User created but could not be retrieved.");
 
+                var token = _authService.GenerateJwtToken(newUser);
                 return Ok(new { token });
+
+
             }
             catch (SqlException ex)
             {

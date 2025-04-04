@@ -4,6 +4,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Data.SqlClient;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace HomeChef.Server.Services
@@ -19,8 +20,19 @@ namespace HomeChef.Server.Services
             _connectionString = _configuration.GetConnectionString("DefaultConnection");
         }
 
+        
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(password);
+            var hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
+
         public async Task<User> ValidateUserAsync(string email, string password)
         {
+            string hashedPassword = HashPassword(password); // הצפנה לפני שליחה למסד
+
             using SqlConnection conn = new SqlConnection(_connectionString);
             await conn.OpenAsync();
 
@@ -30,7 +42,7 @@ namespace HomeChef.Server.Services
             };
 
             cmd.Parameters.AddWithValue("@Email", email);
-            cmd.Parameters.AddWithValue("@PasswordHash", password);
+            cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword); // שולחים HASH למסד
 
             using var reader = await cmd.ExecuteReaderAsync();
 
@@ -49,6 +61,34 @@ namespace HomeChef.Server.Services
 
             return null;
         }
+
+        public async Task<User> GetUserByEmailAsync(string email)
+        {
+            using SqlConnection conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using SqlCommand cmd = new SqlCommand("SELECT * FROM Users WHERE Email = @Email", conn);
+            cmd.Parameters.AddWithValue("@Email", email);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new User
+                {
+                    Id = (int)reader["Id"],
+                    Username = reader["Username"].ToString(),
+                    Email = reader["Email"].ToString(),
+                    Password = "",
+                    IsAdmin = (bool)reader["IsAdmin"],
+                    IsActive = (bool)reader["IsActive"]
+                };
+            }
+
+            return null;
+        }
+
+
+
 
         public string GenerateJwtToken(User user)
         {

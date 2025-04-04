@@ -17,13 +17,15 @@ export default function RegisterPage() {
       const response = await api.post("/auth/register", {
         username,
         email,
-        password,
+        passwordHash: password, // ✅ שם שדה תואם ל-DTO בשרת
       });
+
       localStorage.setItem("token", response.data.token);
       toast.success("Registered successfully! 🍳");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
-      toast.error("Registration failed. Try a different email.");
+      console.error("Registration error:", err);
+      toast.error("Registration failed. Try again.");
     }
   };
 
