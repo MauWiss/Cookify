@@ -3,6 +3,9 @@ using HomeChef.Server.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text;
+using System.Security.Cryptography;
+
 
 namespace HomeChefServer.Controllers
 {
@@ -34,13 +37,21 @@ namespace HomeChefServer.Controllers
             var token = _authService.GenerateJwtToken(user);
             return Ok(new { token });
         }
-
-        // הרשמה
+        // מתודה להצפנת הסיסמה
+        private string HashPassword(string password)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(password);
+            var hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
+        }
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO register)
         {
             try
             {
+                var hashedPassword = HashPassword(register.PasswordHash);
+
                 using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
                 await conn.OpenAsync();
 
@@ -51,9 +62,8 @@ namespace HomeChefServer.Controllers
 
                 cmd.Parameters.AddWithValue("@Username", register.Username);
                 cmd.Parameters.AddWithValue("@Email", register.Email);
-                cmd.Parameters.AddWithValue("@PasswordHash", register.PasswordHash);
+                cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
 
-                // פרמטר לקליטת RETURN מהפרוצדורה
                 var returnValue = cmd.Parameters.Add("@ReturnValue", SqlDbType.Int);
                 returnValue.Direction = ParameterDirection.ReturnValue;
 
@@ -66,8 +76,8 @@ namespace HomeChefServer.Controllers
                 if (result != 1)
                     return StatusCode(500, "Unknown error during registration.");
 
-                // התחברות אוטומטית לאחר הרשמה
-                var newUser = await _authService.ValidateUserAsync(register.Email, register.PasswordHash);
+                // התחברות אוטומטית לאחר ההרשמה
+                var newUser = await _authService.ValidateUserAsync(register.Email, hashedPassword);
                 var token = _authService.GenerateJwtToken(newUser);
 
                 return Ok(new { token });
@@ -76,6 +86,11 @@ namespace HomeChefServer.Controllers
             {
                 return StatusCode(500, $"Database error: {ex.Message}");
             }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Unexpected error: {ex.Message}");
+            }
         }
     }
 }
+

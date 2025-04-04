@@ -51,13 +51,13 @@ export default function LoginPage() {
           >
             Login
           </button>
+          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+            Don’t have an account?{" "}
+            <Link to="/auth/register" className="text-blue-500 hover:underline">
+              Register here
+            </Link>
+          </p>
         </form>
-        <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">
-          Don't have an account?{" "}
-          <Link to="/auth/register" className="text-blue-400 hover:underline">
-            Register
-          </Link>
-        </p>
       </div>
     </div>
   );
