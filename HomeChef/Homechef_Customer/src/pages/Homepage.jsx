@@ -1,20 +1,22 @@
 import { useEffect, useState } from "react";
-import { api } from "../api";
+import api from "../api/api";
+import { FaClock, FaUtensils } from "react-icons/fa";
 
-export default function HomePage() {
+export default function Homepage() {
   const [recipes, setRecipes] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchRecipes = async () => {
       try {
-        const response = await api.get("/NewRecipes");
+        const response = await api.get(
+          "/recipes/paged?pageNumber=1&pageSize=100",
+        );
         setRecipes(response.data);
-        setFiltered(response.data);
-      } catch (error) {
-        console.error("Error fetching recipes:", error);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to load recipes.");
       } finally {
         setLoading(false);
       }
@@ -23,84 +25,51 @@ export default function HomePage() {
     fetchRecipes();
   }, []);
 
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      const filteredRecipes = recipes.filter((recipe) =>
-        recipe.title.toLowerCase().includes(search.toLowerCase()),
-      );
-      setFiltered(filteredRecipes);
-    }, 300);
-    return () => clearTimeout(delay);
-  }, [search, recipes]);
+  if (loading)
+    return (
+      <div className="p-4 text-center text-lg text-gray-600 dark:text-gray-200">
+        Loading recipes...
+      </div>
+    );
+  if (error) return <div className="p-4 text-center text-red-500">{error}</div>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-center text-3xl font-bold text-gray-800 dark:text-white">
-        Discover New Recipes 🍲
-      </h1>
-
-      <div className="flex justify-center">
-        <input
-          type="text"
-          placeholder="Search for a recipe..."
-          className="w-full max-w-md rounded-md border border-gray-300 px-4 py-2 shadow focus:outline-none focus:ring focus:ring-teal-400 dark:border-gray-700 dark:bg-[#1a1a1a] dark:text-white"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      {loading ? (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {[...Array(6)].map((_, index) => (
-            <div
-              key={index}
-              className="animate-pulse overflow-hidden rounded-2xl bg-gray-300 dark:bg-gray-700"
+    <div className="grid grid-cols-1 gap-6 px-6 py-8 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+      {recipes.map((recipe) => (
+        <div
+          key={recipe.id}
+          className="overflow-hidden rounded-2xl bg-white shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
+        >
+          <a href={recipe.sourceUrl} target="_blank" rel="noopener noreferrer">
+            <img
+              src={recipe.imageUrl}
+              alt={recipe.title}
+              className="h-48 w-full object-cover transition hover:opacity-90"
+            />
+          </a>
+          <div className="space-y-2 p-4">
+            <a
+              href={recipe.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-lg font-semibold transition hover:text-blue-500"
             >
-              <div className="h-48 w-full bg-gray-400 dark:bg-gray-600"></div>
-              <div className="space-y-2 p-4">
-                <div className="h-6 w-3/4 rounded bg-gray-500 dark:bg-gray-600"></div>
-                <div className="h-4 rounded bg-gray-400 dark:bg-gray-500"></div>
-              </div>
+              {recipe.title}
+            </a>
+            <div className="text-sm text-gray-600 dark:text-gray-400">
+              {recipe.categoryName}
             </div>
-          ))}
-        </div>
-      ) : filtered.length === 0 ? (
-        <p className="text-center text-gray-600 dark:text-gray-300">
-          No recipes found. Try another search or add a new recipe.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3">
-          {filtered.map((recipe) => (
-            <div
-              key={recipe.id}
-              className="overflow-hidden rounded-2xl bg-white shadow-lg transition hover:scale-[1.02] dark:bg-[#1d1d1d]"
-            >
-              <img
-                src={
-                  recipe.imageUrl ||
-                  "https://t4.ftcdn.net/jpg/04/70/29/97/360_F_470299797_UD0eoVMMSUbHCcNJCdv2t8B2g1GVqYgs.jpg"
-                }
-                alt={recipe.title}
-                className="h-48 w-full object-cover"
-              />
-              <div className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                  {recipe.title}
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  Category: {recipe.category}
-                </p>
-                <a
-                  href={`/meal/${recipe.id}`}
-                  className="mt-3 inline-block font-semibold text-indigo-500 hover:text-indigo-700"
-                >
-                  View Recipe →
-                </a>
-              </div>
+            <div className="mt-1 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+              <span className="flex items-center gap-1">
+                <FaClock /> {recipe.cookingTime} min
+              </span>
+              <span className="flex items-center gap-1">
+                <FaUtensils /> Serves {recipe.servings}
+              </span>
             </div>
-          ))}
+          </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }
