@@ -24,7 +24,6 @@ namespace HomeChefServer.Controllers
         {
             var user = await _authService.ValidateUserAsync(login.Email, login.PasswordHash);
 
-
             if (user == null)
                 return Unauthorized("Email or password is incorrect.");
 
@@ -39,32 +38,38 @@ namespace HomeChefServer.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO register)
         {
-            // בדיקה אם המשתמש כבר קיים
-            var existingUser = await _authService.ValidateUserAsync(register.Email, register.Password);
-            if (existingUser != null)
-                return BadRequest("User already exists with this email.");
-
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            await conn.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_RegisterUser", conn)
+            try
             {
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
+                using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+                await conn.OpenAsync();
 
-            cmd.Parameters.AddWithValue("@FullName", register.FullName);
-            cmd.Parameters.AddWithValue("@Email", register.Email);
-            cmd.Parameters.AddWithValue("@PasswordHash", register.Password);
+                using var cmd = new SqlCommand("sp_RegisterUser", conn)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
 
-            var result = await cmd.ExecuteNonQueryAsync();
-            if (result <= 0)
-                return StatusCode(500, "Failed to register user.");
+                cmd.Parameters.AddWithValue("@Username", register.Username);
+                cmd.Parameters.AddWithValue("@Email", register.Email);
+                cmd.Parameters.AddWithValue("@PasswordHash", register.PasswordHash);
 
-            // התחברות אוטומטית לאחר הרשמה
-            var newUser = await _authService.ValidateUserAsync(register.Email, register.Password);
-            var token = _authService.GenerateJwtToken(newUser);
+                var result = await cmd.ExecuteNonQueryAsync();
 
-            return Ok(new { token });
+                if (result <= 0)
+                    return StatusCode(500, "Unknown error during registration.");
+
+                // התחברות אוטומטית לאחר הרשמה
+                var newUser = await _authService.ValidateUserAsync(register.Email, register.PasswordHash);
+                var token = _authService.GenerateJwtToken(newUser);
+
+                return Ok(new { token });
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("Email already exists"))
+                    return Conflict("A user with this email already exists.");
+
+                return StatusCode(500, $"Database error: {ex.Message}");
+            }
         }
     }
 }
