@@ -137,7 +137,80 @@ namespace HomeChefServer.Controllers
             }
 
             return Ok(new { Id = newRecipeId });
-        } 
+        }
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(int id)
+        {
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand("sp_DeleteRecipe", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@RecipeId", id);
+
+            await cmd.ExecuteNonQueryAsync();
+            return Ok($"Recipe {id} deleted.");
+        }
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<FullRecipeDTO>> GetRecipeById(int id)
+        {
+            FullRecipeDTO recipe = null;
+            var ingredients = new List<IngredientDTO>();
+
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand("sp_GetRecipeById", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("@RecipeId", id);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            // קריאת פרטי המתכון
+            if (await reader.ReadAsync())
+            {
+                recipe = new FullRecipeDTO
+                {
+                    Id = (int)reader["Id"],
+                    Title = reader["Title"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    Servings = (int)reader["Servings"],
+                    CookingTime = (int)reader["CookingTime"],
+                    CategoryId = (int)reader["CategoryId"],
+                    CategoryName = reader["CategoryName"].ToString(),
+                    Ingredients = new List<IngredientDTO>()
+                };
+            }
+
+            // קריאת המרכיבים
+            if (await reader.NextResultAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    ingredients.Add(new IngredientDTO
+                    {
+                        Name = reader["Name"].ToString(),
+                        Quantity = float.Parse(reader["Quantity"].ToString()),
+                        Unit = reader["Unit"].ToString()
+                    });
+                }
+            }
+
+            if (recipe == null)
+                return NotFound();
+
+            recipe.Ingredients = ingredients;
+            return Ok(recipe);
+        }
+
+
 
 
     }

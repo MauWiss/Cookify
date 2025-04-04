@@ -50,18 +50,24 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "HomeChef API", Version = "v1" });
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "HomeChef API",
+        Version = "v1",
+        Description = "API documentation for HomeChef project with JWT authentication support."
+    });
 
-    // הוספת תמיכה ב־JWT
+    // JWT Authentication definition
     c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        Description = "הכנס כאן את הטוקן (פורמט: Bearer {token})",
+        Description = "Enter your JWT token here (format: **Bearer {your_token}**).",
         Name = "Authorization",
         In = Microsoft.OpenApi.Models.ParameterLocation.Header,
         Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
         Scheme = "Bearer"
     });
 
+    // Apply JWT globally
     c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
     {
         {
@@ -73,10 +79,11 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "Bearer"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 });
+
 
 
 var app = builder.Build();
