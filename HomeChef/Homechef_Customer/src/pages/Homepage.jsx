@@ -75,7 +75,7 @@ export default function Homepage() {
   const removeFromFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
-      await api.delete(`/favorites/${recipeId}/favorite`, {
+      await api.delete(`/Favorites/${recipeId}/favorite`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFavorites((prev) => prev.filter((id) => id !== recipeId));

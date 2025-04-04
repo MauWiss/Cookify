@@ -44,17 +44,17 @@ namespace HomeChefServer.Controllers
 
             return Ok(new { Message = $"Recipe {id} added to favorites." });
         }
-
-        // כאן אני שולף את כל המועדפים של המשתמש
-
         [HttpGet("favorites")]
         public async Task<ActionResult<IEnumerable<FavoriteRecipeDTO>>> GetFavorites()
         {
+            // חילוץ מזהה המשתמש מתוך ה־JWT
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
                 return Unauthorized("User ID not found in token.");
 
+            // המרת ה-UserId ל-int (כי בטבלה הוא נשמר כמספר)
             int userId = int.Parse(userIdClaim.Value);
+
             var favorites = new List<FavoriteRecipeDTO>();
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -64,6 +64,8 @@ namespace HomeChefServer.Controllers
             {
                 CommandType = CommandType.StoredProcedure
             };
+
+            // הוספת ה-UserId כפרמטר
             cmd.Parameters.AddWithValue("@UserId", userId);
 
             using var reader = await cmd.ExecuteReaderAsync();
@@ -80,6 +82,7 @@ namespace HomeChefServer.Controllers
 
             return Ok(favorites);
         }
+
 
 
         // DELETE api/<FavoritesController>/5
