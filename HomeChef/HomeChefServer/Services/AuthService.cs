@@ -39,7 +39,7 @@ namespace HomeChef.Server.Services
                 return new User
                 {
                     Id = (int)reader["Id"],
-                    FullName = reader["FullName"].ToString(),
+                    Username = reader["Username"].ToString(),
                     Email = reader["Email"].ToString(),
                     Password = "", // לא מחזירים סיסמה
                     IsAdmin = (bool)reader["IsAdmin"],
@@ -59,7 +59,7 @@ namespace HomeChef.Server.Services
             {
                 new Claim(ClaimTypes.Name, user.Email),
                 new Claim("UserId", user.Id.ToString()),
-                new Claim("FullName", user.FullName),
+                new Claim("Username", user.Username),
                 new Claim(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User")
             };
 
