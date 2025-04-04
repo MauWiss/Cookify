@@ -29,38 +29,7 @@ namespace HomeChef.Server.Services
             return Convert.ToBase64String(hash);
         }
 
-        public async Task<User> ValidateUserAsync(string email, string password)
-        {
-            string hashedPassword = HashPassword(password); // הצפנה לפני שליחה למסד
-
-            using SqlConnection conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-
-            using SqlCommand cmd = new SqlCommand("sp_LoginUser", conn)
-            {
-                CommandType = System.Data.CommandType.StoredProcedure
-            };
-
-            cmd.Parameters.AddWithValue("@Email", email);
-            cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword); // שולחים HASH למסד
-
-            using var reader = await cmd.ExecuteReaderAsync();
-
-            if (await reader.ReadAsync())
-            {
-                return new User
-                {
-                    Id = (int)reader["Id"],
-                    Username = reader["Username"].ToString(),
-                    Email = reader["Email"].ToString(),
-                    Password = "", // לא מחזירים סיסמה
-                    IsAdmin = (bool)reader["IsAdmin"],
-                    IsActive = (bool)reader["IsActive"]
-                };
-            }
-
-            return null;
-        }
+       
 
         public async Task<User> GetUserByEmailAsync(string email)
         {
@@ -78,7 +47,7 @@ namespace HomeChef.Server.Services
                     Id = (int)reader["Id"],
                     Username = reader["Username"].ToString(),
                     Email = reader["Email"].ToString(),
-                    Password = "",
+                    Password = reader["PasswordHash"].ToString(),
                     IsAdmin = (bool)reader["IsAdmin"],
                     IsActive = (bool)reader["IsActive"]
                 };

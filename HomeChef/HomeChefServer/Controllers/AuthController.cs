@@ -5,6 +5,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.Win32;
 
 
 namespace HomeChefServer.Controllers
@@ -22,21 +23,6 @@ namespace HomeChefServer.Controllers
             _configuration = configuration;
         }
 
-        // התחברות
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserLoginDTO login)
-        {
-            var user = await _authService.ValidateUserAsync(login.Email, login.PasswordHash);
-
-            if (user == null)
-                return Unauthorized("Email or password is incorrect.");
-
-            if (!user.IsActive)
-                return Unauthorized("User is not active.");
-
-            var token = _authService.GenerateJwtToken(user);
-            return Ok(new { token });
-        }
         // מתודה להצפנת הסיסמה
         private string HashPassword(string password)
         {
@@ -45,6 +31,26 @@ namespace HomeChefServer.Controllers
             var hash = sha256.ComputeHash(bytes);
             return Convert.ToBase64String(hash);
         }
+
+        // התחברות
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLoginDTO login)
+        {
+            var user = await _authService.GetUserByEmailAsync(login.Email);
+
+            // השוואה של ההאש בפועל
+            var hashedPassword = HashPassword(login.Password);
+
+            if (user == null || user.Password != hashedPassword)
+                return Unauthorized("Email or password is incorrect.");
+
+            if (!user.IsActive)
+                return Unauthorized("User is not active.");
+
+            var token = _authService.GenerateJwtToken(user);
+            return Ok(new { token });
+        }
+
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO register)
         {
