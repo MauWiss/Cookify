@@ -4,9 +4,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HomeChefServer.Data
 {
-    public class ApplicationDbContext : DbContext
+    public class HomeChefDbContext : DbContext
     {
-        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
+        public HomeChefDbContext(DbContextOptions<HomeChefDbContext> options) : base(options)
         {
         }
 
