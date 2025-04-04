@@ -1,4 +1,4 @@
-﻿using HomeChefServer.Controllers.Models;
+﻿using HomeChefServer.Controllers;
 using HomeChefServer.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,7 +10,6 @@ namespace HomeChefServer.Data
         {
         }
 
-        public DbSet<User> Users { get; set; }
-        public DbSet<NewRecipe> NewRecipes { get; set; }
+    
     }
 }
