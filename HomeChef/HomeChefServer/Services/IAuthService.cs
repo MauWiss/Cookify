@@ -1,6 +1,10 @@
-﻿namespace HomeChefServer.Services
+﻿using HomeChef.Server.Models;
+
+namespace HomeChef.Server.Services
 {
-    public class IAuthService
+    public interface IAuthService
     {
+        Task<User> ValidateUserAsync(string email, string password);
+        string GenerateJwtToken(User user);
     }
 }

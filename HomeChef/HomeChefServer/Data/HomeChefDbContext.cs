@@ -1,5 +1,4 @@
 ﻿using HomeChefServer.Controllers;
-using HomeChefServer.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeChefServer.Data
