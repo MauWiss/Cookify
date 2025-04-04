@@ -1,12 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import {
-  FaHeart,
-  FaRegHeart,
-  FaClock,
-  FaUtensils,
-  FaSearch,
-} from "react-icons/fa";
+import { FaClock, FaUtensils, FaSearch } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -15,17 +9,19 @@ export default function Homepage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [favorites, setFavorites] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState(""); // State for category filter
 
   const token = localStorage.getItem("token");
 
-  // פונקציה לשליפת המתכונים
-  const fetchRecipes = async (term = "") => {
+  const fetchRecipes = async (term = "", category = "") => {
     setLoading(true);
     try {
-      const endpoint = term
-        ? `/recipes/search?term=${encodeURIComponent(term)}`
-        : "/recipes/paged?pageNumber=1&pageSize=100";
+      const endpoint = category
+        ? `/recipes/search?term=${encodeURIComponent(term)}&category=${encodeURIComponent(category)}`
+        : term
+          ? `/recipes/search?term=${encodeURIComponent(term)}`
+          : "/recipes/paged?pageNumber=1&pageSize=100";
 
       const response = await api.get(endpoint);
       setRecipes(response.data);
@@ -41,69 +37,32 @@ export default function Homepage() {
     }
   };
 
-  // פונקציה לשליפת המתכונים המועדפים
-  const fetchFavorites = async () => {
-    if (!token) return;
+  const fetchCategories = async () => {
     try {
-      const res = await api.get("/favorites", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFavorites(res.data.map((fav) => fav.recipeId));
+      const response = await api.get("/categories"); // Assuming the API has a /categories endpoint
+      setCategories(response.data);
     } catch (err) {
-      console.error("Failed to fetch favorites", err);
+      console.error("Failed to fetch categories", err);
     }
   };
-
-  // פונקציה להוסיף למועדפים
-  const addToFavorites = async (recipeId) => {
-    if (!recipeId) return;
-    try {
-      await api.post(
-        `/favorites/${recipeId}/favorite`,
-        {}, // אין גוף
-        { headers: { Authorization: `Bearer ${token}` } },
-      );
-      setFavorites((prev) => [...prev, recipeId]);
-      toast.success("Added to favorites ❤️");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to add to favorites.");
-    }
-  };
-
-  // פונקציה להסיר מהמועדפים
-  const removeFromFavorites = async (recipeId) => {
-    if (!recipeId) return;
-    try {
-      await api.delete(`/Favorites/${recipeId}/favorite`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFavorites((prev) => prev.filter((id) => id !== recipeId));
-      toast.success("Removed from favorites 💔");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to remove from favorites.");
-    }
-  };
-
-  // פונקציה לבדוק אם המתכון כבר במועדפים
-  const isFavorite = (recipeId) => favorites.includes(recipeId);
 
   useEffect(() => {
     fetchRecipes();
-    fetchFavorites();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
-      fetchRecipes(searchTerm);
-    }, 500); // ממתין 0.5 שניות אחרי ההקלדה
+      fetchRecipes(searchTerm, selectedCategory);
+    }, 500);
     return () => clearTimeout(delayDebounce);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCategory]);
 
   return (
     <div className="px-6 py-8">
       <ToastContainer />
+
+      {/* חיפוש */}
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -113,6 +72,25 @@ export default function Homepage() {
           className="flex-grow bg-transparent px-4 py-2 text-sm text-gray-800 placeholder-gray-400 outline-none dark:text-white dark:placeholder-gray-300"
         />
         <FaSearch className="mx-3 text-gray-400" />
+      </div>
+
+      {/* Dropdown for category selection */}
+      <div className="mb-4">
+        <label className="mr-2 text-lg text-gray-800 dark:text-white">
+          Filter by Category:
+        </label>
+        <select
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="rounded-md border p-2"
+        >
+          <option value="">All Categories</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.name}>
+              {category.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       {loading ? (
@@ -149,21 +127,9 @@ export default function Homepage() {
               )}
 
               <div className="space-y-2 p-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-semibold transition hover:text-blue-500">
-                    {recipe.title}
-                  </h3>
-                  <button
-                    onClick={() =>
-                      isFavorite(recipe.recipeId)
-                        ? removeFromFavorites(recipe.recipeId)
-                        : addToFavorites(recipe.recipeId)
-                    }
-                    className="text-red-500 transition hover:scale-110"
-                  >
-                    {isFavorite(recipe.recipeId) ? <FaHeart /> : <FaRegHeart />}
-                  </button>
-                </div>
+                <h3 className="text-lg font-semibold transition hover:text-blue-500">
+                  {recipe.title}
+                </h3>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
                   {recipe.categoryName}
                 </div>

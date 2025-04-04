@@ -52,34 +52,41 @@ namespace HomeChefServer.Controllers
         }
         // חיפוש מתכונים לפי מילה
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<RecipeSearchResultDTO>>> SearchRecipes([FromQuery] string term)
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> SearchRecipes(string term, string category = "")
         {
-            List<RecipeSearchResultDTO> results = new();
+            var recipes = new List<RecipeDTO>();
 
-            using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using SqlCommand cmd = new SqlCommand("sp_SearchRecipes", conn)
+            var cmd = new SqlCommand("sp_SearchRecipes", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
             cmd.Parameters.AddWithValue("@SearchTerm", term);
+            if (!string.IsNullOrEmpty(category))
+            {
+                cmd.Parameters.AddWithValue("@Category", category);
+            }
 
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                results.Add(new RecipeSearchResultDTO
+                recipes.Add(new RecipeDTO
                 {
                     RecipeId = (int)reader["RecipeId"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
-                    CategoryName = reader["CategoryName"].ToString()
+                    CategoryName = reader["CategoryName"].ToString(),
+                    CookingTime = (int)reader["CookingTime"],
+                    Servings = (int)reader["Servings"]
                 });
             }
 
-            return Ok(results);
+            return Ok(recipes);
         }
+
         [HttpPost("add")]
         public async Task<IActionResult> AddRecipe(CreateRecipeDTO recipe)
 
