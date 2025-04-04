@@ -1,43 +1,54 @@
-﻿using Microsoft.AspNetCore.Mvc;
-
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+﻿using HomeChef.Server.Models.DTOs;
+using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Data.SqlClient;
 
 namespace HomeChefServer.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class RecipesController : ControllerBase
     {
-        // GET: api/<RecipesController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        private readonly IConfiguration _configuration;
+
+        public RecipesController(IConfiguration configuration)
         {
-            return new string[] { "value1", "value2" };
+            _configuration = configuration;
         }
 
-        // GET api/<RecipesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        // שליפה מדורגת של מתכונים
+        [HttpGet("paged")]
+        public async Task<ActionResult<IEnumerable<PagedRecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
         {
-            return "value";
-        }
+            List<PagedRecipeDTO> recipes = new List<PagedRecipeDTO>();
 
-        // POST api/<RecipesController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
+            using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
 
-        // PUT api/<RecipesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
+            using SqlCommand cmd = new SqlCommand("sp_GetRecipesPaged", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
 
-        // DELETE api/<RecipesController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+            cmd.Parameters.AddWithValue("@PageSize", pageSize);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                recipes.Add(new PagedRecipeDTO
+                {
+                    Id = (int)reader["Id"],
+                    Title = reader["Title"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    Servings = (int)reader["Servings"],
+                    CookingTime = (int)reader["CookingTime"],
+                    CategoryName = reader["CategoryName"].ToString()
+                });
+            }
+
+            return Ok(recipes);
         }
     }
 }
