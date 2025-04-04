@@ -22,7 +22,8 @@ namespace HomeChefServer.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO login)
         {
-            var user = await _authService.ValidateUserAsync(login.Email, login.Password);
+            var user = await _authService.ValidateUserAsync(login.Email, login.PasswordHash);
+
 
             if (user == null)
                 return Unauthorized("Email or password is incorrect.");
@@ -53,7 +54,7 @@ namespace HomeChefServer.Controllers
 
             cmd.Parameters.AddWithValue("@FullName", register.FullName);
             cmd.Parameters.AddWithValue("@Email", register.Email);
-            cmd.Parameters.AddWithValue("@Password", register.Password);
+            cmd.Parameters.AddWithValue("@PasswordHash", register.Password);
 
             var result = await cmd.ExecuteNonQueryAsync();
             if (result <= 0)
