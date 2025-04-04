@@ -81,7 +81,8 @@ namespace HomeChefServer.Controllers
             return Ok(results);
         }
         [HttpPost("add")]
-         public async Task<IActionResult> AddRecipe([FromBody] CreateRecipeDTO recipe)
+        
+        public async Task<IActionResult> AddRecipe([FromBody] CreateRecipeDTO recipe)
         {
             // שליפת מזהה המשתמש מתוך הטוקן (JWT)
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
