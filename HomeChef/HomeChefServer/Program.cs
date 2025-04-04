@@ -4,28 +4,34 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
-//COnnection  
+// Connection  
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//  Controllers
+// Controllers
 builder.Services.AddControllers();
+
+// Swagger
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
 
 // Health Checks
 builder.Services.AddHealthChecks()
     .AddSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-/*
- //https://localhost:5007/health
- //https://localhost:7019/health
- */
-
 
 var app = builder.Build();
 
-//  Controllers Mapping
+// Swagger (Development only)
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+// Controllers Mapping
 app.MapControllers();
 
-// מיפוי בדיקת בריאות למסד הנתונים
+// Health check endpoint
 app.MapHealthChecks("/health");
 
 app.Run();
