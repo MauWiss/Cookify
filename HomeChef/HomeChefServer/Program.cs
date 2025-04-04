@@ -4,10 +4,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// הגדרת מפתח סודי לטוקן
-var key = Encoding.UTF8.GetBytes("YourSuperSecretKey!ChangeThis");
 
-// הוספת Authentication
+var jwtKey = builder.Configuration["Jwt:Key"];
+var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+var key = Encoding.UTF8.GetBytes(jwtKey);
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -17,35 +19,43 @@ builder.Services.AddAuthentication(options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
-        ValidateIssuer = false,
+        ValidateIssuer = true,
         ValidateAudience = false,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtIssuer,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
 });
+
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        policy =>
-        {
-            policy.AllowAnyOrigin()
-                  .AllowAnyHeader()
-                  .AllowAnyMethod();
-        });
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
+    });
 });
 
-// שאר השירותים
+// שירותים נוספים
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// הוספת Middleware לאימות
+
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
+
+
+
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowAll");
 
 app.MapControllers();
 

@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
-using HomeChefServer.Data;
-using System.Data;
+
+// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace HomeChefServer.Controllers
 {
@@ -10,55 +8,36 @@ namespace HomeChefServer.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-
-        public AuthController(ApplicationDbContext context)
+        // GET: api/<AuthController>
+        [HttpGet]
+        public IEnumerable<string> Get()
         {
-            _context = context;
+            return new string[] { "value1", "value2" };
         }
 
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register(string username, string email, string passwordHash)
+        // GET api/<AuthController>/5
+        [HttpGet("{id}")]
+        public string Get(int id)
         {
-            try
-            {
-                var resultParam = new SqlParameter
-                {
-                    ParameterName = "@NewUserId",
-                    SqlDbType = SqlDbType.Int,
-                    Direction = ParameterDirection.Output
-                };
-
-                await _context.Database.ExecuteSqlRawAsync(
-                    "EXEC sp_RegisterUser @Username, @Email, @PasswordHash",
-                    new SqlParameter("@Username", username),
-                    new SqlParameter("@Email", email),
-                    new SqlParameter("@PasswordHash", passwordHash)
-                );
-
-                return Ok(new { message = "Registration successful." });
-            }
-            catch (SqlException ex)
-            {
-                if (ex.Message.Contains("Email already exists"))
-                    return BadRequest("Email already exists.");
-                return StatusCode(500, "Database error: " + ex.Message);
-            }
+            return "value";
         }
 
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(string email, string passwordHash)
+        // POST api/<AuthController>
+        [HttpPost]
+        public void Post([FromBody] string value)
         {
-            var users = await _context.Users
-                .FromSqlRaw("EXEC sp_LoginUser @Email, @PasswordHash",
-                    new SqlParameter("@Email", email),
-                    new SqlParameter("@PasswordHash", passwordHash))
-                .ToListAsync();
+        }
 
-            if (users.Count == 0)
-                return Unauthorized("Invalid credentials.");
+        // PUT api/<AuthController>/5
+        [HttpPut("{id}")]
+        public void Put(int id, [FromBody] string value)
+        {
+        }
 
-            return Ok(users.First());
+        // DELETE api/<AuthController>/5
+        [HttpDelete("{id}")]
+        public void Delete(int id)
+        {
         }
     }
 }
