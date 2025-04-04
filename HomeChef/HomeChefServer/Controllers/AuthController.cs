@@ -1,6 +1,7 @@
 ﻿using HomeChef.Server.Models.DTOs;
 using HomeChef.Server.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace HomeChefServer.Controllers
@@ -45,16 +46,24 @@ namespace HomeChefServer.Controllers
 
                 using var cmd = new SqlCommand("sp_RegisterUser", conn)
                 {
-                    CommandType = System.Data.CommandType.StoredProcedure
+                    CommandType = CommandType.StoredProcedure
                 };
 
                 cmd.Parameters.AddWithValue("@Username", register.Username);
                 cmd.Parameters.AddWithValue("@Email", register.Email);
                 cmd.Parameters.AddWithValue("@PasswordHash", register.PasswordHash);
 
-                var result = await cmd.ExecuteNonQueryAsync();
+                // פרמטר לקליטת RETURN מהפרוצדורה
+                var returnValue = cmd.Parameters.Add("@ReturnValue", SqlDbType.Int);
+                returnValue.Direction = ParameterDirection.ReturnValue;
 
-                if (result <= 0)
+                await cmd.ExecuteNonQueryAsync();
+                int result = (int)returnValue.Value;
+
+                if (result == -1)
+                    return Conflict("A user with this email already exists.");
+
+                if (result != 1)
                     return StatusCode(500, "Unknown error during registration.");
 
                 // התחברות אוטומטית לאחר הרשמה
@@ -65,9 +74,6 @@ namespace HomeChefServer.Controllers
             }
             catch (SqlException ex)
             {
-                if (ex.Message.Contains("Email already exists"))
-                    return Conflict("A user with this email already exists.");
-
                 return StatusCode(500, $"Database error: {ex.Message}");
             }
         }
