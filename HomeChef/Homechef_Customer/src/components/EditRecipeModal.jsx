@@ -1,7 +1,7 @@
-// components/EditRecipeModal.jsx
 import * as Dialog from "@radix-ui/react-dialog";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import confetti from "canvas-confetti"; // ✅ חדש!
 import api from "../api/api";
 
 export default function EditRecipeModal({
@@ -56,17 +56,27 @@ export default function EditRecipeModal({
       };
 
       await api.put("/myrecipes/update", updated);
-      toast.success("✅ Your recipe was updated successfully!", {
-        position: "top-right",
+
+      // 🎉 אפקט קונפטי
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+      });
+
+      // ✅ Toast
+      toast.success("🎉 Recipe updated successfully!", {
+        position: "top-center",
         autoClose: 3000,
         theme: "colored",
       });
+
       setOpen(false);
       onRecipeUpdated();
     } catch (err) {
       console.error(err);
       toast.error("❌ Failed to update recipe", {
-        position: "top-right",
+        position: "top-center",
         theme: "colored",
       });
     }
