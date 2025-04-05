@@ -16,7 +16,7 @@ export default function FavoritesPage() {
     setLoading(true);
     try {
       const endpoint = categoryId
-        ? `/Favorites/favorites/category/${categoryId}`
+        ? `/Categories/${categoryId}/favorites`
         : "/Favorites/favorites";
 
       const res = await api.get(endpoint, {
