@@ -19,9 +19,9 @@ namespace HomeChefServer.Controllers
 
         // שליפה מדורגת של מתכונים
         [HttpGet("paged")]
-        public async Task<ActionResult<IEnumerable<PagedRecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
         {
-            List<PagedRecipeDTO> recipes = new List<PagedRecipeDTO>();
+            List<RecipeDTO> recipes = new List<RecipeDTO>();
 
             using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -37,9 +37,9 @@ namespace HomeChefServer.Controllers
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                recipes.Add(new PagedRecipeDTO
+                recipes.Add(new RecipeDTO
                 {
-                    Id = (int)reader["Id"],
+                    RecipeId = (int)reader["Id"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
                     SourceUrl = reader["SourceUrl"].ToString(),
@@ -221,14 +221,14 @@ namespace HomeChefServer.Controllers
        
 
         [HttpGet("my-recipes")]
-        public async Task<ActionResult<IEnumerable<PagedRecipeDTO>>> GetMyRecipes()
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetMyRecipes()
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
                 return Unauthorized("User ID not found in token.");
 
             int userId = int.Parse(userIdClaim.Value);
-            var recipes = new List<PagedRecipeDTO>();
+            var recipes = new List<RecipeDTO>();
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -242,9 +242,9 @@ namespace HomeChefServer.Controllers
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                recipes.Add(new PagedRecipeDTO
+                recipes.Add(new RecipeDTO
                 {
-                    Id = (int)reader["Id"],
+                    RecipeId = (int)reader["Id"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
                     SourceUrl = reader["SourceUrl"].ToString(),
