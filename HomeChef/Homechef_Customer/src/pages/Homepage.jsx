@@ -70,16 +70,15 @@ export default function Homepage() {
   const isFavorite = (recipeId) => favorites.includes(recipeId);
   const addToFavorites = async (recipeId) => {
     if (!token) {
-      toast.warning("Please log in to add favorites 💡");
+      toast.warn("Please login to add to favorites ⚠️");
       return;
     }
+    if (!recipeId) return;
     try {
       await api.post(
         `/Favorites/${recipeId}/favorite`,
         {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
       setFavorites((prev) => [...prev, recipeId]);
       toast.success("Added to favorites ❤️");
@@ -88,6 +87,7 @@ export default function Homepage() {
       toast.error("Failed to add to favorites.");
     }
   };
+
   const removeFromFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
@@ -126,14 +126,14 @@ export default function Homepage() {
       <ToastContainer />
 
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
-        <FaSearch className="mx-3 text-gray-400" />
         <input
           type="text"
           placeholder="Search for a recipe..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-grow bg-transparent px-4 py-2 text-base font-semibold tracking-wide text-gray-800 placeholder-gray-500 outline-none dark:text-white dark:placeholder-gray-300"
+          className="flex-grow bg-transparent px-4 py-2 text-base font-semibold tracking-wide text-gray-800 placeholder-gray-700 outline-none dark:text-white dark:placeholder-gray-300"
         />
+        <FaSearch className="mx-3 text-gray-400" />
       </div>
 
       <div className="mb-4">
