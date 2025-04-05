@@ -61,22 +61,10 @@ export default function FavoritesPage() {
     }
   };
 
-  // UseEffect to fetch favorites based on selected category
   useEffect(() => {
     fetchCategories();
     fetchFavorites();
   }, []);
-
-  useEffect(() => {
-    // Update the favorites when the category changes
-    if (selectedCategoryId) {
-      setFavorites((prev) =>
-        prev.filter((fav) => fav.categoryId === selectedCategoryId),
-      );
-    } else {
-      fetchFavorites(); // If no category is selected, show all favorites
-    }
-  }, [selectedCategoryId]);
 
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-8 dark:bg-gray-900">
@@ -86,7 +74,9 @@ export default function FavoritesPage() {
       </h2>
 
       <div className="mb-4">
-        <label className="mr-2 text-lg text-white">Filter by Category:</label>
+        <label className="mr-2 text-lg text-gray-800 dark:text-white">
+          Filter by Category:
+        </label>
         <select
           value={selectedCategoryId ?? ""}
           onChange={(e) =>
@@ -115,55 +105,60 @@ export default function FavoritesPage() {
         </p>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {favorites.map((recipe) => (
-            <div
-              key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
-            >
-              <a
-                href={recipe.sourceUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+          {favorites
+            .filter(
+              (fav) =>
+                !selectedCategoryId || fav.categoryId === selectedCategoryId,
+            )
+            .map((recipe) => (
+              <div
+                key={recipe.recipeId}
+                className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
               >
-                <img
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  className="h-48 w-full object-cover"
-                />
-              </a>
-
-              <button
-                onClick={() => removeFavorite(recipe.recipeId)}
-                className="absolute right-2 top-2 z-10 rounded-full bg-gray-700 p-2 text-white shadow-md transition hover:scale-110 hover:bg-red-600"
-                title="Remove from favorites"
-              >
-                <FaHeartBroken size={18} />
-              </button>
-
-              <div className="space-y-2 p-4">
                 <a
                   href={recipe.sourceUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
-                  <h3 className="text-lg font-semibold text-gray-900 transition hover:text-blue-500 dark:text-white">
-                    {recipe.title}
-                  </h3>
+                  <img
+                    src={recipe.imageUrl}
+                    alt={recipe.title}
+                    className="h-48 w-full object-cover"
+                  />
                 </a>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
-                  {recipe.categoryName}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
-                  <span className="flex items-center gap-1">
-                    <FaClock /> {recipe.cookingTime || "?"} min
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <FaUtensils /> Serves {recipe.servings || "?"}
-                  </span>
+
+                <button
+                  onClick={() => removeFavorite(recipe.recipeId)}
+                  className="absolute right-2 top-2 z-10 rounded-full bg-gray-700 p-2 text-white shadow-md transition hover:scale-110 hover:bg-red-600"
+                  title="Remove from favorites"
+                >
+                  <FaHeartBroken size={18} />
+                </button>
+
+                <div className="space-y-2 p-4">
+                  <a
+                    href={recipe.sourceUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <h3 className="text-lg font-semibold text-gray-900 hover:text-blue-500 dark:text-white">
+                      {recipe.title}
+                    </h3>
+                  </a>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    {recipe.categoryName}
+                  </p>
+                  <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                    <span className="flex items-center gap-1">
+                      <FaClock /> {recipe.cookingTime || "?"} min
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <FaUtensils /> Serves {recipe.servings || "?"}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
         </div>
       )}
     </div>

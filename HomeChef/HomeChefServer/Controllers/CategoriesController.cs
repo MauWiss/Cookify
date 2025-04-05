@@ -75,6 +75,47 @@ namespace HomeChefServer.Controllers
             return Ok(recipes);
         }
 
+        [HttpGet("{categoryId}/favorites")]
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetFavoritesByCategory(int categoryId)
+        {
+            var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+            if (userIdClaim == null)
+                return Unauthorized("User ID not found in token.");
+
+            int userId = int.Parse(userIdClaim.Value);
+
+            var recipes = new List<RecipeDTO>();
+
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand("sp_GetFavoritesByUserIdAndCategory", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                recipes.Add(new RecipeDTO
+                {
+                    RecipeId = (int)reader["RecipeId"],
+                    Title = reader["Title"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0,
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                    CategoryName = reader["CategoryName"].ToString()
+                });
+            }
+
+            return Ok(recipes);
+        }
+
+
 
     }
 }
