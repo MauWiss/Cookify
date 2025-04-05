@@ -8,6 +8,8 @@ import "react-toastify/dist/ReactToastify.css";
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const token = localStorage.getItem("token");
 
   const fetchFavorites = async () => {
@@ -22,6 +24,15 @@ export default function FavoritesPage() {
       toast.error("Something went wrong while loading your favorites.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+      setCategories(res.data);
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
     }
   };
 
@@ -50,9 +61,22 @@ export default function FavoritesPage() {
     }
   };
 
+  // UseEffect to fetch favorites based on selected category
   useEffect(() => {
+    fetchCategories();
     fetchFavorites();
   }, []);
+
+  useEffect(() => {
+    // Update the favorites when the category changes
+    if (selectedCategoryId) {
+      setFavorites((prev) =>
+        prev.filter((fav) => fav.categoryId === selectedCategoryId),
+      );
+    } else {
+      fetchFavorites(); // If no category is selected, show all favorites
+    }
+  }, [selectedCategoryId]);
 
   return (
     <div className="min-h-screen bg-gray-100 px-6 py-8 dark:bg-gray-900">
@@ -60,6 +84,26 @@ export default function FavoritesPage() {
       <h2 className="mb-6 text-center text-2xl font-bold text-gray-800 dark:text-white">
         My Favorite Recipes ❤️
       </h2>
+
+      <div className="mb-4">
+        <label className="mr-2 text-lg text-white">Filter by Category:</label>
+        <select
+          value={selectedCategoryId ?? ""}
+          onChange={(e) =>
+            setSelectedCategoryId(
+              e.target.value ? Number(e.target.value) : null,
+            )
+          }
+          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">All</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
         <div className="flex justify-center">
@@ -76,11 +120,17 @@ export default function FavoritesPage() {
               key={recipe.recipeId}
               className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
             >
-              <img
-                src={recipe.imageUrl}
-                alt={recipe.title}
-                className="h-48 w-full object-cover"
-              />
+              <a
+                href={recipe.sourceUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <img
+                  src={recipe.imageUrl}
+                  alt={recipe.title}
+                  className="h-48 w-full object-cover"
+                />
+              </a>
 
               <button
                 onClick={() => removeFavorite(recipe.recipeId)}
@@ -91,9 +141,15 @@ export default function FavoritesPage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                  {recipe.title}
-                </h3>
+                <a
+                  href={recipe.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <h3 className="text-lg font-semibold text-gray-900 transition hover:text-blue-500 dark:text-white">
+                    {recipe.title}
+                  </h3>
+                </a>
                 <p className="text-sm text-gray-600 dark:text-gray-400">
                   {recipe.categoryName}
                 </p>
