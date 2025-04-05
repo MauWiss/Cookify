@@ -49,7 +49,7 @@ export default function Homepage() {
   const fetchFavorites = async () => {
     if (!token) return;
     try {
-      const res = await api.get("/favorites", {
+      const res = await api.get("/Favorites/favorites", {
         headers: { Authorization: `Bearer ${token}` },
       });
       setFavorites(res.data.map((fav) => fav.recipeId));
@@ -68,20 +68,20 @@ export default function Homepage() {
   };
 
   const isFavorite = (recipeId) => favorites.includes(recipeId);
+
   const addToFavorites = async (recipeId) => {
     if (!token) {
       toast.info("Please login to add to favorites ❤️");
       return;
     }
-
-    if (isFavorite(recipeId)) {
-      toast.info("This recipe is already in your favorites.");
+    if (!recipeId) {
+      toast.error("Recipe ID is missing.");
       return;
     }
 
     try {
       await api.post(
-        `/favorites/${recipeId}/favorite`,
+        `/Favorites/${recipeId}/favorite`,
         {},
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -91,12 +91,19 @@ export default function Homepage() {
       toast.success("Added to favorites ❤️");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add to favorites.");
+      if (err.response?.status === 409) {
+        toast.info("Already in favorites.");
+      } else {
+        toast.error("Failed to add to favorites.");
+      }
     }
   };
 
   const removeFromFavorites = async (recipeId) => {
-    if (!recipeId) return;
+    if (!token) {
+      toast.info("Please login to remove from favorites 💔");
+      return;
+    }
     try {
       await api.delete(`/Favorites/${recipeId}/favorite`, {
         headers: { Authorization: `Bearer ${token}` },
