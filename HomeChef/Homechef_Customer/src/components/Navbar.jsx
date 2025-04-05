@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { FaHeart } from "react-icons/fa";
+import { GiCook } from "react-icons/gi";
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
-
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -26,25 +26,33 @@ export default function Navbar() {
       : "text-gray-800 hover:text-blue-500 dark:text-white dark:hover:text-blue-400 transition";
 
   return (
-    <nav className="flex items-center justify-between bg-gray-100 px-8 py-4 shadow-md dark:bg-gray-900">
+    <nav className="flex flex-wrap items-center justify-between bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
       {/* Logo */}
       <h1 className="text-2xl font-bold tracking-wide text-gray-900 dark:text-white">
         HomeChef 🍳
       </h1>
 
-      {/* Links */}
-      <div className="flex items-center gap-6 text-lg font-medium">
+      {/* Navigation Links */}
+      <div className="flex flex-wrap items-center gap-6 text-lg font-medium">
         <Link className={active("/")} to="/">
           Home
         </Link>
 
         {token && (
-          <Link className={active("/favorites")} to="/favorites">
-            <div className="flex items-center gap-2">
-              <FaHeart className="text-red-500" />
-              My Favorites
-            </div>
-          </Link>
+          <>
+            <Link className={active("/favorites")} to="/favorites">
+              <div className="flex items-center gap-2">
+                <FaHeart className="text-red-500" />
+                Favorites
+              </div>
+            </Link>
+            <Link className={active("/my-recipes")} to="/my-recipes">
+              <div className="flex items-center gap-2">
+                <GiCook className="text-orange-500" />
+                My Recipes
+              </div>
+            </Link>
+          </>
         )}
 
         {!token ? (
@@ -69,6 +77,7 @@ export default function Navbar() {
           </button>
         )}
 
+        {/* Dark Mode Toggle */}
         <button
           onClick={() => setDark((prev) => !prev)}
           className="text-gray-700 transition hover:text-yellow-400 dark:text-white"

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import api from "../api/api";
+import api from "../../api/api";
 import Swal from "sweetalert2";
 import { FaClock, FaUtensils, FaHeartBroken } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
