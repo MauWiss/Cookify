@@ -17,7 +17,7 @@ export default function RegisterPage() {
       const response = await api.post("/auth/register", {
         username,
         email,
-        passwordHash: password, // ✅ שם שדה תואם ל-DTO בשרת
+        passwordHash: password,
       });
 
       localStorage.setItem("token", response.data.token);
@@ -32,8 +32,8 @@ export default function RegisterPage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-gray-800 via-gray-900 to-black px-4 py-16">
       <ToastContainer />
-      <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-[0_10px_30px_rgba(0,0,0,0.4)] dark:bg-gray-900">
-        <h2 className="mb-6 text-center text-3xl font-extrabold text-gray-800 dark:text-white">
+      <div className="w-full max-w-md rounded-2xl bg-white p-10 shadow-xl dark:bg-gray-900">
+        <h2 className="mb-6 text-center text-3xl font-bold text-gray-800 dark:text-white">
           Create Account 🍳
         </h2>
         <form onSubmit={handleRegister} className="space-y-6">
@@ -78,14 +78,14 @@ export default function RegisterPage() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-lg bg-gradient-to-r from-green-500 to-emerald-600 py-3 font-semibold text-white shadow-md transition hover:opacity-90"
+            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white hover:bg-blue-700"
           >
             Register
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-300">
           Already have an account?{" "}
-          <Link to="/auth/login" className="text-blue-400 hover:underline">
+          <Link to="/auth/login" className="text-blue-500 hover:underline">
             Login here
           </Link>
         </p>
