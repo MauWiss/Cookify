@@ -70,15 +70,22 @@ export default function Homepage() {
   const isFavorite = (recipeId) => favorites.includes(recipeId);
   const addToFavorites = async (recipeId) => {
     if (!token) {
-      toast.warn("Please login to add to favorites ⚠️");
+      toast.info("Please login to add to favorites ❤️");
       return;
     }
-    if (!recipeId) return;
+
+    if (isFavorite(recipeId)) {
+      toast.info("This recipe is already in your favorites.");
+      return;
+    }
+
     try {
       await api.post(
-        `/Favorites/${recipeId}/favorite`,
+        `/favorites/${recipeId}/favorite`,
         {},
-        { headers: { Authorization: `Bearer ${token}` } },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
       );
       setFavorites((prev) => [...prev, recipeId]);
       toast.success("Added to favorites ❤️");
