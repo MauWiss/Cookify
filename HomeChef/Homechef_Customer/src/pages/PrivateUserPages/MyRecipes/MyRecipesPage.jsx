@@ -14,7 +14,7 @@ export default function MyRecipesPage() {
   const fetchRecipes = async () => {
     setLoading(true);
     try {
-      const res = await api.get("/myrecipes/my-recipes");
+      const res = await api.get("/MyRecipes/my-recipes");
       setRecipes(res.data);
     } catch (err) {
       console.error("Failed to load recipes", err);

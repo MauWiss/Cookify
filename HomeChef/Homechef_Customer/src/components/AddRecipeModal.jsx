@@ -16,17 +16,13 @@ export default function AddRecipeModal({ onRecipeAdded }) {
   ]);
   const [categories, setCategories] = useState([]);
 
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
-
   useEffect(() => {
-    if (open) fetchCategories();
+    if (open) {
+      api
+        .get("/categories")
+        .then((res) => setCategories(res.data))
+        .catch((err) => console.error("Failed to fetch categories", err));
+    }
   }, [open]);
 
   const handleAddIngredient = () => {
@@ -34,8 +30,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
   };
 
   const handleRemoveIngredient = (index) => {
-    const newIngredients = ingredients.filter((_, i) => i !== index);
-    setIngredients(newIngredients);
+    setIngredients(ingredients.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -51,21 +46,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
         ingredients,
       };
 
-      // שלב ראשון: הוספת המתכון
-      const res = await api.post("/myrecipes/add", newRecipe);
-
-      // שלב שני: הוספת המצרכים
-      const newRecipeId = res.data.id;
-      for (let ingredient of ingredients) {
-        const ingredientData = {
-          name: ingredient.name,
-          quantity: ingredient.quantity,
-          unit: ingredient.unit,
-        };
-
-        await api.post(`/myrecipes/${newRecipeId}/ingredients`, ingredientData);
-      }
-
+      await api.post("/myrecipes/add", newRecipe);
       toast.success("Recipe added! 🥗");
       setOpen(false);
       onRecipeAdded();
@@ -126,6 +107,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               placeholder="Cooking Time (min)"
               required
             />
+
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
@@ -140,7 +122,6 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               ))}
             </select>
 
-            {/* Display Ingredients Fields */}
             {ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2">
                 <input
@@ -169,7 +150,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
                   }
                   type="number"
                   className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-                  placeholder="Quantity"
+                  placeholder="Qty"
                   required
                 />
                 <input
@@ -190,7 +171,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
                   onClick={() => handleRemoveIngredient(index)}
                   className="rounded-full bg-red-500 px-2 py-1 text-white"
                 >
-                  Remove
+                  ×
                 </button>
               </div>
             ))}
@@ -198,7 +179,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
             <button
               type="button"
               onClick={handleAddIngredient}
-              className="text-blue-500"
+              className="text-blue-500 hover:underline"
             >
               + Add Ingredient
             </button>
