@@ -1,8 +1,7 @@
-// components/AddRecipeModal.jsx
-import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect } from "react";
-import { toast } from "react-toastify";
 import api from "../api/api";
+import { toast } from "react-toastify";
+import * as Dialog from "@radix-ui/react-dialog";
 
 export default function AddRecipeModal({ onRecipeAdded }) {
   const [open, setOpen] = useState(false);
@@ -12,6 +11,9 @@ export default function AddRecipeModal({ onRecipeAdded }) {
   const [servings, setServings] = useState("");
   const [cookingTime, setCookingTime] = useState("");
   const [categoryId, setCategoryId] = useState("");
+  const [ingredients, setIngredients] = useState([
+    { name: "", quantity: "", unit: "" },
+  ]);
   const [categories, setCategories] = useState([]);
 
   const fetchCategories = async () => {
@@ -27,6 +29,15 @@ export default function AddRecipeModal({ onRecipeAdded }) {
     if (open) fetchCategories();
   }, [open]);
 
+  const handleAddIngredient = () => {
+    setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
+  };
+
+  const handleRemoveIngredient = (index) => {
+    const newIngredients = ingredients.filter((_, i) => i !== index);
+    setIngredients(newIngredients);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -37,9 +48,24 @@ export default function AddRecipeModal({ onRecipeAdded }) {
         servings: parseInt(servings),
         cookingTime: parseInt(cookingTime),
         categoryId: parseInt(categoryId),
-        ingredients: [], // אפשר להוסיף מרכיבים בהמשך
+        ingredients,
       };
-      await api.post("/myrecipes/add", newRecipe);
+
+      // שלב ראשון: הוספת המתכון
+      const res = await api.post("/myrecipes/add", newRecipe);
+
+      // שלב שני: הוספת המצרכים
+      const newRecipeId = res.data.id;
+      for (let ingredient of ingredients) {
+        const ingredientData = {
+          name: ingredient.name,
+          quantity: ingredient.quantity,
+          unit: ingredient.unit,
+        };
+
+        await api.post(`/myrecipes/${newRecipeId}/ingredients`, ingredientData);
+      }
+
       toast.success("Recipe added! 🥗");
       setOpen(false);
       onRecipeAdded();
@@ -114,9 +140,72 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               ))}
             </select>
 
+            {/* Display Ingredients Fields */}
+            {ingredients.map((ingredient, index) => (
+              <div key={index} className="flex gap-2">
+                <input
+                  value={ingredient.name}
+                  onChange={(e) =>
+                    setIngredients((prev) =>
+                      prev.map((ing, i) =>
+                        i === index ? { ...ing, name: e.target.value } : ing,
+                      ),
+                    )
+                  }
+                  className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                  placeholder="Ingredient Name"
+                  required
+                />
+                <input
+                  value={ingredient.quantity}
+                  onChange={(e) =>
+                    setIngredients((prev) =>
+                      prev.map((ing, i) =>
+                        i === index
+                          ? { ...ing, quantity: e.target.value }
+                          : ing,
+                      ),
+                    )
+                  }
+                  type="number"
+                  className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                  placeholder="Quantity"
+                  required
+                />
+                <input
+                  value={ingredient.unit}
+                  onChange={(e) =>
+                    setIngredients((prev) =>
+                      prev.map((ing, i) =>
+                        i === index ? { ...ing, unit: e.target.value } : ing,
+                      ),
+                    )
+                  }
+                  className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+                  placeholder="Unit"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveIngredient(index)}
+                  className="rounded-full bg-red-500 px-2 py-1 text-white"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+
+            <button
+              type="button"
+              onClick={handleAddIngredient}
+              className="text-blue-500"
+            >
+              + Add Ingredient
+            </button>
+
             <button
               type="submit"
-              className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
+              className="w-full rounded bg-green-600 py-2 text-white hover:bg-green-700"
             >
               Add Recipe
             </button>

@@ -3,6 +3,8 @@ using HomeChefServer.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
+using System.Text.Json;
+
 
 namespace HomeChefServer.Controllers
 {
@@ -58,9 +60,7 @@ namespace HomeChefServer.Controllers
 
         [HttpPost("add")]
         public async Task<IActionResult> AddRecipe(CreateRecipeDTO recipe)
-
         {
-            // שליפת מזהה המשתמש מתוך הטוקן (JWT)
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
                 return Unauthorized("User ID not found in token.");
@@ -72,47 +72,30 @@ namespace HomeChefServer.Controllers
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // שלב ראשון: יצירת המתכון עצמו
-            using (var cmd = new SqlCommand("sp_AddRecipe", conn))
+            var ingredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
+
+            using var cmd = new SqlCommand("sp_AddRecipe", conn)
             {
-                cmd.CommandType = CommandType.StoredProcedure;
+                CommandType = CommandType.StoredProcedure
+            };
 
-                cmd.Parameters.AddWithValue("@Title", recipe.Title);
-                cmd.Parameters.AddWithValue("@ImageUrl", recipe.ImageUrl);
-                cmd.Parameters.AddWithValue("@SourceUrl", recipe.SourceUrl);
-                cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
-                cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
-                cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
-                cmd.Parameters.AddWithValue("@CreatedByUserId", userId);
+            cmd.Parameters.AddWithValue("@Title", recipe.Title);
+            cmd.Parameters.AddWithValue("@ImageUrl", recipe.ImageUrl);
+            cmd.Parameters.AddWithValue("@SourceUrl", recipe.SourceUrl);
+            cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
+            cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
+            cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
+            cmd.Parameters.AddWithValue("@CreatedByUserId", userId);
+            cmd.Parameters.AddWithValue("@IngredientsJson", ingredientsJson);
 
-                using var reader = await cmd.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    newRecipeId = Convert.ToInt32(reader["RecipeId"]);
-                }
-                else
-                {
-                    return StatusCode(500, "Failed to create recipe.");
-                }
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                newRecipeId = Convert.ToInt32(reader["RecipeId"]);
+                return Ok(new { Id = newRecipeId });
             }
 
-            // שלב שני: הוספת מרכיבים למתכון
-            foreach (var ingredient in recipe.Ingredients)
-            {
-                using var cmd = new SqlCommand("sp_AddIngredientToRecipe", conn)
-                {
-                    CommandType = CommandType.StoredProcedure
-                };
-
-                cmd.Parameters.AddWithValue("@RecipeId", newRecipeId);
-                cmd.Parameters.AddWithValue("@IngredientName", ingredient.Name);
-                cmd.Parameters.AddWithValue("@Quantity", ingredient.Quantity);
-                cmd.Parameters.AddWithValue("@Unit", ingredient.Unit);
-
-                await cmd.ExecuteNonQueryAsync();
-            }
-
-            return Ok(new { Id = newRecipeId });
+            return StatusCode(500, "Failed to create recipe.");
         }
 
         // עריכת מתכון 
@@ -129,7 +112,7 @@ namespace HomeChefServer.Controllers
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            // 🔒 בדיקה: האם המשתמש הוא יוצר המתכון
+            // בדיקה האם המשתמש הוא יוצר המתכון
             using var checkCmd = new SqlCommand("SELECT CreatedByUserId FROM NewRecipes WHERE Id = @RecipeId", conn);
             checkCmd.Parameters.AddWithValue("@RecipeId", recipe.RecipeId);
 
@@ -137,11 +120,11 @@ namespace HomeChefServer.Controllers
             if (creatorIdObj == null)
                 return NotFound("Recipe not found.");
 
-            int creatorId = (int)creatorIdObj;
-            if (creatorId != userId)
+            if ((int)creatorIdObj != userId)
                 return Forbid("You are not allowed to edit this recipe.");
 
-            // ✏️ אם הבדיקה עברה – נמשיך לעדכן
+            var ingredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
+
             using var cmd = new SqlCommand("sp_UpdateRecipe", conn)
             {
                 CommandType = CommandType.StoredProcedure
@@ -154,11 +137,14 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
             cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
             cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@IngredientsJson", ingredientsJson);
 
             await cmd.ExecuteNonQueryAsync();
 
             return Ok(new { Message = $"Recipe {recipe.RecipeId} updated successfully." });
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
