@@ -133,10 +133,10 @@ export default function Homepage() {
   }, [searchTerm, selectedCategoryId]);
 
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-8 dark:bg-gray-900">
+    <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
 
-      <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
+      <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-gray-100 p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
           placeholder="Search for a recipe..."
@@ -147,8 +147,10 @@ export default function Homepage() {
         <FaSearch className="mx-3 text-gray-400" />
       </div>
 
-      <div className="mb-4">
-        <label className="mr-2 text-lg text-white">Filter by Category:</label>
+      <div className="mb-4 text-left">
+        <label className="mr-2 text-lg text-gray-800 dark:text-white">
+          Filter by Category:
+        </label>
         <select
           value={selectedCategoryId ?? ""}
           onChange={(e) =>
@@ -156,7 +158,7 @@ export default function Homepage() {
               e.target.value ? Number(e.target.value) : null,
             )
           }
-          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
+          className="rounded-lg border bg-white px-4 py-2 shadow-sm dark:border-white dark:bg-gray-700 dark:text-white"
         >
           <option value="">All</option>
           {categories.map((cat) => (
@@ -178,7 +180,7 @@ export default function Homepage() {
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
+              className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               {recipe.sourceUrl ? (
                 <a
@@ -220,7 +222,7 @@ export default function Homepage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold transition hover:text-blue-500">
+                <h3 className="text-lg font-semibold transition hover:text-blue-500 dark:text-white">
                   {recipe.title}
                 </h3>
                 <div className="text-sm text-gray-600 dark:text-gray-400">

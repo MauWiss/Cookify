@@ -71,7 +71,7 @@ export default function FavoritesPage() {
   }, [selectedCategoryId]);
 
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-8 dark:bg-gray-900">
+    <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
       <h2 className="mb-6 text-center text-2xl font-bold text-gray-800 dark:text-white">
         My Favorite Recipes ❤️
@@ -112,7 +112,7 @@ export default function FavoritesPage() {
           {favorites.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
+              className="relative overflow-hidden rounded-2xl bg-gray-200 shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
             >
               <a
                 href={recipe.sourceUrl}

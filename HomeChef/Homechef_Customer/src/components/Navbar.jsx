@@ -1,69 +1,80 @@
+// src/components/Navbar.jsx
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Moon, Sun } from "lucide-react";
-import { FaHeart } from "react-icons/fa";
+import { FaMoon, FaSun } from "react-icons/fa";
 
 export default function Navbar() {
-  const location = useLocation();
   const navigate = useNavigate();
-  const [dark, setDark] = useState(false);
-
-  const token = localStorage.getItem("token");
+  const [darkMode, setDarkMode] = useState(
+    localStorage.getItem("theme") === "dark",
+  );
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
 
   useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-  }, [dark]);
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    navigate("/auth/login");
+    setIsLoggedIn(false);
+    navigate("/login");
   };
 
-  const active = (path) =>
-    location.pathname === path
-      ? "text-blue-400 font-bold underline underline-offset-4"
-      : "text-white hover:text-blue-300 transition";
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem("token"));
+  }, []);
 
   return (
-    <nav className="flex items-center justify-between bg-gray-800 px-6 py-3 shadow-md">
-      <h1 className="text-xl font-semibold text-white">HomeChef 🍳</h1>
-      <div className="flex items-center space-x-4">
-        <Link className={active("/")} to="/">
+    <nav className="flex items-center justify-between bg-white px-6 py-4 shadow dark:bg-gray-800">
+      <div className="flex items-center gap-6 text-lg font-semibold">
+        <Link
+          to="/"
+          className="text-gray-800 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+        >
           Home
         </Link>
-
-        {token && (
-          <Link className={active("/favorites")} to="/favorites">
-            <div className="flex items-center gap-1">
-              <FaHeart className="text-red-500" /> My Favorites
-            </div>
+        {isLoggedIn && (
+          <Link
+            to="/favorites"
+            className="text-gray-800 hover:text-blue-600 dark:text-white dark:hover:text-blue-400"
+          >
+            Favorites
           </Link>
         )}
+      </div>
 
-        {!token ? (
-          <>
-            <Link className={active("/auth/login")} to="/auth/login">
-              Login
-            </Link>
-            <Link className={active("/auth/register")} to="/auth/register">
-              Register
-            </Link>
-          </>
-        ) : (
+      <div className="flex items-center gap-4">
+        <button
+          onClick={() => setDarkMode((prev) => !prev)}
+          className="text-gray-700 hover:text-yellow-400 dark:text-white dark:hover:text-yellow-300"
+        >
+          {darkMode ? <FaSun size={18} /> : <FaMoon size={18} />}
+        </button>
+
+        {isLoggedIn ? (
           <button
             onClick={handleLogout}
-            className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white transition hover:bg-red-700"
+            className="rounded-lg bg-red-500 px-3 py-1 text-white hover:bg-red-600"
           >
             Logout
           </button>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="rounded-lg bg-blue-500 px-3 py-1 text-white hover:bg-blue-600"
+            >
+              Login
+            </Link>
+            <Link
+              to="/register"
+              className="rounded-lg border border-blue-500 px-3 py-1 text-blue-500 hover:bg-blue-500 hover:text-white"
+            >
+              Register
+            </Link>
+          </>
         )}
-
-        <button
-          onClick={() => setDark(!dark)}
-          className="text-white transition hover:text-yellow-300"
-        >
-          {dark ? <Sun size={20} /> : <Moon size={20} />}
-        </button>
       </div>
     </nav>
   );
