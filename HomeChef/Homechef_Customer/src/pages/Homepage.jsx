@@ -158,7 +158,7 @@ export default function Homepage() {
               e.target.value ? Number(e.target.value) : null,
             )
           }
-          className="rounded-lg border bg-white px-4 py-2 shadow-sm dark:border-white dark:bg-gray-700 dark:text-white"
+          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
         >
           <option value="">All</option>
           {categories.map((cat) => (
