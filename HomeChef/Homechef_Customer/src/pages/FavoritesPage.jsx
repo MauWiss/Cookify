@@ -77,7 +77,7 @@ export default function FavoritesPage() {
         My Favorite Recipes ❤️
       </h2>
 
-      <div className="mb-4 text-center">
+      <div className="mb-4 text-left">
         <label className="mr-2 text-lg text-gray-800 dark:text-white">
           Filter by Category:
         </label>
