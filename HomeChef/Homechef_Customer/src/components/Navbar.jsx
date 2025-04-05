@@ -22,25 +22,25 @@ export default function Navbar() {
 
   const active = (path) =>
     location.pathname === path
-      ? "text-blue-400 font-bold underline underline-offset-4"
-      : "text-white hover:text-blue-300 transition";
+      ? "text-blue-500 font-semibold underline underline-offset-4"
+      : "text-gray-800 hover:text-blue-500 dark:text-white dark:hover:text-blue-400 transition";
 
   return (
-    <nav className="flex items-center justify-between bg-gray-200 px-6 py-3 shadow-md dark:bg-gray-800">
-      {/* Logo / Title */}
-      <h1 className="text-xl font-semibold text-gray-800 dark:text-white">
+    <nav className="flex items-center justify-between bg-gray-100 px-8 py-4 shadow-md dark:bg-gray-900">
+      {/* Logo */}
+      <h1 className="text-2xl font-bold tracking-wide text-gray-900 dark:text-white">
         HomeChef 🍳
       </h1>
 
-      {/* Links & Actions */}
-      <div className="flex items-center gap-6 text-sm font-medium">
+      {/* Links */}
+      <div className="flex items-center gap-6 text-lg font-medium">
         <Link className={active("/")} to="/">
           Home
         </Link>
 
         {token && (
           <Link className={active("/favorites")} to="/favorites">
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <FaHeart className="text-red-500" />
               My Favorites
             </div>
@@ -59,7 +59,7 @@ export default function Navbar() {
         ) : (
           <button
             onClick={handleLogout}
-            className="rounded-md bg-red-600 px-3 py-1.5 text-white transition hover:bg-red-700"
+            className="rounded-md bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
           >
             Logout
           </button>
@@ -67,9 +67,10 @@ export default function Navbar() {
 
         <button
           onClick={() => setDark((prev) => !prev)}
-          className="text-gray-800 transition hover:text-yellow-400 dark:text-white"
+          className="text-gray-700 transition hover:text-yellow-400 dark:text-white"
+          title="Toggle Dark Mode"
         >
-          {dark ? <Sun size={20} /> : <Moon size={20} />}
+          {dark ? <Sun size={22} /> : <Moon size={22} />}
         </button>
       </div>
     </nav>
