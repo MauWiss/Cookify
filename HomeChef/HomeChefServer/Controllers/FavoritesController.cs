@@ -1,4 +1,5 @@
 ﻿using HomeChef.Server.Models.DTOs;
+using HomeChefServer.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using System.Data;
@@ -45,17 +46,16 @@ namespace HomeChefServer.Controllers
             return Ok(new { Message = $"Recipe {id} added to favorites." });
         }
         [HttpGet("favorites")]
-        public async Task<ActionResult<IEnumerable<FavoriteRecipeDTO>>> GetFavorites()
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetFavorites()
         {
             // חילוץ מזהה המשתמש מתוך ה־JWT
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
                 return Unauthorized("User ID not found in token.");
 
-            // המרת ה-UserId ל-int (כי בטבלה הוא נשמר כמספר)
             int userId = int.Parse(userIdClaim.Value);
 
-            var favorites = new List<FavoriteRecipeDTO>();
+            var favorites = new List<RecipeDTO>();
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -65,24 +65,25 @@ namespace HomeChefServer.Controllers
                 CommandType = CommandType.StoredProcedure
             };
 
-            // הוספת ה-UserId כפרמטר
             cmd.Parameters.AddWithValue("@UserId", userId);
 
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                favorites.Add(new FavoriteRecipeDTO
+                favorites.Add(new RecipeDTO
                 {
                     RecipeId = (int)reader["RecipeId"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0,
                     CategoryName = reader["CategoryName"].ToString()
                 });
             }
 
             return Ok(favorites);
         }
-
 
 
         // DELETE api/<FavoritesController>/5
