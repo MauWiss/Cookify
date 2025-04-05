@@ -5,8 +5,6 @@ import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
 import MyRecipesPage from "./pages/PrivateUserPages/MyRecipes/MyRecipesPage";
-import AddRecipePage from "./pages/PrivateUserPages/MyRecipes/AddRecipePage";
-import EditRecipePage from "./pages/PrivateUserPages/MyRecipes/EditRecipePage";
 import PrivateRoute from "./components/PrivateRoute";
 
 export default function App() {
@@ -31,22 +29,6 @@ export default function App() {
           element={
             <PrivateRoute>
               <MyRecipesPage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/my-recipes/add"
-          element={
-            <PrivateRoute>
-              <AddRecipePage />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/my-recipes/edit/:id"
-          element={
-            <PrivateRoute>
-              <EditRecipePage />
             </PrivateRoute>
           }
         />
