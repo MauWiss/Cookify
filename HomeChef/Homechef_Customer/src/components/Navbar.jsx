@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, LogOut } from "lucide-react";
 import { FaHeart } from "react-icons/fa";
 
 export default function Navbar() {
@@ -59,9 +59,13 @@ export default function Navbar() {
         ) : (
           <button
             onClick={handleLogout}
-            className="rounded-md bg-red-600 px-4 py-2 font-semibold text-white transition hover:bg-red-700"
+            title="Logout"
+            className="group relative flex items-center justify-center rounded-full bg-red-600 p-2 transition hover:bg-red-700"
           >
-            Logout
+            <LogOut className="h-5 w-5 text-white transition group-hover:scale-110" />
+            <span className="absolute -bottom-7 scale-0 rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition group-hover:scale-100 group-hover:opacity-100">
+              Logout
+            </span>
           </button>
         )}
 
