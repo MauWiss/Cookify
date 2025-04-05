@@ -1,4 +1,5 @@
 ﻿using HomeChef.Server.Models.DTOs;
+using HomeChefServer.Models.DTOs;
 using Microsoft.Extensions.Configuration;
 using System.Data;
 using System.Data.SqlClient;
@@ -14,9 +15,9 @@ namespace HomeChef.Server.Services
             _configuration = configuration;
         }
 
-        public async Task<List<RecipeSearchResultDTO>> SearchRecipesAsync(string searchTerm)
+        public async Task<List<RecipeDTO>> SearchRecipesAsync(string searchTerm)
         {
-            var results = new List<RecipeSearchResultDTO>();
+            var results = new List<RecipeDTO>();
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -31,12 +32,15 @@ namespace HomeChef.Server.Services
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                results.Add(new RecipeSearchResultDTO
+                results.Add(new RecipeDTO
                 {
                     RecipeId = (int)reader["RecipeId"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
-                    CategoryName = reader["CategoryName"].ToString()
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    CategoryName = reader["CategoryName"].ToString(),
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0
                 });
             }
 

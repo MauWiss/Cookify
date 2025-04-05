@@ -16,23 +16,25 @@ export default function Homepage() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [favorites, setFavorites] = useState([]);
-
   const token = localStorage.getItem("token");
 
-  const fetchRecipes = async (term = "", category = "") => {
+  const fetchRecipes = async (term = "", categoryId = null) => {
     setLoading(true);
     try {
-      const endpoint = category
-        ? `/recipes/search?term=${encodeURIComponent(term)}&category=${encodeURIComponent(category)}`
-        : term
-          ? `/recipes/search?term=${encodeURIComponent(term)}`
-          : "/recipes/paged?pageNumber=1&pageSize=100";
+      let endpoint = "";
+
+      if (term && term.trim() !== "") {
+        endpoint = `/recipes/search?term=${encodeURIComponent(term)}`;
+      } else if (categoryId) {
+        endpoint = `/categories/${categoryId}/recipes`;
+      } else {
+        endpoint = "/recipes/paged?pageNumber=1&pageSize=100";
+      }
 
       const response = await api.get(endpoint);
       setRecipes(response.data);
-
       if (term && response.data.length === 0) {
         toast.info("No recipes found 🍽️");
       }
@@ -56,6 +58,16 @@ export default function Homepage() {
     }
   };
 
+  const fetchCategories = async () => {
+    try {
+      const res = await api.get("/categories");
+      setCategories(res.data);
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
+  const isFavorite = (recipeId) => favorites.includes(recipeId);
   const addToFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
@@ -73,7 +85,6 @@ export default function Homepage() {
       toast.error("Failed to add to favorites.");
     }
   };
-
   const removeFromFavorites = async (recipeId) => {
     if (!recipeId) return;
     try {
@@ -88,38 +99,29 @@ export default function Homepage() {
     }
   };
 
-  const isFavorite = (recipeId) => favorites.includes(recipeId);
-
   useEffect(() => {
+    fetchCategories();
     fetchRecipes();
     fetchFavorites();
-    fetchCategories();
   }, []);
 
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      fetchRecipes(searchTerm, selectedCategory);
+    const delay = setTimeout(() => {
+      fetchRecipes(
+        searchTerm,
+        searchTerm.trim() === "" ? selectedCategoryId : null,
+      );
     }, 500);
-    return () => clearTimeout(delayDebounce);
-  }, [searchTerm, selectedCategory]);
-
-  const fetchCategories = async () => {
-    try {
-      const response = await api.get("/categories");
-      setCategories(response.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
+    return () => clearTimeout(delay);
+  }, [searchTerm, selectedCategoryId]);
 
   return (
     <div
       className="min-h-screen px-6 py-8"
       style={{ backgroundColor: "#1a202c" }}
     >
-      {" "}
-      {/* קבענו רקע קבוע בלבן */}
       <ToastContainer />
+
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -130,21 +132,27 @@ export default function Homepage() {
         />
         <FaSearch className="mx-3 text-gray-400" />
       </div>
+
       <div className="mb-4">
-        <label className="mr-2 text-lg text-white">Choose Category:</label>
+        <label className="mr-2 text-lg text-white">Filter by Category:</label>
         <select
-          value={selectedCategory}
-          onChange={(e) => setSelectedCategory(e.target.value)}
+          value={selectedCategoryId ?? ""}
+          onChange={(e) =>
+            setSelectedCategoryId(
+              e.target.value ? Number(e.target.value) : null,
+            )
+          }
           className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
         >
-          <option value="">All Categories</option>
-          {categories.map((category) => (
-            <option key={category.id} value={category.name}>
-              {category.name}
+          <option value="">All</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
             </option>
           ))}
         </select>
       </div>
+
       {loading ? (
         <div className="flex justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
@@ -153,9 +161,9 @@ export default function Homepage() {
         <div className="text-center text-red-500">{error}</div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
-          {recipes.map((recipe, index) => (
+          {recipes.map((recipe) => (
             <div
-              key={recipe.recipeId || index}
+              key={recipe.recipeId}
               className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               {recipe.sourceUrl ? (
@@ -183,11 +191,6 @@ export default function Homepage() {
                   isFavorite(recipe.recipeId)
                     ? removeFromFavorites(recipe.recipeId)
                     : addToFavorites(recipe.recipeId)
-                }
-                title={
-                  isFavorite(recipe.recipeId)
-                    ? "Remove from favorites"
-                    : "Add to favorites"
                 }
                 className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
                   isFavorite(recipe.recipeId)

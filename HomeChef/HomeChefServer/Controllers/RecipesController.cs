@@ -1,4 +1,5 @@
 ﻿using HomeChef.Server.Models.DTOs;
+using HomeChefServer.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
@@ -50,9 +51,8 @@ namespace HomeChefServer.Controllers
 
             return Ok(recipes);
         }
-        // חיפוש מתכונים לפי מילה
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<RecipeDTO>>> SearchRecipes(string term, string category = "")
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> SearchRecipes(string term)
         {
             var recipes = new List<RecipeDTO>();
 
@@ -65,10 +65,6 @@ namespace HomeChefServer.Controllers
             };
 
             cmd.Parameters.AddWithValue("@SearchTerm", term);
-            if (!string.IsNullOrEmpty(category))
-            {
-                cmd.Parameters.AddWithValue("@Category", category);
-            }
 
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
@@ -78,14 +74,16 @@ namespace HomeChefServer.Controllers
                     RecipeId = (int)reader["RecipeId"],
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
                     CategoryName = reader["CategoryName"].ToString(),
-                    CookingTime = (int)reader["CookingTime"],
-                    Servings = (int)reader["Servings"]
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0
                 });
             }
 
             return Ok(recipes);
         }
+
 
         [HttpPost("add")]
         public async Task<IActionResult> AddRecipe(CreateRecipeDTO recipe)

@@ -1,9 +1,11 @@
 ﻿using HomeChef.Server.Models.DTOs;
+using HomeChefServer.Models.DTOs;
 
 namespace HomeChef.Server.Services
 {
     public interface IRecipeService
     {
-        Task<List<RecipeSearchResultDTO>> SearchRecipesAsync(string searchTerm);
+        Task<List<RecipeDTO>> SearchRecipesAsync(string searchTerm);
+
     }
 }
