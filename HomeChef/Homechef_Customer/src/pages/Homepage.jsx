@@ -133,10 +133,7 @@ export default function Homepage() {
   }, [searchTerm, selectedCategoryId]);
 
   return (
-    <div
-      className="min-h-screen px-6 py-8"
-      style={{ backgroundColor: "#1a202c" }}
-    >
+    <div className="min-h-screen bg-gray-100 px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
 
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
