@@ -1,3 +1,4 @@
+// components/AddRecipeModal.jsx
 import { useState, useEffect } from "react";
 import api from "../api/api";
 import { toast } from "react-toastify";
@@ -47,12 +48,19 @@ export default function AddRecipeModal({ onRecipeAdded }) {
       };
 
       await api.post("/myrecipes/add", newRecipe);
-      toast.success("Recipe added! 🥗");
+      toast.success("🎉 Your recipe was added successfully!", {
+        position: "top-center",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       setOpen(false);
       onRecipeAdded();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to add recipe");
+      toast.error("❌ Failed to add recipe");
     }
   };
 
@@ -186,7 +194,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
 
             <button
               type="submit"
-              className="w-full rounded bg-green-600 py-2 text-white hover:bg-green-700"
+              className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
             >
               Add Recipe
             </button>
