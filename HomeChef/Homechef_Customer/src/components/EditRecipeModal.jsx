@@ -56,12 +56,19 @@ export default function EditRecipeModal({
       };
 
       await api.put("/myrecipes/update", updated);
-      toast.success("Recipe updated successfully! ✅");
+      toast.success("✅ Your recipe was updated successfully!", {
+        position: "top-right",
+        autoClose: 3000,
+        theme: "colored",
+      });
       setOpen(false);
       onRecipeUpdated();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update recipe");
+      toast.error("❌ Failed to update recipe", {
+        position: "top-right",
+        theme: "colored",
+      });
     }
   };
 
@@ -74,7 +81,7 @@ export default function EditRecipeModal({
       }}
     >
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
           <Dialog.Title className="mb-4 text-xl font-bold dark:text-white">
             Edit Recipe
@@ -85,17 +92,20 @@ export default function EditRecipeModal({
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
               required
+              placeholder="Title"
             />
             <input
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
               required
+              placeholder="Image URL"
             />
             <input
               value={sourceUrl}
               onChange={(e) => setSourceUrl(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+              placeholder="Source URL (optional)"
             />
             <input
               value={servings}
@@ -104,6 +114,7 @@ export default function EditRecipeModal({
               min="1"
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
               required
+              placeholder="Servings"
             />
             <input
               value={cookingTime}
@@ -112,11 +123,13 @@ export default function EditRecipeModal({
               min="1"
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
               required
+              placeholder="Cooking Time (min)"
             />
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
+              required
             >
               <option value="">Select Category</option>
               {categories.map((c) => (
@@ -125,6 +138,7 @@ export default function EditRecipeModal({
                 </option>
               ))}
             </select>
+
             {ingredients.map((ingredient, index) => (
               <div key={index} className="flex gap-2">
                 <input
@@ -157,6 +171,20 @@ export default function EditRecipeModal({
                 />
               </div>
             ))}
+
+            <button
+              type="button"
+              onClick={() =>
+                setIngredients((prev) => [
+                  ...prev,
+                  { name: "", quantity: "", unit: "" },
+                ])
+              }
+              className="text-sm text-blue-600 hover:underline"
+            >
+              + Add Ingredient
+            </button>
+
             <button
               type="submit"
               className="w-full rounded bg-yellow-600 py-2 text-white hover:bg-yellow-700"

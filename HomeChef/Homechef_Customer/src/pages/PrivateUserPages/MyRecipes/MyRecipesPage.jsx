@@ -1,16 +1,17 @@
+// pages/PrivateUserPages/MyRecipes/MyRecipesPage.jsx
 import { useEffect, useState } from "react";
 import api from "../../../api/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import AddRecipeModal from "../../../components/AddRecipeModal";
+import EditRecipeModal from "../../../components/EditRecipeModal";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [editingRecipeId, setEditingRecipeId] = useState(null);
 
   const fetchRecipes = async () => {
     setLoading(true);
@@ -67,12 +68,10 @@ export default function MyRecipesPage() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
-      {/* כותרת */}
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
         My Recipes 👨‍🍳
       </h2>
 
-      {/* כפתור + select בצד שמאל */}
       <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-end">
         <AddRecipeModal onRecipeAdded={fetchRecipes} />
         <div>
@@ -98,7 +97,6 @@ export default function MyRecipesPage() {
         </div>
       </div>
 
-      {/* תוכן */}
       {loading ? (
         <div className="text-center text-gray-500 dark:text-gray-300">
           Loading...
@@ -134,9 +132,7 @@ export default function MyRecipesPage() {
 
               <div className="absolute right-3 top-3 flex gap-2">
                 <button
-                  onClick={() =>
-                    navigate(`/my-recipes/edit/${recipe.recipeId}`)
-                  }
+                  onClick={() => setEditingRecipeId(recipe.recipeId)}
                   className="rounded-full bg-yellow-500 p-2 text-white hover:bg-yellow-600"
                   title="Edit"
                 >
@@ -153,6 +149,18 @@ export default function MyRecipesPage() {
             </div>
           ))}
         </div>
+      )}
+
+      {/* 🔧 Edit Modal */}
+      {editingRecipeId && (
+        <EditRecipeModal
+          recipeId={editingRecipeId}
+          onClose={() => setEditingRecipeId(null)}
+          onRecipeUpdated={() => {
+            fetchRecipes();
+            setTimeout(() => setEditingRecipeId(null), 50);
+          }}
+        />
       )}
     </div>
   );
