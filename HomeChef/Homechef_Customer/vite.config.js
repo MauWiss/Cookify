@@ -26,18 +26,23 @@ export default defineConfig({
             type: "image/png",
           },
         ],
-        screenshots: [
+      },
+      workbox: {
+        runtimeCaching: [
           {
-            src: "screenshot1.png",
-            type: "image/png",
-            sizes: "600x800",
-            form_factor: "wide",
-          },
-          {
-            src: "screenshot2.png",
-            type: "image/png",
-            sizes: "600x800",
-            form_factor: "wide",
+            urlPattern: ({ request }) =>
+              request.destination === "document" ||
+              request.destination === "script" ||
+              request.destination === "style" ||
+              request.destination === "image",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "homechef-cache",
+              expiration: {
+                maxEntries: 200,
+                maxAgeSeconds: 7 * 24 * 60 * 60, // שבוע
+              },
+            },
           },
         ],
       },
