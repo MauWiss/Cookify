@@ -67,99 +67,93 @@ export default function MyRecipesPage() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-2xl font-bold dark:text-white">My Recipes 👨‍🍳</h2>
+      {/* כותרת */}
+      <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
+        My Recipes 👨‍🍳
+      </h2>
+
+      {/* כפתור + select בצד שמאל */}
+      <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-end">
         <AddRecipeModal onRecipeAdded={fetchRecipes} />
-      </div>
-
-      {/* Layout: Sidebar left + content right */}
-      <div className="flex gap-6">
-        {/* Sidebar אנכי עם קטגוריות */}
-        <aside className="w-48 flex-shrink-0 space-y-2 overflow-y-auto rounded-xl bg-gray-100 p-4 dark:bg-gray-800">
-          <button
-            onClick={() => setSelectedCategoryId("")}
-            className={`w-full rounded px-3 py-2 text-left text-sm transition ${
-              selectedCategoryId === ""
-                ? "bg-blue-500 text-white"
-                : "bg-white text-gray-800 dark:bg-gray-700 dark:text-white"
-            }`}
+        <div>
+          <label
+            htmlFor="category"
+            className="mb-1 block text-sm font-medium text-gray-800 dark:text-white"
           >
-            All Categories
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategoryId(cat.name)}
-              className={`w-full rounded px-3 py-2 text-left text-sm transition ${
-                selectedCategoryId === cat.name
-                  ? "bg-blue-500 text-white"
-                  : "bg-white text-gray-800 dark:bg-gray-700 dark:text-white"
-              }`}
-            >
-              {cat.name}
-            </button>
-          ))}
-        </aside>
-
-        {/* תוכן המתכונים */}
-        <main className="flex-1">
-          {loading ? (
-            <div className="text-center text-gray-500 dark:text-gray-300">
-              Loading...
-            </div>
-          ) : filteredRecipes.length === 0 ? (
-            <div className="text-center text-gray-500 dark:text-gray-300">
-              No recipes found.
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
-              {filteredRecipes.map((recipe) => (
-                <div
-                  key={recipe.recipeId}
-                  className="relative overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg dark:bg-gray-800"
-                >
-                  <img
-                    src={recipe.imageUrl}
-                    alt={recipe.title}
-                    className="h-48 w-full object-cover"
-                  />
-                  <div className="space-y-2 p-4">
-                    <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
-                      {recipe.title}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      Category: {recipe.categoryName}
-                    </p>
-                    <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
-                      <span>🕒 {recipe.cookingTime} min</span>
-                      <span>🍽 {recipe.servings} servings</span>
-                    </div>
-                  </div>
-
-                  <div className="absolute right-3 top-3 flex gap-2">
-                    <button
-                      onClick={() =>
-                        navigate(`/my-recipes/edit/${recipe.recipeId}`)
-                      }
-                      className="rounded-full bg-yellow-500 p-2 text-white hover:bg-yellow-600"
-                      title="Edit"
-                    >
-                      <FaEdit size={16} />
-                    </button>
-                    <button
-                      onClick={() => handleDelete(recipe.recipeId)}
-                      className="rounded-full bg-red-600 p-2 text-white hover:bg-red-700"
-                      title="Delete"
-                    >
-                      <FaTrash size={16} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </main>
+            Filter by Category:
+          </label>
+          <select
+            id="category"
+            value={selectedCategoryId}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
+            className="w-48 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
+          >
+            <option value="">All</option>
+            {categories.map((cat) => (
+              <option key={cat.id} value={cat.name}>
+                {cat.name}
+              </option>
+            ))}
+          </select>
+        </div>
       </div>
+
+      {/* תוכן */}
+      {loading ? (
+        <div className="text-center text-gray-500 dark:text-gray-300">
+          Loading...
+        </div>
+      ) : filteredRecipes.length === 0 ? (
+        <div className="text-center text-gray-500 dark:text-gray-300">
+          No recipes found.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
+          {filteredRecipes.map((recipe) => (
+            <div
+              key={recipe.recipeId}
+              className="relative overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg dark:bg-gray-800"
+            >
+              <img
+                src={recipe.imageUrl}
+                alt={recipe.title}
+                className="h-48 w-full object-cover"
+              />
+              <div className="space-y-2 p-4">
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-white">
+                  {recipe.title}
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Category: {recipe.categoryName}
+                </p>
+                <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-300">
+                  <span>🕒 {recipe.cookingTime} min</span>
+                  <span>🍽 {recipe.servings} servings</span>
+                </div>
+              </div>
+
+              <div className="absolute right-3 top-3 flex gap-2">
+                <button
+                  onClick={() =>
+                    navigate(`/my-recipes/edit/${recipe.recipeId}`)
+                  }
+                  className="rounded-full bg-yellow-500 p-2 text-white hover:bg-yellow-600"
+                  title="Edit"
+                >
+                  <FaEdit size={16} />
+                </button>
+                <button
+                  onClick={() => handleDelete(recipe.recipeId)}
+                  className="rounded-full bg-red-600 p-2 text-white hover:bg-red-700"
+                  title="Delete"
+                >
+                  <FaTrash size={16} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
