@@ -176,7 +176,7 @@ export default function Homepage() {
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className="grid grid-cols-1 gap-6 m-16 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}

@@ -4,6 +4,16 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { auth } from './firebase'
+
+// בתוך GoogleLoginButton.jsx
+import LoginWithGoogle from "../../components/LoginWithGoogle"
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+
+
+
+
+
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,6 +30,33 @@ export default function LoginPage() {
       toast.error("Login failed. Please check your credentials.");
     }
   };
+
+  const handleGoogleLogin = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+
+      // שלב 1: קבלת ה-ID Token מ-Firebase
+      const idToken = await user.getIdToken();
+
+      // שלב 2: שליחת ה-ID Token לשרת שלך
+      const response = await api.post("/auth/google", {}, {
+        headers: {
+          Authorization: `Bearer ${idToken}`
+        }
+      });
+      console.log("response from server:", response.data);
+      localStorage.setItem("token", response.data.token);
+      toast.success("Welcome back!");
+      setTimeout(() => navigate("/"), 1500);
+
+    } catch (error) {
+      console.error("Google login error:", error);
+      toast.error("Google login failed");
+    }
+  };
+
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-16 dark:bg-gray-900">
@@ -54,6 +91,9 @@ export default function LoginPage() {
           >
             Login
           </button>
+          <LoginWithGoogle onLogin={handleGoogleLogin} />
+
+
 
           <p className="pt-2 text-center text-sm text-gray-600 dark:text-gray-400">
             Don’t have an account?{" "}

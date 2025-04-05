@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/api";
 import Swal from "sweetalert2";
-import { FaClock, FaUtensils, FaHeartBroken } from "react-icons/fa";
+import { FaClock, FaUtensils, FaHeartBroken, FaRegHeart, FaHeart } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -73,8 +73,8 @@ export default function FavoritesPage() {
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
-      <h2 className="mb-6 text-center text-2xl font-bold text-gray-800 dark:text-white">
-        My Favorite Recipes ❤️
+      <h2 className="mb-6 text-center text-2xl font-bold text-gray-800 dark:text-white flex items-center justify-center gap-2" >
+        My Favorite Recipes  <FaHeart className="text-red-500" />
       </h2>
 
       <div className="mb-4 text-left">
@@ -128,10 +128,10 @@ export default function FavoritesPage() {
 
               <button
                 onClick={() => removeFavorite(recipe.recipeId)}
-                className="absolute right-2 top-2 z-10 rounded-full bg-gray-700 p-2 text-white shadow-md transition hover:scale-110 hover:bg-red-600"
+                className="absolute right-2 top-2 z-10 rounded-full bg-red-500 p-2 text-white shadow-md transition-all duration-300 hover:scale-110 hover:bg-red-600 "
                 title="Remove from favorites"
               >
-                <FaHeartBroken size={18} />
+                  <FaHeart size={18} />
               </button>
 
               <div className="space-y-2 p-4">

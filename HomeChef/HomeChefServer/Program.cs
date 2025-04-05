@@ -1,4 +1,6 @@
-﻿using HomeChef.Server.Services;
+﻿using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using HomeChef.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -83,6 +85,15 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
+
+
+
+FirebaseApp.Create(new AppOptions()
+{
+    Credential = GoogleCredential.FromFile("serviceAccountKey.json")
+});
+
 
 
 

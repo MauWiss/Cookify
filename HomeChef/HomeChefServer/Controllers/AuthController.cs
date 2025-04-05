@@ -6,6 +6,9 @@ using System.Data.SqlClient;
 using System.Text;
 using System.Security.Cryptography;
 using Microsoft.Win32;
+using FirebaseAdmin.Auth;
+using NuGet.Protocol.Plugins;
+using HomeChef.Server.Models;
 
 
 namespace HomeChefServer.Controllers
@@ -50,6 +53,81 @@ namespace HomeChefServer.Controllers
             var token = _authService.GenerateJwtToken(user);
             return Ok(new { token });
         }
+
+        [HttpPost("google")]
+        public async Task<IActionResult> GoogleLogin()
+        {
+            var authHeader = Request.Headers["Authorization"].ToString();
+            if (!authHeader.StartsWith("Bearer "))
+                return Unauthorized("Missing Bearer token");
+
+            var idToken = authHeader.Substring("Bearer ".Length);
+
+            try
+            {
+                var decodedToken = await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(idToken);
+                var uid = decodedToken.Uid;
+                var email = decodedToken.Claims["email"]?.ToString();
+                var name = decodedToken.Claims["name"]?.ToString();
+
+                if (string.IsNullOrEmpty(email))
+                    return BadRequest("Email not provided by Google");
+
+                var user = await _authService.GetUserByEmailAsync(email);
+                if (user == null)
+                {
+                    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+                    await conn.OpenAsync();
+
+                    using var cmd = new SqlCommand("sp_RegisterUser", conn)
+                    {
+                        CommandType = CommandType.StoredProcedure
+                    };
+
+                    cmd.Parameters.AddWithValue("@Username", name);
+                    cmd.Parameters.AddWithValue("@Email", email);
+                    cmd.Parameters.AddWithValue("@PasswordHash", ""); // ריק כי זה משתמש Google
+
+                    var returnValue = cmd.Parameters.Add("@ReturnValue", SqlDbType.Int);
+                    returnValue.Direction = ParameterDirection.ReturnValue;
+
+                    await cmd.ExecuteNonQueryAsync();
+                    int result = (int)returnValue.Value;
+
+                    if (result == -1)
+                        return Conflict("A user with this email already exists.");
+
+                    if (result != 1)
+                        return StatusCode(500, "Unknown error during registration.");
+
+                    user = await _authService.GetUserByEmailAsync(email);
+                    if (user == null)
+                        return StatusCode(500, "User created but could not be retrieved.");
+                }
+
+               
+                var token = _authService.GenerateJwtToken(user);
+
+                return Ok(new
+                {
+                    message = "Login successful",
+                    token = token,
+                    user = new
+                    {
+                        id = user.Id,
+                        email = user.Email,
+                        username = user.Username
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return Unauthorized("Invalid token");
+            }
+        }
+
+
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterUserDTO register)
@@ -101,6 +179,7 @@ namespace HomeChefServer.Controllers
             {
                 return StatusCode(500, $"Unexpected error: {ex.Message}");
             }
+           
         }
     }
 }
