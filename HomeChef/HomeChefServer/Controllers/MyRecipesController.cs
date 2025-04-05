@@ -88,7 +88,7 @@ namespace HomeChefServer.Controllers
                 using var reader = await cmd.ExecuteReaderAsync();
                 if (await reader.ReadAsync())
                 {
-                    newRecipeId = Convert.ToInt32(reader["NewRecipeId"]);
+                    newRecipeId = Convert.ToInt32(reader["RecipeId"]);
                 }
                 else
                 {

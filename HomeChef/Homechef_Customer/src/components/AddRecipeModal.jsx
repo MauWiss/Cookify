@@ -2,7 +2,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { useState, useEffect } from "react";
 import { toast } from "react-toastify";
-import api from "../../../api/api";
+import api from "../api/api";
 
 export default function AddRecipeModal({ onRecipeAdded }) {
   const [open, setOpen] = useState(false);
@@ -37,9 +37,9 @@ export default function AddRecipeModal({ onRecipeAdded }) {
         servings: parseInt(servings),
         cookingTime: parseInt(cookingTime),
         categoryId: parseInt(categoryId),
-        ingredients: [], // תוכל להוסיף בהמשך
+        ingredients: [], // אפשר להוסיף מרכיבים בהמשך
       };
-      const res = await api.post("/myrecipes/add", newRecipe);
+      await api.post("/myrecipes/add", newRecipe);
       toast.success("Recipe added! 🥗");
       setOpen(false);
       onRecipeAdded();
@@ -116,7 +116,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
 
             <button
               type="submit"
-              className="w-full rounded bg-green-600 py-2 text-white hover:bg-green-700"
+              className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
             >
               Add Recipe
             </button>
