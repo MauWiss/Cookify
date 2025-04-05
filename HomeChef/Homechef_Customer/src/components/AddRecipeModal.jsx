@@ -1,8 +1,8 @@
-// components/AddRecipeModal.jsx
 import { useState, useEffect } from "react";
 import api from "../api/api";
 import { toast } from "react-toastify";
 import * as Dialog from "@radix-ui/react-dialog";
+import confetti from "canvas-confetti";
 
 export default function AddRecipeModal({ onRecipeAdded }) {
   const [open, setOpen] = useState(false);
@@ -48,19 +48,28 @@ export default function AddRecipeModal({ onRecipeAdded }) {
       };
 
       await api.post("/myrecipes/add", newRecipe);
+
       toast.success("🎉 Your recipe was added successfully!", {
         position: "top-center",
-        autoClose: 2000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
+        autoClose: 2500,
+        theme: "colored",
       });
+
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ["#ffcc00", "#ff6f61", "#7cb342", "#f5f5f5"],
+      });
+
       setOpen(false);
       onRecipeAdded();
     } catch (err) {
       console.error(err);
-      toast.error("❌ Failed to add recipe");
+      toast.error("❌ Failed to add recipe", {
+        position: "top-center",
+        theme: "colored",
+      });
     }
   };
 
@@ -71,7 +80,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
       </Dialog.Trigger>
 
       <Dialog.Portal>
-        <Dialog.Overlay className="fixed inset-0 bg-black/50" />
+        <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
           <Dialog.Title className="mb-4 text-xl font-bold dark:text-white">
             Add New Recipe
@@ -115,7 +124,6 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               placeholder="Cooking Time (min)"
               required
             />
-
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
