@@ -113,9 +113,13 @@ export default function Homepage() {
   };
 
   return (
-    <div className="px-6 py-8">
+    <div
+      className="min-h-screen px-6 py-8"
+      style={{ backgroundColor: "#1a202c" }}
+    >
+      {" "}
+      {/* קבענו רקע קבוע בלבן */}
       <ToastContainer />
-
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -126,11 +130,8 @@ export default function Homepage() {
         />
         <FaSearch className="mx-3 text-gray-400" />
       </div>
-
       <div className="mb-4">
-        <label className="mr-2 text-lg text-gray-800 dark:text-white">
-          Choose Category:
-        </label>
+        <label className="mr-2 text-lg text-white">Choose Category:</label>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
@@ -144,7 +145,6 @@ export default function Homepage() {
           ))}
         </select>
       </div>
-
       {loading ? (
         <div className="flex justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>

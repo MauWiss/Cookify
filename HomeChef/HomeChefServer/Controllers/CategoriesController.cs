@@ -42,10 +42,11 @@ namespace HomeChefServer.Controllers
 
             return Ok(categories);
         }
-
-        [HttpGet("by-category-id")]
-        public async Task<IActionResult> GetRecipesByCategoryId([FromQuery] int categoryId)
+        [HttpGet("{id}/recipes")]
+        public async Task<IActionResult> GetRecipesByCategory(int id)
         {
+            var recipes = new List<RecipeDTO>();
+
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
@@ -53,9 +54,8 @@ namespace HomeChefServer.Controllers
             {
                 CommandType = CommandType.StoredProcedure
             };
-            cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+            cmd.Parameters.AddWithValue("@CategoryId", id);
 
-            var recipes = new List<RecipeDTO>();
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
@@ -65,14 +65,15 @@ namespace HomeChefServer.Controllers
                     Title = reader["Title"].ToString(),
                     ImageUrl = reader["ImageUrl"].ToString(),
                     SourceUrl = reader["SourceUrl"].ToString(),
-                    CookingTime = reader["CookingTime"] as int?,
-                    Servings = reader["Servings"] as int?,
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0,
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
                     CategoryName = reader["CategoryName"].ToString()
                 });
             }
 
             return Ok(recipes);
         }
+
 
     }
 }
