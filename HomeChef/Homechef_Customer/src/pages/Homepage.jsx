@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import api from "../api/api";
-import { FaClock, FaUtensils, FaSearch } from "react-icons/fa";
+import {
+  FaClock,
+  FaUtensils,
+  FaSearch,
+  FaHeart,
+  FaRegHeart,
+} from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -10,7 +16,8 @@ export default function Homepage() {
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [categories, setCategories] = useState([]);
-  const [selectedCategory, setSelectedCategory] = useState(""); // State for category filter
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [favorites, setFavorites] = useState([]);
 
   const token = localStorage.getItem("token");
 
@@ -37,17 +44,55 @@ export default function Homepage() {
     }
   };
 
-  const fetchCategories = async () => {
+  const fetchFavorites = async () => {
+    if (!token) return;
     try {
-      const response = await api.get("/categories"); // Assuming the API has a /categories endpoint
-      setCategories(response.data);
+      const res = await api.get("/favorites", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites(res.data.map((fav) => fav.recipeId));
     } catch (err) {
-      console.error("Failed to fetch categories", err);
+      console.error("Failed to fetch favorites", err);
     }
   };
 
+  const addToFavorites = async (recipeId) => {
+    if (!recipeId) return;
+    try {
+      await api.post(
+        `/Favorites/${recipeId}/favorite`,
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      setFavorites((prev) => [...prev, recipeId]);
+      toast.success("Added to favorites ❤️");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add to favorites.");
+    }
+  };
+
+  const removeFromFavorites = async (recipeId) => {
+    if (!recipeId) return;
+    try {
+      await api.delete(`/Favorites/${recipeId}/favorite`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setFavorites((prev) => prev.filter((id) => id !== recipeId));
+      toast.success("Removed from favorites 💔");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to remove from favorites.");
+    }
+  };
+
+  const isFavorite = (recipeId) => favorites.includes(recipeId);
+
   useEffect(() => {
     fetchRecipes();
+    fetchFavorites();
     fetchCategories();
   }, []);
 
@@ -58,11 +103,19 @@ export default function Homepage() {
     return () => clearTimeout(delayDebounce);
   }, [searchTerm, selectedCategory]);
 
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get("/categories");
+      setCategories(response.data);
+    } catch (err) {
+      console.error("Failed to fetch categories", err);
+    }
+  };
+
   return (
     <div className="px-6 py-8">
       <ToastContainer />
 
-      {/* חיפוש */}
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-white p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -74,15 +127,14 @@ export default function Homepage() {
         <FaSearch className="mx-3 text-gray-400" />
       </div>
 
-      {/* Dropdown for category selection */}
       <div className="mb-4">
         <label className="mr-2 text-lg text-gray-800 dark:text-white">
-          Filter by Category:
+          Choose Category:
         </label>
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="rounded-md border p-2"
+          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
         >
           <option value="">All Categories</option>
           {categories.map((category) => (
@@ -94,8 +146,8 @@ export default function Homepage() {
       </div>
 
       {loading ? (
-        <div className="text-center text-lg text-gray-500 dark:text-gray-300">
-          Loading...
+        <div className="flex justify-center">
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
         </div>
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
@@ -104,7 +156,7 @@ export default function Homepage() {
           {recipes.map((recipe, index) => (
             <div
               key={recipe.recipeId || index}
-              className="overflow-hidden rounded-2xl bg-white shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
+              className="relative overflow-hidden rounded-2xl bg-white shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               {recipe.sourceUrl ? (
                 <a
@@ -125,6 +177,30 @@ export default function Homepage() {
                   className="h-48 w-full object-cover"
                 />
               )}
+
+              <button
+                onClick={() =>
+                  isFavorite(recipe.recipeId)
+                    ? removeFromFavorites(recipe.recipeId)
+                    : addToFavorites(recipe.recipeId)
+                }
+                title={
+                  isFavorite(recipe.recipeId)
+                    ? "Remove from favorites"
+                    : "Add to favorites"
+                }
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
+                  isFavorite(recipe.recipeId)
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-white text-red-500 hover:bg-red-100"
+                } hover:scale-110`}
+              >
+                {isFavorite(recipe.recipeId) ? (
+                  <FaHeart size={18} />
+                ) : (
+                  <FaRegHeart size={18} />
+                )}
+              </button>
 
               <div className="space-y-2 p-4">
                 <h3 className="text-lg font-semibold transition hover:text-blue-500">

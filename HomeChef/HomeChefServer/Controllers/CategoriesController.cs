@@ -42,5 +42,37 @@ namespace HomeChefServer.Controllers
 
             return Ok(categories);
         }
+
+        [HttpGet("by-category-id")]
+        public async Task<IActionResult> GetRecipesByCategoryId([FromQuery] int categoryId)
+        {
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand("sp_GetRecipesByCategoryId", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("@CategoryId", categoryId);
+
+            var recipes = new List<RecipeDTO>();
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                recipes.Add(new RecipeDTO
+                {
+                    RecipeId = (int)reader["RecipeId"],
+                    Title = reader["Title"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    CookingTime = reader["CookingTime"] as int?,
+                    Servings = reader["Servings"] as int?,
+                    CategoryName = reader["CategoryName"].ToString()
+                });
+            }
+
+            return Ok(recipes);
+        }
+
     }
 }
