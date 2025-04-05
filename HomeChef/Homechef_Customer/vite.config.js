@@ -7,19 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: [
-        "icon-192.png",
-        "icon-512.png",
-        "screenshot1.png",
-        "screenshot2.png",
-      ],
       manifest: {
         short_name: "HomeChef",
         name: "HomeChef Recipes App",
         start_url: ".",
         display: "standalone",
-        theme_color: "#ffffff",
         background_color: "#ffffff",
+        theme_color: "#ffffff",
         icons: [
           {
             src: "/icon-192.png",
@@ -43,6 +37,7 @@ export default defineConfig({
             src: "screenshot2.png",
             type: "image/png",
             sizes: "600x800",
+            form_factor: "wide",
           },
         ],
       },
