@@ -1,43 +1,51 @@
-import { useState, useEffect } from "react";
-import api from "../api/api";
-import { toast } from "react-toastify";
 import * as Dialog from "@radix-ui/react-dialog";
-import confetti from "canvas-confetti";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
+import confetti from "canvas-confetti"; // ✅ חדש!
+import api from "../api/api";
 
-export default function AddRecipeModal({ onRecipeAdded }) {
-  const [open, setOpen] = useState(false);
+export default function EditRecipeModal({
+  recipeId,
+  onClose,
+  onRecipeUpdated,
+}) {
+  const [open, setOpen] = useState(true);
   const [title, setTitle] = useState("");
   const [imageUrl, setImageUrl] = useState("");
   const [sourceUrl, setSourceUrl] = useState("");
   const [servings, setServings] = useState("");
   const [cookingTime, setCookingTime] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [ingredients, setIngredients] = useState([
-    { name: "", quantity: "", unit: "" },
-  ]);
+  const [ingredients, setIngredients] = useState([]);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     if (open) {
-      api
-        .get("/categories")
-        .then((res) => setCategories(res.data))
-        .catch((err) => console.error("Failed to fetch categories", err));
+      api.get("/categories").then((res) => setCategories(res.data));
+      api.get(`/recipes/${recipeId}`).then((res) => {
+        const r = res.data;
+        setTitle(r.title);
+        setImageUrl(r.imageUrl);
+        setSourceUrl(r.sourceUrl);
+        setServings(r.servings);
+        setCookingTime(r.cookingTime);
+        setCategoryId(r.categoryId);
+        setIngredients(r.ingredients);
+      });
     }
-  }, [open]);
+  }, [open, recipeId]);
 
-  const handleAddIngredient = () => {
-    setIngredients([...ingredients, { name: "", quantity: "", unit: "" }]);
-  };
-
-  const handleRemoveIngredient = (index) => {
-    setIngredients(ingredients.filter((_, i) => i !== index));
+  const handleIngredientChange = (index, field, value) => {
+    setIngredients((prev) =>
+      prev.map((ing, i) => (i === index ? { ...ing, [field]: value } : ing)),
+    );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const newRecipe = {
+      const updated = {
+        recipeId,
         title,
         imageUrl,
         sourceUrl,
@@ -47,26 +55,27 @@ export default function AddRecipeModal({ onRecipeAdded }) {
         ingredients,
       };
 
-      await api.post("/myrecipes/add", newRecipe);
+      await api.put("/myrecipes/update", updated);
 
-      toast.success("🎉 Your recipe was added successfully!", {
-        position: "top-center",
-        autoClose: 2500,
-        theme: "colored",
-      });
-
+      // 🎉 אפקט קונפטי
       confetti({
         particleCount: 120,
         spread: 80,
         origin: { y: 0.6 },
-        colors: ["#ffcc00", "#ff6f61", "#7cb342", "#f5f5f5"],
+      });
+
+      // ✅ Toast
+      toast.success("🎉 Recipe updated successfully!", {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "colored",
       });
 
       setOpen(false);
-      onRecipeAdded();
+      onRecipeUpdated();
     } catch (err) {
       console.error(err);
-      toast.error("❌ Failed to add recipe", {
+      toast.error("❌ Failed to update recipe", {
         position: "top-center",
         theme: "colored",
       });
@@ -74,37 +83,39 @@ export default function AddRecipeModal({ onRecipeAdded }) {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white hover:bg-blue-700">
-        + Add Recipe
-      </Dialog.Trigger>
-
+    <Dialog.Root
+      open={open}
+      onOpenChange={(val) => {
+        setOpen(val);
+        if (!val) onClose();
+      }}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm" />
         <Dialog.Content className="fixed left-1/2 top-1/2 w-[90vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl bg-white p-6 shadow-lg dark:bg-gray-900">
           <Dialog.Title className="mb-4 text-xl font-bold dark:text-white">
-            Add New Recipe
+            Edit Recipe
           </Dialog.Title>
           <form onSubmit={handleSubmit} className="space-y-4">
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-              placeholder="Title"
               required
+              placeholder="Title"
             />
             <input
               value={imageUrl}
               onChange={(e) => setImageUrl(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-              placeholder="Image URL"
               required
+              placeholder="Image URL"
             />
             <input
               value={sourceUrl}
               onChange={(e) => setSourceUrl(e.target.value)}
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-              placeholder="Source URL"
+              placeholder="Source URL (optional)"
             />
             <input
               value={servings}
@@ -112,8 +123,8 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               type="number"
               min="1"
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-              placeholder="Servings"
               required
+              placeholder="Servings"
             />
             <input
               value={cookingTime}
@@ -121,8 +132,8 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               type="number"
               min="1"
               className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-              placeholder="Cooking Time (min)"
               required
+              placeholder="Cooking Time (min)"
             />
             <select
               value={categoryId}
@@ -131,9 +142,9 @@ export default function AddRecipeModal({ onRecipeAdded }) {
               required
             >
               <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
+              {categories.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
                 </option>
               ))}
             </select>
@@ -143,11 +154,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
                 <input
                   value={ingredient.name}
                   onChange={(e) =>
-                    setIngredients((prev) =>
-                      prev.map((ing, i) =>
-                        i === index ? { ...ing, name: e.target.value } : ing,
-                      ),
-                    )
+                    handleIngredientChange(index, "name", e.target.value)
                   }
                   className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
                   placeholder="Ingredient Name"
@@ -156,13 +163,7 @@ export default function AddRecipeModal({ onRecipeAdded }) {
                 <input
                   value={ingredient.quantity}
                   onChange={(e) =>
-                    setIngredients((prev) =>
-                      prev.map((ing, i) =>
-                        i === index
-                          ? { ...ing, quantity: e.target.value }
-                          : ing,
-                      ),
-                    )
+                    handleIngredientChange(index, "quantity", e.target.value)
                   }
                   type="number"
                   className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
@@ -172,39 +173,33 @@ export default function AddRecipeModal({ onRecipeAdded }) {
                 <input
                   value={ingredient.unit}
                   onChange={(e) =>
-                    setIngredients((prev) =>
-                      prev.map((ing, i) =>
-                        i === index ? { ...ing, unit: e.target.value } : ing,
-                      ),
-                    )
+                    handleIngredientChange(index, "unit", e.target.value)
                   }
                   className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
                   placeholder="Unit"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => handleRemoveIngredient(index)}
-                  className="rounded-full bg-red-500 px-2 py-1 text-white"
-                >
-                  ×
-                </button>
               </div>
             ))}
 
             <button
               type="button"
-              onClick={handleAddIngredient}
-              className="text-blue-500 hover:underline"
+              onClick={() =>
+                setIngredients((prev) => [
+                  ...prev,
+                  { name: "", quantity: "", unit: "" },
+                ])
+              }
+              className="text-sm text-blue-600 hover:underline"
             >
               + Add Ingredient
             </button>
 
             <button
               type="submit"
-              className="w-full rounded bg-blue-600 py-2 text-white hover:bg-blue-700"
+              className="w-full rounded bg-yellow-600 py-2 text-white hover:bg-yellow-700"
             >
-              Add Recipe
+              Save Changes
             </button>
           </form>
         </Dialog.Content>

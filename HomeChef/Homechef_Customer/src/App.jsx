@@ -7,6 +7,9 @@ import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
 import MyRecipesPage from "./pages/PrivateUserPages/MyRecipes/MyRecipesPage";
 import PrivateRoute from "./components/PrivateRoute";
 
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export default function App() {
   return (
     <div className="min-h-screen bg-white text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-white">
@@ -42,6 +45,9 @@ export default function App() {
           }
         />
       </Routes>
+
+      {/* 💬 הודעות toast */}
+      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
     </div>
   );
 }
