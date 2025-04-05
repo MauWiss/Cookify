@@ -2,14 +2,14 @@
 import { useEffect, useState } from "react";
 import api from "../../../api/api";
 import { FaEdit, FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import AddRecipeModal from "../../../components/AddRecipeModal";
+import EditRecipeModal from "../../../components/EditRecipeModal";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+  const [editingRecipe, setEditingRecipe] = useState(null); // מודל פתוח לעריכה
 
   const fetchRecipes = async () => {
     setLoading(true);
@@ -57,6 +57,14 @@ export default function MyRecipesPage() {
         <AddRecipeModal onRecipeAdded={fetchRecipes} />
       </div>
 
+      {editingRecipe && (
+        <EditRecipeModal
+          recipe={editingRecipe}
+          onClose={() => setEditingRecipe(null)}
+          onUpdated={fetchRecipes}
+        />
+      )}
+
       {loading ? (
         <div className="text-center text-gray-500 dark:text-gray-300">
           Loading...
@@ -92,9 +100,7 @@ export default function MyRecipesPage() {
 
               <div className="absolute right-3 top-3 flex gap-2">
                 <button
-                  onClick={() =>
-                    navigate(`/my-recipes/edit/${recipe.recipeId}`)
-                  }
+                  onClick={() => setEditingRecipe(recipe)}
                   className="rounded-full bg-yellow-500 p-2 text-white hover:bg-yellow-600"
                   title="Edit"
                 >

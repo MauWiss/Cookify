@@ -42,14 +42,14 @@ export default function Navbar() {
           <>
             <Link className={active("/favorites")} to="/favorites">
               <div className="flex items-center gap-2">
-                <FaHeart className="text-red-500" />
                 Favorites
+                <FaHeart className="text-red-500" />
               </div>
             </Link>
             <Link className={active("/my-recipes")} to="/my-recipes">
               <div className="flex items-center gap-2">
-                <GiCook className="text-orange-500" />
                 My Recipes
+                <GiCook className="text-orange-500" />
               </div>
             </Link>
           </>
