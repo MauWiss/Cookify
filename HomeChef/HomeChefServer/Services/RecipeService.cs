@@ -48,20 +48,20 @@ namespace HomeChef.Server.Services
 
             return results;
         }
-        public async Task<RecipeProfileDTO> GetRecipeProfileByIdAsync(int id)
-        {
-            using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
+        //public async Task<RecipeProfileDTO> GetRecipeProfileByIdAsync(int id)
+        //{
+        //    using (var connection = new SqlConnection(_configuration.GetConnectionString("DefaultConnection")))
 
-            {
-                var parameters = new { Id = id };
-                var result = await connection.QueryFirstOrDefaultAsync<RecipeProfileDTO>(
-                    "sp_GetRecipeProfileById",
-                    parameters,
-                    commandType: CommandType.StoredProcedure
-                );
-                return result;
-            }
-        }
+        //    {
+        //        var parameters = new { Id = id };
+        //        var result = await connection.QueryFirstOrDefaultAsync<RecipeProfileDTO>(
+        //            "sp_GetRecipeProfileById",
+        //            parameters,
+        //            commandType: CommandType.StoredProcedure
+        //        );
+        //        return result;
+        //    }
+        //}
 
 
     }

@@ -4,6 +4,9 @@ using HomeChef.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FirebaseAdmin;
+using Google.Apis.Auth.OAuth2;
+using System.IO; 
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -85,6 +88,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 
 
 
