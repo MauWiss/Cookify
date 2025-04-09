@@ -2,6 +2,8 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://localhost:7019/api",
+  // baseURL: "https://homechefserver.azurewebsites.net/api",
+
   headers: {
     "Content-Type": "application/json",
   },
