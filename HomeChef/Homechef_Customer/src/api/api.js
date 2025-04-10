@@ -72,6 +72,9 @@ export const updateMyRecipe = (recipeId, updatedData) =>
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
 export const registerUser = (userData) => api.post("/auth/register", userData);
-export const logoutUser = () => localStorage.removeItem("token");
+export const logoutUser = () => {
+  localStorage.removeItem("token");
+  delete api.defaults.headers.common["Authorization"];
+};
 
 export default api;
