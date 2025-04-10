@@ -4,6 +4,7 @@ import Swal from "sweetalert2";
 import { FaClock, FaUtensils, FaHeartBroken, FaRegHeart, FaHeart } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CategorySelect from "../../components/CategorySelect";
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState([]);
@@ -66,7 +67,6 @@ export default function FavoritesPage() {
   };
 
   useEffect(() => {
-    fetchCategories();
     fetchFavorites(selectedCategoryId);
   }, [selectedCategoryId]);
 
@@ -77,27 +77,7 @@ export default function FavoritesPage() {
         My Favorite Recipes  <FaHeart className="text-red-500" />
       </h2>
 
-      <div className="mb-4 text-left">
-        <label className="mr-2 text-lg text-gray-800 dark:text-white">
-          Filter by Category:
-        </label>
-        <select
-          value={selectedCategoryId ?? ""}
-          onChange={(e) =>
-            setSelectedCategoryId(
-              e.target.value ? Number(e.target.value) : null,
-            )
-          }
-          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
-        >
-          <option value="">All</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySelect/>
 
       {loading ? (
         <div className="flex justify-center">

@@ -37,10 +37,10 @@ export default function LoginPage() {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // שלב 1: קבלת ה-ID Token מ-Firebase
+    //Get token 
       const idToken = await user.getIdToken();
 
-      // שלב 2: שליחת ה-ID Token לשרת שלך
+      //send token to my server
       const response = await api.post("/auth/google", {}, {
         headers: {
           Authorization: `Bearer ${idToken}`

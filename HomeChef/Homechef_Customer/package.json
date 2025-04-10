@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.1",
     "@heroicons/react": "^2.2.0",
+    "@microsoft/signalr": "^8.0.7",
     "@radix-ui/react-dialog": "^1.1.6",
     "axios": "^1.8.4",
     "canvas-confetti": "^1.9.3",

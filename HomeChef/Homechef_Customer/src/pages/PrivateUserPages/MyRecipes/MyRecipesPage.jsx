@@ -4,6 +4,7 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import AddRecipeModal from "../../../components/AddRecipeModal";
 import EditRecipeModal from "../../../components/EditRecipeModal";
+import CategorySelect from "../../../components/CategorySelect";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
@@ -58,7 +59,6 @@ export default function MyRecipesPage() {
 
   useEffect(() => {
     fetchRecipes();
-    fetchCategories();
   }, []);
 
   const filteredRecipes = selectedCategoryId
@@ -73,27 +73,7 @@ export default function MyRecipesPage() {
 
       <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-end">
         <AddRecipeModal onRecipeAdded={fetchRecipes} />
-        <div>
-          <label
-            htmlFor="category"
-            className="mb-1 block text-sm font-medium text-gray-800 dark:text-white"
-          >
-            Filter by Category:
-          </label>
-          <select
-            id="category"
-            value={selectedCategoryId}
-            onChange={(e) => setSelectedCategoryId(e.target.value)}
-            className="w-48 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
-          >
-            <option value="">All</option>
-            {categories.map((cat) => (
-              <option key={cat.id} value={cat.name}>
-                {cat.name}
-              </option>
-            ))}
-          </select>
-        </div>
+        <CategorySelect/>
       </div>
 
       {loading ? (

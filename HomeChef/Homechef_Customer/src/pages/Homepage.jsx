@@ -9,6 +9,7 @@ import {
 } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CategorySelect from "../components/CategorySelect";
 
 export default function Homepage() {
   const [recipes, setRecipes] = useState([]);
@@ -117,7 +118,6 @@ export default function Homepage() {
   };
 
   useEffect(() => {
-    fetchCategories();
     fetchRecipes();
     fetchFavorites();
   }, []);
@@ -147,27 +147,8 @@ export default function Homepage() {
         <FaSearch className="mx-3 text-gray-400" />
       </div>
 
-      <div className="mb-4 text-left">
-        <label className="mr-2 text-lg text-gray-800 dark:text-white">
-          Filter by Category:
-        </label>
-        <select
-          value={selectedCategoryId ?? ""}
-          onChange={(e) =>
-            setSelectedCategoryId(
-              e.target.value ? Number(e.target.value) : null,
-            )
-          }
-          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
-        >
-          <option value="">All</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CategorySelect />
+<hr></hr>
 
       {loading ? (
         <div className="flex justify-center">
@@ -208,11 +189,10 @@ export default function Homepage() {
                     ? removeFromFavorites(recipe.recipeId)
                     : addToFavorites(recipe.recipeId)
                 }
-                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
-                  isFavorite(recipe.recipeId)
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-white text-red-500 hover:bg-red-100"
-                } hover:scale-110`}
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${isFavorite(recipe.recipeId)
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-white text-red-500 hover:bg-red-100"
+                  } hover:scale-110`}
               >
                 {isFavorite(recipe.recipeId) ? (
                   <FaHeart size={18} />

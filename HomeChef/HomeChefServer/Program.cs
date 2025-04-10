@@ -4,13 +4,18 @@ using HomeChef.Server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Microsoft.AspNetCore.SignalR;
+using HomeChefServer.SignalR;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IRecipeService, RecipeService>();
 
-
+builder.Services.AddSignalR();
+builder.Services.AddAuthentication(); // אם את משתמשת ב-Auth
+builder.Services.AddAuthorization();
 
 
 var jwtKey = builder.Configuration["Jwt:Key"];
@@ -25,6 +30,7 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    // סט הפרמטרים שכבר הגדרת:
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
@@ -34,6 +40,21 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtIssuer,
         IssuerSigningKey = new SymmetricSecurityKey(key)
     };
+
+    // *** החלק החשוב לסיגנל.ר ***
+    options.Events = new JwtBearerEvents
+    {
+        OnMessageReceived = context =>
+        {
+            // בודק אם יש access_token ב-Query (SignalR שולח אותו כך)
+            var accessToken = context.Request.Query["access_token"];
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                context.Token = accessToken;
+            }
+            return Task.CompletedTask;
+        }
+    };
 });
 
 
@@ -41,9 +62,11 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy
+            .SetIsOriginAllowed(origin => true) 
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials(); 
     });
 });
 
@@ -95,13 +118,15 @@ FirebaseApp.Create(new AppOptions()
 });
 
 
-
+builder.Services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
 var app = builder.Build();
 
+app.MapHub<NotificationHub>("/notificationHub");
 
 
-    app.UseSwagger();
+
+app.UseSwagger();
     app.UseSwaggerUI();
 
 app.UseCors("AllowAll");
