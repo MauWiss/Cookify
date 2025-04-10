@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using HomeChefServer.SignalR;
 
+using System.IO; 
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -108,6 +109,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 });
+
 
 
 

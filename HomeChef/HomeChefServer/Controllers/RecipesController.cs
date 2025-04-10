@@ -1,4 +1,6 @@
-﻿using HomeChef.Server.Models.DTOs;
+﻿using Dapper;
+using HomeChef.Server.Models.DTOs;
+using HomeChef.Server.Services;
 using HomeChefServer.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
@@ -156,10 +158,27 @@ namespace HomeChefServer.Controllers
             return Ok(recipe);
         }
 
-        
+        //[HttpGet("profile/{id}")]
+        //public async Task<IActionResult> GetRecipeProfile(int id)
+        //{
+        //    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
- 
-     
+        //    var parameters = new { Id = id };
+
+        //    var recipe = await conn.QueryFirstOrDefaultAsync<RecipeProfileDTO>(
+        //        "sp_GetRecipeProfileById",
+        //        parameters,
+        //        commandType: CommandType.StoredProcedure
+        //    );
+
+        //    if (recipe == null)
+        //        return NotFound();
+
+        //    return Ok(recipe);
+        //}
+
+
+
 
 
 
