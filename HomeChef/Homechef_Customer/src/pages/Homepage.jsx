@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import api from "../api/api";
 import {
   FaClock,
   FaUtensils,
@@ -8,20 +6,21 @@ import {
   FaHeart,
   FaRegHeart,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CategorySelect from "../components/CategorySelect";
-import HeroSection from "../components/HeroSection";
+import api from "../api/api";
 
 export default function Homepage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const token = localStorage.getItem("token");
-  const navigate = useNavigate();
+  const navigate = useNavigate(); // New navigation
 
   const fetchRecipes = async (term = "", categoryId = null) => {
     setLoading(true);
@@ -61,58 +60,47 @@ export default function Homepage() {
     }
   };
 
-
-
-  const isFavorite = (recipeId) => favorites.includes(recipeId);
-
-  const addToFavorites = async (recipeId) => {
-    if (!token) {
-      toast.info("Please login to add to favorites ❤️");
-      return;
-    }
-    if (!recipeId) {
-      toast.error("Recipe ID is missing.");
-      return;
-    }
-
+  const fetchCategories = async () => {
     try {
-      await api.post(
-        `/Favorites/${recipeId}/favorite`,
-        {},
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
-      setFavorites((prev) => [...prev, recipeId]);
-      toast.success("Added to favorites ❤️");
+      const res = await api.get("/categories");
+      setCategories(res.data);
     } catch (err) {
-      console.error(err);
-      if (err.response?.status === 409) {
-        toast.info("Already in favorites.");
-      } else {
-        toast.error("Failed to add to favorites.");
-      }
+      console.error("Failed to fetch categories", err);
     }
   };
 
-  const removeFromFavorites = async (recipeId) => {
+  const isFavorite = (recipeId) => favorites.includes(recipeId);
+
+  const handleFavorite = async (recipeId) => {
     if (!token) {
-      toast.info("Please login to remove from favorites 💔");
+      toast.info("Please login to add/remove favorites ❤️");
       return;
     }
+
     try {
-      await api.delete(`/Favorites/${recipeId}/favorite`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFavorites((prev) => prev.filter((id) => id !== recipeId));
-      toast.success("Removed from favorites 💔");
+      if (isFavorite(recipeId)) {
+        await api.delete(`/Favorites/${recipeId}/favorite`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setFavorites((prev) => prev.filter((id) => id !== recipeId));
+        toast.success("Removed from favorites 💔");
+      } else {
+        await api.post(
+          `/Favorites/${recipeId}/favorite`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } },
+        );
+        setFavorites((prev) => [...prev, recipeId]);
+        toast.success("Added to favorites ❤️");
+      }
     } catch (err) {
       console.error(err);
-      toast.error("Failed to remove from favorites.");
+      toast.error("Failed to update favorites.");
     }
   };
 
   useEffect(() => {
+    fetchCategories();
     fetchRecipes();
     fetchFavorites();
   }, []);
@@ -130,7 +118,6 @@ export default function Homepage() {
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
-
       <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-gray-100 p-2 shadow-md dark:bg-gray-800">
         <input
           type="text"
@@ -142,16 +129,27 @@ export default function Homepage() {
         <FaSearch className="mx-3 text-gray-400" />
       </div>
 
-      {recipes.length > 0 && (
-        <HeroSection
-          title={recipes[0].title}
-          imageUrl={recipes[0].imageUrl}
-          buttonText="Full Recipe" />
-      )}
-
-      <hr></hr>
-      <CategorySelect />
-      
+      <div className="mb-4 text-left">
+        <label className="mr-2 text-lg text-gray-800 dark:text-white">
+          Filter by Category:
+        </label>
+        <select
+          value={selectedCategoryId ?? ""}
+          onChange={(e) =>
+            setSelectedCategoryId(
+              e.target.value ? Number(e.target.value) : null,
+            )
+          }
+          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
+        >
+          <option value="">All</option>
+          {categories.map((cat) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
+      </div>
 
       {loading ? (
         <div className="flex justify-center">
@@ -167,18 +165,13 @@ export default function Homepage() {
               className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               <img
-                onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
+                onClick={() => navigate(`/recipes/${recipe.recipeId}`)} // Navigate to recipe profile
                 src={recipe.imageUrl}
                 alt={recipe.title}
                 className="h-48 w-full cursor-pointer object-cover transition hover:opacity-90"
               />
-
               <button
-                onClick={() =>
-                  isFavorite(recipe.recipeId)
-                    ? removeFromFavorites(recipe.recipeId)
-                    : addToFavorites(recipe.recipeId)
-                }
+                onClick={() => handleFavorite(recipe.recipeId)}
                 className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
                   isFavorite(recipe.recipeId)
                     ? "bg-red-500 text-white hover:bg-red-600"
@@ -193,10 +186,7 @@ export default function Homepage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3
-                  onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
-                  className="cursor-pointer text-lg font-semibold transition hover:text-blue-500 dark:text-white"
-                >
+                <h3 className="text-lg font-semibold transition hover:text-blue-500 dark:text-white">
                   {recipe.title}
                 </h3>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
