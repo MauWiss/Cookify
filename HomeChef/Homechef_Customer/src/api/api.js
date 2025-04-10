@@ -3,13 +3,12 @@ import axios from "axios";
 const api = axios.create({
   baseURL: "https://localhost:7019/api",
   // baseURL: "https://homechefserver.azurewebsites.net/api",
-
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// אינטרספטור להוספת ה־token אוטומטית לכל הבקשות
+// 🔐 הוספת טוקן אוטומטית לכל קריאה
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -47,9 +46,9 @@ export const removeFavorite = (recipeId) =>
 // 🔷 Reviews API
 export const fetchReviews = (recipeId) => api.get(`/reviews/${recipeId}`);
 export const addReview = (recipeId, reviewText) =>
-  api.post(`/reviews/${recipeId}`, JSON.stringify(reviewText));
+  api.post(`/reviews/${recipeId}`, { reviewText });
 export const updateReview = (reviewId, reviewText) =>
-  api.put(`/reviews/${reviewId}`, JSON.stringify(reviewText));
+  api.put(`/reviews/${reviewId}`, { reviewText });
 export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`);
 
 // 🔷 Ratings API
@@ -57,7 +56,7 @@ export const fetchUserRating = (recipeId) => api.get(`/ratings/${recipeId}/my`);
 export const postRating = (recipeId, rating) =>
   api.post(`/ratings/${recipeId}`, { rating });
 
-// 🔷 Auth API (דוגמה - אם אתה צריך)
+// 🔷 Auth API
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
 export const registerUser = (userData) => api.post("/auth/register", userData);

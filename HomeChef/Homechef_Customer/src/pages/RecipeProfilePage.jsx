@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import api from "../api/api";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import StarRating from "../components/StarRating";
+import { fetchRecipeProfile, fetchUserRating, postRating } from "../api/api";
 
 const RecipeProfilePage = () => {
   const { id } = useParams();
@@ -12,35 +14,32 @@ const RecipeProfilePage = () => {
 
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
-  const [userRating, setUserRating] = useState(null);
+  const [userRating, setUserRating] = useState(0);
   const [averageRating, setAverageRating] = useState(0);
   const [totalRatings, setTotalRatings] = useState(0);
 
   useEffect(() => {
-    const fetchRecipe = async () => {
+    const loadData = async () => {
       try {
-        const res = await api.get(`/recipes/profile/${id}`);
-        setRecipe(res.data);
-        setAverageRating(res.data.averageRating || 0);
-        setTotalRatings(res.data.totalRatings || 0);
-      } catch {
+        const [recipeRes, ratingRes] = await Promise.all([
+          fetchRecipeProfile(id),
+          token
+            ? fetchUserRating(id)
+            : Promise.resolve({ data: { rating: 0 } }),
+        ]);
+
+        setRecipe(recipeRes.data);
+        setAverageRating(Number(recipeRes.data.averageRating || 0));
+        setTotalRatings(Number(recipeRes.data.totalRatings || 0));
+        setUserRating(Number(ratingRes.data?.rating ?? 0));
+      } catch (err) {
+        console.error(err);
         setError("Recipe not found");
       }
     };
 
-    const fetchUserRating = async () => {
-      if (!token) return;
-      try {
-        const res = await api.get(`/ratings/${id}/my`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setUserRating(res.data.rating);
-      } catch {}
-    };
-
-    fetchRecipe();
-    fetchUserRating();
-  }, [id]);
+    loadData();
+  }, [id, token]);
 
   const handleRatingChange = async (newRating) => {
     if (!token) {
@@ -49,13 +48,7 @@ const RecipeProfilePage = () => {
     }
 
     try {
-      await api.post(
-        `/ratings/${id}`,
-        { rating: newRating },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
-      );
+      await postRating(id, newRating);
       toast.success("Rating submitted! 🌟");
       setUserRating(newRating);
 
@@ -98,6 +91,8 @@ const RecipeProfilePage = () => {
 
   return (
     <div className="mx-auto mt-12 max-w-6xl rounded-3xl bg-white px-8 py-10 shadow-2xl dark:bg-gray-900 dark:shadow-gray-800">
+      <ToastContainer />
+
       <button
         onClick={() => navigate(-1)}
         className="mb-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gray-200 to-gray-300 px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:from-gray-300 hover:to-gray-400 dark:from-gray-700 dark:to-gray-800 dark:text-white dark:hover:from-gray-600"
@@ -122,15 +117,15 @@ const RecipeProfilePage = () => {
 
           <div>
             <StarRating
-              value={userRating || 0}
+              value={userRating}
               onChange={handleRatingChange}
               editable={!!token}
             />
-            {totalRatings > 0 && (
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-                {averageRating} ({totalRatings} ratings)
-              </p>
-            )}
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {totalRatings > 0
+                ? `${averageRating} (${totalRatings} ratings)`
+                : "No ratings yet"}
+            </p>
           </div>
 
           <div className="space-y-2 text-gray-700 dark:text-gray-300">
@@ -202,7 +197,7 @@ const RecipeProfilePage = () => {
         {recipe.instructionsText && (
           <div className="prose dark:prose-invert max-w-none">
             <h2 className="text-2xl font-bold">Instructions</h2>
-            {recipe.instructionsText?.includes("<li>") ? (
+            {recipe.instructionsText.includes("<li>") ? (
               <div
                 className="space-y-1"
                 dangerouslySetInnerHTML={{ __html: recipe.instructionsText }}
