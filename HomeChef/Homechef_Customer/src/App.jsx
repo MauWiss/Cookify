@@ -6,27 +6,26 @@ import RegisterPage from "./pages/Auth/RegisterPage";
 import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
 import MyRecipesPage from "./pages/PrivateUserPages/MyRecipesPage";
 import PrivateRoute from "./components/PrivateRoute";
-import useNotifications from "./hooks/useNotifications"; // ודא שהקובץ
-//הזה קיים
-import RecipeProfilePage from "./pages/RecipeProfilePage"; // ייבוא חדש
-
-import { ToastContainer, toast } from "react-toastify";
+import useNotifications from "./hooks/useNotifications";
+import RecipeProfilePage from "./pages/RecipeProfilePage";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { AuthProvider } from "./pages/Auth/AuthContext";
 
 export default function App() {
-  useNotifications((notification) => {
-    toast.info(notification.content || "🔔 התראה חדשה!");
-  });
+  useNotifications(); // optional: handles SignalR or real-time
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 transition-colors duration-300 dark:bg-gray-900 dark:text-white">
+    <AuthProvider>
+      <ToastContainer position="top-center" />
       <Navbar />
       <Routes>
         <Route path="/" element={<Homepage />} />
+        <Route path="/recipes/:id" element={<RecipeProfilePage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
-        <Route path="/recipes/:id" element={<RecipeProfilePage />} />
 
+        {/* 🔒 Protected Routes */}
         <Route
           path="/favorites"
           element={
@@ -43,19 +42,7 @@ export default function App() {
             </PrivateRoute>
           }
         />
-
-        <Route
-          path="*"
-          element={
-            <div className="flex h-[70vh] items-center justify-center text-2xl font-semibold">
-              404 - Page Not Found 🚫
-            </div>
-          }
-        />
       </Routes>
-
-      {/* 💬 הודעות toast */}
-      <ToastContainer position="top-center" autoClose={3000} theme="colored" />
-    </div>
+    </AuthProvider>
   );
 }

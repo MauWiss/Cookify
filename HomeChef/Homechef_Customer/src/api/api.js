@@ -8,7 +8,7 @@ const api = axios.create({
   },
 });
 
-// 🔐 הוספת טוקן אוטומטית לכל קריאה
+// Automatically attach token to every request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -19,9 +19,8 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
-export const logoutUser = () => localStorage.removeItem("token");
 
-// 🔷 Recipes API
+// 🔷 Recipes
 export const fetchRecipes = (term, categoryId) => {
   if (term?.trim()) {
     return api.get(`/recipes/search?term=${encodeURIComponent(term)}`);
@@ -34,33 +33,34 @@ export const fetchRecipes = (term, categoryId) => {
 export const fetchRecipeProfile = (recipeId) =>
   api.get(`/recipes/profile/${recipeId}`);
 
-// 🔷 Categories API
+// 🔷 Categories
 export const fetchCategories = () => api.get("/categories");
 
-// 🔷 Favorites API
+// 🔷 Favorites
 export const fetchFavorites = () => api.get("/Favorites/favorites");
 export const addFavorite = (recipeId) =>
   api.post(`/Favorites/${recipeId}/favorite`, {});
 export const removeFavorite = (recipeId) =>
   api.delete(`/Favorites/${recipeId}/favorite`);
 
-// 🔷 Reviews API
+// 🔷 Reviews ✅✅
 export const fetchReviews = (recipeId) => api.get(`/reviews/${recipeId}`);
 export const addReview = (recipeId, reviewText) =>
-  api.post(`/reviews/${recipeId}`, JSON.stringify(reviewText), {
+  api.post(`/reviews/${recipeId}`, reviewText, {
     headers: { "Content-Type": "application/json" },
   });
-
 export const updateReview = (reviewId, reviewText) =>
-  api.put(`/reviews/${reviewId}`, { reviewText });
+  api.put(`/reviews/${reviewId}`, reviewText, {
+    headers: { "Content-Type": "application/json" },
+  });
 export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`);
 
-// 🔷 Ratings API
+// 🔷 Ratings
 export const fetchUserRating = (recipeId) => api.get(`/ratings/${recipeId}/my`);
 export const postRating = (recipeId, rating) =>
   api.post(`/ratings/${recipeId}`, { rating });
 
-// 🔷 My Recipes API
+// 🔷 My Recipes
 export const fetchMyRecipes = () => api.get("/myrecipes/my-recipes");
 export const deleteMyRecipe = (recipeId) =>
   api.delete(`/myrecipes/${recipeId}`);
@@ -68,9 +68,13 @@ export const addMyRecipe = (recipeData) => api.post("/myrecipes", recipeData);
 export const updateMyRecipe = (recipeId, updatedData) =>
   api.put(`/myrecipes/${recipeId}`, updatedData);
 
-// 🔷 Auth API
+// 🔷 Auth
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
 export const registerUser = (userData) => api.post("/auth/register", userData);
+export const logoutUser = () => {
+  localStorage.removeItem("token");
+  delete api.defaults.headers.common["Authorization"];
+};
 
 export default api;

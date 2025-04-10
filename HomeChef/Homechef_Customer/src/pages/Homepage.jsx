@@ -61,18 +61,9 @@ export default function Homepage() {
 
       <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
-      {recipes.length > 0 && (
-        <HeroSection
-          title={recipes[0].title}
-          imageUrl={recipes[0].imageUrl}
-          buttonText="Full Recipe"
-          recipeId = {recipes[0].id} />
-      )}
-
       <hr></hr>
-      <br></br>
-      
-      <CategorySelect 
+
+      <CategorySelect
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
