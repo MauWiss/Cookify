@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
+import { toast } from "react-toastify";
+import { logoutUser } from "../api/api";
 
 export default function Navbar() {
   const location = useLocation();
@@ -16,7 +18,8 @@ export default function Navbar() {
   }, [dark]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
+    logoutUser(); // ✅ clean abstraction
+    toast.info("Logged out successfully 👋");
     navigate("/auth/login");
   };
 
@@ -27,12 +30,10 @@ export default function Navbar() {
 
   return (
     <nav className="flex flex-wrap items-center justify-between bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
-      {/* Logo */}
       <h1 className="text-2xl font-bold tracking-wide text-gray-900 dark:text-white">
         HomeChef 🍳
       </h1>
 
-      {/* Navigation Links */}
       <div className="flex flex-wrap items-center gap-6 text-lg font-medium">
         <Link className={active("/")} to="/">
           Home
@@ -42,14 +43,12 @@ export default function Navbar() {
           <>
             <Link className={active("/favorites")} to="/favorites">
               <div className="flex items-center gap-2">
-                Favorites
-                <FaHeart className="text-red-500" />
+                Favorites <FaHeart className="text-red-500" />
               </div>
             </Link>
             <Link className={active("/my-recipes")} to="/my-recipes">
               <div className="flex items-center gap-2">
-                My Recipes
-                <GiCook className="text-orange-500" />
+                My Recipes <GiCook className="text-orange-500" />
               </div>
             </Link>
           </>
@@ -77,7 +76,6 @@ export default function Navbar() {
           </button>
         )}
 
-        {/* Dark Mode Toggle */}
         <button
           onClick={() => setDark((prev) => !prev)}
           className="text-gray-700 transition hover:text-yellow-400 dark:text-white"
