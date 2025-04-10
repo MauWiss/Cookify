@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../api/api";
 import {
   FaClock,
@@ -20,6 +21,7 @@ export default function Homepage() {
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const token = localStorage.getItem("token");
+  const navigate = useNavigate();
 
   const fetchRecipes = async (term = "", categoryId = null) => {
     setLoading(true);
@@ -148,7 +150,7 @@ export default function Homepage() {
       </div>
 
       <CategorySelect />
-<hr></hr>
+      <hr className="my-6 border-t border-gray-300 dark:border-gray-700" />
 
       {loading ? (
         <div className="flex justify-center">
@@ -157,31 +159,18 @@ export default function Homepage() {
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 m-16 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
               className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
-              {recipe.sourceUrl ? (
-                <a
-                  href={recipe.sourceUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img
-                    src={recipe.imageUrl}
-                    alt={recipe.title}
-                    className="h-48 w-full object-cover transition hover:opacity-90"
-                  />
-                </a>
-              ) : (
-                <img
-                  src={recipe.imageUrl}
-                  alt={recipe.title}
-                  className="h-48 w-full object-cover"
-                />
-              )}
+              <img
+                onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
+                src={recipe.imageUrl}
+                alt={recipe.title}
+                className="h-48 w-full cursor-pointer object-cover transition hover:opacity-90"
+              />
 
               <button
                 onClick={() =>
@@ -189,10 +178,11 @@ export default function Homepage() {
                     ? removeFromFavorites(recipe.recipeId)
                     : addToFavorites(recipe.recipeId)
                 }
-                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${isFavorite(recipe.recipeId)
-                  ? "bg-red-500 text-white hover:bg-red-600"
-                  : "bg-white text-red-500 hover:bg-red-100"
-                  } hover:scale-110`}
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
+                  isFavorite(recipe.recipeId)
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "bg-white text-red-500 hover:bg-red-100"
+                } hover:scale-110`}
               >
                 {isFavorite(recipe.recipeId) ? (
                   <FaHeart size={18} />
@@ -202,7 +192,10 @@ export default function Homepage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold transition hover:text-blue-500 dark:text-white">
+                <h3
+                  onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
+                  className="cursor-pointer text-lg font-semibold transition hover:text-blue-500 dark:text-white"
+                >
                   {recipe.title}
                 </h3>
                 <div className="text-sm text-gray-600 dark:text-gray-400">
