@@ -60,6 +60,9 @@ export const postRating = (recipeId, rating) =>
 export const fetchMyRecipes = () => api.get("/myrecipes/my-recipes");
 export const deleteMyRecipe = (recipeId) =>
   api.delete(`/myrecipes/${recipeId}`);
+export const addMyRecipe = (recipeData) => api.post("/myrecipes", recipeData);
+export const updateMyRecipe = (recipeId, updatedData) =>
+  api.put(`/myrecipes/${recipeId}`, updatedData);
 
 // 🔷 Auth API
 export const loginUser = (email, password) =>
