@@ -1,14 +1,13 @@
 import { useState } from "react";
-import api from "../../api/api";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+import { loginUser } from "../../api/api";
 import { auth } from "./firebase";
-
-// בתוך GoogleLoginButton.jsx
-import LoginWithGoogle from "../../components/LoginWithGoogle";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import api from "../../api/api";
+import LoginWithGoogle from "../../components/LoginWithGoogle";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -18,8 +17,8 @@ export default function LoginPage() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/auth/login", { email, password });
-      localStorage.setItem("token", response.data.token);
+      const res = await loginUser(email, password);
+      localStorage.setItem("token", res.data.token);
       toast.success("Welcome back!");
       setTimeout(() => navigate("/"), 1500);
     } catch {
@@ -28,31 +27,25 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = async () => {
-    const provider = new GoogleAuthProvider();
     try {
+      const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+      const token = await result.user.getIdToken();
 
-      //Get token
-      const idToken = await user.getIdToken();
-
-      //send token to my server
-      const response = await api.post(
+      const res = await api.post(
         "/auth/google",
         {},
         {
-          headers: {
-            Authorization: `Bearer ${idToken}`,
-          },
+          headers: { Authorization: `Bearer ${token}` },
         },
       );
-      console.log("response from server:", response.data);
-      localStorage.setItem("token", response.data.token);
-      toast.success("Welcome back!");
+
+      localStorage.setItem("token", res.data.token);
+      toast.success("Logged in with Google!");
       setTimeout(() => navigate("/"), 1500);
-    } catch (error) {
-      console.error("Google login error:", error);
-      toast.error("Google login failed");
+    } catch (err) {
+      console.error("Google login error:", err);
+      toast.error("Google login failed.");
     }
   };
 
@@ -60,7 +53,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-16 dark:bg-gray-900">
       <ToastContainer position="top-center" />
 
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl transition-all dark:bg-gray-800">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl dark:bg-gray-800">
         <h2 className="mb-6 text-center text-3xl font-extrabold text-gray-800 dark:text-white">
           Login to <span className="text-blue-500">HomeChef 🍳</span>
         </h2>
@@ -71,7 +64,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
             required
           />
           <input
@@ -79,16 +72,17 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
-            className="w-full rounded-lg border border-gray-300 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm transition focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
+            className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
             required
           />
 
           <button
             type="submit"
-            className="w-full rounded-lg bg-blue-600 py-3 font-semibold tracking-wide text-white shadow transition hover:bg-blue-700"
+            className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white shadow transition hover:bg-blue-700"
           >
             Login
           </button>
+
           <LoginWithGoogle onLogin={handleGoogleLogin} />
 
           <p className="pt-2 text-center text-sm text-gray-600 dark:text-gray-400">
