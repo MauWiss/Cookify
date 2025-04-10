@@ -7,6 +7,7 @@ import { addFavorite, removeFavorite } from "../api/api";
 import SearchInput from "../components/SearchInput";
 import CategorySelect from "../components/CategorySelect";
 import { useRecipesData } from "../hooks/useRecipesData";
+import HeroSection from "../components/HeroSection";
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -69,9 +70,9 @@ export default function Homepage() {
       )}
 
       <hr></hr>
+      <br></br>
       
-      
-      <CategorySelect
+      <CategorySelect 
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
