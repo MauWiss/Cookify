@@ -2,19 +2,76 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import api from "../api/api";
+import { toast } from "react-toastify";
+import StarRating from "../components/StarRating";
 
 const RecipeProfilePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [userRating, setUserRating] = useState(null);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   useEffect(() => {
-    api
-      .get(`/recipes/profile/${id}`)
-      .then((res) => setRecipe(res.data))
-      .catch(() => setError("Recipe not found"));
+    const fetchRecipe = async () => {
+      try {
+        const res = await api.get(`/recipes/profile/${id}`);
+        setRecipe(res.data);
+        setAverageRating(res.data.averageRating || 0);
+        setTotalRatings(res.data.totalRatings || 0);
+      } catch {
+        setError("Recipe not found");
+      }
+    };
+
+    const fetchUserRating = async () => {
+      if (!token) return;
+      try {
+        const res = await api.get(`/ratings/${id}/my`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setUserRating(res.data.rating);
+      } catch {}
+    };
+
+    fetchRecipe();
+    fetchUserRating();
   }, [id]);
+
+  const handleRatingChange = async (newRating) => {
+    if (!token) {
+      toast.info("Please login to rate this recipe ⭐");
+      return;
+    }
+
+    try {
+      await api.post(
+        `/ratings/${id}`,
+        { rating: newRating },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        },
+      );
+      toast.success("Rating submitted! 🌟");
+      setUserRating(newRating);
+
+      const updatedTotal = totalRatings + (userRating ? 0 : 1);
+      const updatedAverage = (
+        (averageRating * totalRatings + newRating) /
+        updatedTotal
+      ).toFixed(1);
+
+      setAverageRating(Number(updatedAverage));
+      setTotalRatings(updatedTotal);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit rating.");
+    }
+  };
 
   if (error) {
     return (
@@ -63,23 +120,44 @@ const RecipeProfilePage = () => {
             {recipe.title}
           </h1>
 
+          <div>
+            <StarRating
+              value={userRating || 0}
+              onChange={handleRatingChange}
+              editable={!!token}
+            />
+            {totalRatings > 0 && (
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                {averageRating} ({totalRatings} ratings)
+              </p>
+            )}
+          </div>
+
           <div className="space-y-2 text-gray-700 dark:text-gray-300">
-            <p>
-              <strong>Published by:</strong> {recipe.publisher || "Unknown"}
-            </p>
+            {recipe.publisher && (
+              <p>
+                <strong>Published by:</strong> {recipe.publisher}
+              </p>
+            )}
             <p>
               <strong>Date:</strong>{" "}
               {new Date(recipe.createdAt).toLocaleDateString()}
             </p>
-            <p>
-              <strong>Cuisine:</strong> {recipe.cuisine}
-            </p>
-            <p>
-              <strong>Cooking Time:</strong> {recipe.cookingTime} min
-            </p>
-            <p>
-              <strong>Servings:</strong> {recipe.servings}
-            </p>
+            {recipe.cuisine && (
+              <p>
+                <strong>Cuisine:</strong> {recipe.cuisine}
+              </p>
+            )}
+            {recipe.cookingTime > 0 && (
+              <p>
+                <strong>Cooking Time:</strong> {recipe.cookingTime} min
+              </p>
+            )}
+            {recipe.servings > 0 && (
+              <p>
+                <strong>Servings:</strong> {recipe.servings}
+              </p>
+            )}
           </div>
 
           <div className="mt-4 flex flex-wrap gap-3">
@@ -114,28 +192,28 @@ const RecipeProfilePage = () => {
       </div>
 
       <div className="mt-12 space-y-10">
-        <div className="prose dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold">Summary</h2>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: recipe.summary || "<em>No summary provided.</em>",
-            }}
-          />
-        </div>
+        {recipe.summary && (
+          <div className="prose dark:prose-invert max-w-none">
+            <h2 className="text-2xl font-bold">Summary</h2>
+            <div dangerouslySetInnerHTML={{ __html: recipe.summary }} />
+          </div>
+        )}
 
-        <div className="prose dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold">Instructions</h2>
-          {recipe.instructionsText?.includes("<li>") ? (
-            <div
-              className="space-y-1"
-              dangerouslySetInnerHTML={{ __html: recipe.instructionsText }}
-            />
-          ) : (
-            <pre className="whitespace-pre-wrap rounded-xl bg-gray-100 p-5 text-sm text-gray-800 dark:bg-gray-800 dark:text-gray-100">
-              {recipe.instructionsText}
-            </pre>
-          )}
-        </div>
+        {recipe.instructionsText && (
+          <div className="prose dark:prose-invert max-w-none">
+            <h2 className="text-2xl font-bold">Instructions</h2>
+            {recipe.instructionsText?.includes("<li>") ? (
+              <div
+                className="space-y-1"
+                dangerouslySetInnerHTML={{ __html: recipe.instructionsText }}
+              />
+            ) : (
+              <pre className="whitespace-pre-wrap rounded-xl bg-gray-100 p-5 text-sm text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+                {recipe.instructionsText}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
