@@ -1,73 +1,36 @@
-import { useEffect, useState } from "react";
-import {
-  FaClock,
-  FaUtensils,
-  FaSearch,
-  FaHeart,
-  FaRegHeart,
-} from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { FaClock, FaUtensils, FaHeart, FaRegHeart } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import api from "../api/api";
+import { addFavorite, removeFavorite } from "../api/api";
+import SearchInput from "../components/SearchInput";
+import CategorySelect from "../components/CategorySelect";
+import { useRecipesData } from "../hooks/useRecipesData";
 
 export default function Homepage() {
-  const [recipes, setRecipes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categories, setCategories] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const [favorites, setFavorites] = useState([]);
+  const navigate = useNavigate();
   const token = localStorage.getItem("token");
-  const navigate = useNavigate(); // New navigation
 
-  const fetchRecipes = async (term = "", categoryId = null) => {
-    setLoading(true);
-    try {
-      let endpoint = "";
+  const {
+    recipes,
+    loading,
+    error,
+    categories,
+    favorites,
+    reloadRecipes,
+    reloadFavorites,
+  } = useRecipesData();
 
-      if (term && term.trim() !== "") {
-        endpoint = `/recipes/search?term=${encodeURIComponent(term)}`;
-      } else if (categoryId) {
-        endpoint = `/categories/${categoryId}/recipes`;
-      } else {
-        endpoint = "/recipes/paged?pageNumber=1&pageSize=100";
-      }
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-      const response = await api.get(endpoint);
-      setRecipes(response.data);
-      if (term && response.data.length === 0) {
-        toast.info("No recipes found 🍽️");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Failed to load recipes.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchFavorites = async () => {
-    if (!token) return;
-    try {
-      const res = await api.get("/Favorites/favorites", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setFavorites(res.data.map((fav) => fav.recipeId));
-    } catch (err) {
-      console.error("Failed to fetch favorites", err);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      reloadRecipes(searchTerm, selectedCategoryId);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchTerm, selectedCategoryId]);
 
   const isFavorite = (recipeId) => favorites.includes(recipeId);
 
@@ -76,80 +39,32 @@ export default function Homepage() {
       toast.info("Please login to add/remove favorites ❤️");
       return;
     }
-
     try {
       if (isFavorite(recipeId)) {
-        await api.delete(`/Favorites/${recipeId}/favorite`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setFavorites((prev) => prev.filter((id) => id !== recipeId));
+        await removeFavorite(recipeId);
         toast.success("Removed from favorites 💔");
       } else {
-        await api.post(
-          `/Favorites/${recipeId}/favorite`,
-          {},
-          { headers: { Authorization: `Bearer ${token}` } },
-        );
-        setFavorites((prev) => [...prev, recipeId]);
+        await addFavorite(recipeId);
         toast.success("Added to favorites ❤️");
       }
+      reloadFavorites(); // לרענן את המועדפים
     } catch (err) {
       console.error(err);
       toast.error("Failed to update favorites.");
     }
   };
 
-  useEffect(() => {
-    fetchCategories();
-    fetchRecipes();
-    fetchFavorites();
-  }, []);
-
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchRecipes(
-        searchTerm,
-        searchTerm.trim() === "" ? selectedCategoryId : null,
-      );
-    }, 500);
-    return () => clearTimeout(delay);
-  }, [searchTerm, selectedCategoryId]);
-
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
-      <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-gray-100 p-2 shadow-md dark:bg-gray-800">
-        <input
-          type="text"
-          placeholder="Search for a recipe..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="flex-grow bg-transparent px-4 py-2 text-base font-semibold tracking-wide text-gray-800 placeholder-gray-700 outline-none dark:text-white dark:placeholder-gray-300"
-        />
-        <FaSearch className="mx-3 text-gray-400" />
-      </div>
 
-      <div className="mb-4 text-left">
-        <label className="mr-2 text-lg text-gray-800 dark:text-white">
-          Filter by Category:
-        </label>
-        <select
-          value={selectedCategoryId ?? ""}
-          onChange={(e) =>
-            setSelectedCategoryId(
-              e.target.value ? Number(e.target.value) : null,
-            )
-          }
-          className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
-        >
-          <option value="">All</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.id}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
-      </div>
+      <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+
+      <CategorySelect
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={setSelectedCategoryId}
+      />
 
       {loading ? (
         <div className="flex justify-center">
@@ -165,7 +80,7 @@ export default function Homepage() {
               className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               <img
-                onClick={() => navigate(`/recipes/${recipe.recipeId}`)} // Navigate to recipe profile
+                onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
                 src={recipe.imageUrl}
                 alt={recipe.title}
                 className="h-48 w-full cursor-pointer object-cover transition hover:opacity-90"
