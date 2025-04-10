@@ -146,7 +146,8 @@ export default function Homepage() {
         <HeroSection
           title={recipes[0].title}
           imageUrl={recipes[0].imageUrl}
-          buttonText="Full Recipe" />
+          buttonText="Full Recipe"
+          recipeId = {recipes[0].id} />
       )}
 
       <hr></hr>
