@@ -56,6 +56,11 @@ export const fetchUserRating = (recipeId) => api.get(`/ratings/${recipeId}/my`);
 export const postRating = (recipeId, rating) =>
   api.post(`/ratings/${recipeId}`, { rating });
 
+// 🔷 My Recipes API
+export const fetchMyRecipes = () => api.get("/myrecipes/my-recipes");
+export const deleteMyRecipe = (recipeId) =>
+  api.delete(`/myrecipes/${recipeId}`);
+
 // 🔷 Auth API
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
