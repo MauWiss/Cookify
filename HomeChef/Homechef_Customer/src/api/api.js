@@ -47,7 +47,10 @@ export const removeFavorite = (recipeId) =>
 // 🔷 Reviews API
 export const fetchReviews = (recipeId) => api.get(`/reviews/${recipeId}`);
 export const addReview = (recipeId, reviewText) =>
-  api.post(`/reviews/${recipeId}`, { reviewText });
+  api.post(`/reviews/${recipeId}`, JSON.stringify(reviewText), {
+    headers: { "Content-Type": "application/json" },
+  });
+
 export const updateReview = (reviewId, reviewText) =>
   api.put(`/reviews/${reviewId}`, { reviewText });
 export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`);
