@@ -158,24 +158,24 @@ namespace HomeChefServer.Controllers
             return Ok(recipe);
         }
 
-        //[HttpGet("profile/{id}")]
-        //public async Task<IActionResult> GetRecipeProfile(int id)
-        //{
-        //    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        [HttpGet("profile/{id}")]
+        public async Task<IActionResult> GetRecipeProfile(int id)
+        {
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
 
-        //    var parameters = new { Id = id };
+            var parameters = new { Id = id };
 
-        //    var recipe = await conn.QueryFirstOrDefaultAsync<RecipeProfileDTO>(
-        //        "sp_GetRecipeProfileById",
-        //        parameters,
-        //        commandType: CommandType.StoredProcedure
-        //    );
+            var recipe = await conn.QueryFirstOrDefaultAsync<RecipeProfileDTO>(
+                "sp_GetRecipeProfileById",
+                parameters,
+                commandType: CommandType.StoredProcedure
+            );
 
-        //    if (recipe == null)
-        //        return NotFound();
+            if (recipe == null)
+                return NotFound();
 
-        //    return Ok(recipe);
-        //}
+            return Ok(recipe);
+        }
 
 
 
