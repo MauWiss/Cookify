@@ -6,8 +6,9 @@ import RegisterPage from "./pages/Auth/RegisterPage";
 import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
 import MyRecipesPage from "./pages/PrivateUserPages/MyRecipes/MyRecipesPage";
 import PrivateRoute from "./components/PrivateRoute";
-import useNotifications from "./hooks/useNotifications"; // ודא שהקובץ הזה קיים
-
+import useNotifications from "./hooks/useNotifications"; // ודא שהקובץ
+//הזה קיים
+import RecipeProfilePage from "./pages/RecipeProfilePage"; // ייבוא חדש
 
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -24,6 +25,7 @@ export default function App() {
         <Route path="/" element={<Homepage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
+        <Route path="/recipes/:id" element={<RecipeProfilePage />} />
 
         <Route
           path="/favorites"
