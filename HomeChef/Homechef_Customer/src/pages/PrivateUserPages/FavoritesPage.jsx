@@ -9,7 +9,6 @@ import CategorySelect from "../../components/CategorySelect";
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const token = localStorage.getItem("token");
 
@@ -29,15 +28,6 @@ export default function FavoritesPage() {
       toast.error("Something went wrong while loading your favorites.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
     }
   };
 

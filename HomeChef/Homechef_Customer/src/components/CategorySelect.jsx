@@ -22,16 +22,16 @@ const CategorySelect = () => {
   }, []);
 
   return (
-    <div className="mb-4 text-left">
+    <div className="mx-auto my-8 max-w-6xl rounded-xl bg-gray-100 px-6 py-4 shadow-sm dark:bg-gray-800">
       <label
         htmlFor="category"
-        className="mb-1 block text-sm font-medium text-gray-800 dark:text-white"
+        className="block text-lg font-semibold text-gray-700 dark:text-white mb-2"
       >
         Filter by Category:
       </label>
       <select
         id="category"
-        value={selectedCategoryId}
+        value={selectedCategoryId ?? ""}
         onChange={(e) => setSelectedCategoryId(e.target.value)}
         className="w-relative rounded-md border border-gray-300 bg-white px-4 py-2 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-600 dark:bg-gray-800 dark:text-white"
       >

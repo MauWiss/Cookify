@@ -10,13 +10,13 @@ import {
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import CategorySelect from "../components/CategorySelect";
+import HeroSection from "../components/HeroSection";
 
 export default function Homepage() {
   const [recipes, setRecipes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
   const [favorites, setFavorites] = useState([]);
   const token = localStorage.getItem("token");
@@ -59,14 +59,7 @@ export default function Homepage() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
+
 
   const isFavorite = (recipeId) => favorites.includes(recipeId);
 
@@ -147,8 +140,16 @@ export default function Homepage() {
         <FaSearch className="mx-3 text-gray-400" />
       </div>
 
+      {recipes.length > 0 && (
+        <HeroSection
+          title={recipes[0].title}
+          imageUrl={recipes[0].imageUrl}
+          buttonText="Full Recipe" />
+      )}
+
+      <hr></hr>
       <CategorySelect />
-<hr></hr>
+      
 
       {loading ? (
         <div className="flex justify-center">

@@ -8,7 +8,6 @@ import CategorySelect from "../../../components/CategorySelect";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [selectedCategoryId, setSelectedCategoryId] = useState("");
   const [loading, setLoading] = useState(true);
   const [editingRecipeId, setEditingRecipeId] = useState(null);
@@ -25,14 +24,6 @@ export default function MyRecipesPage() {
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const res = await api.get("/categories");
-      setCategories(res.data);
-    } catch (err) {
-      console.error("Failed to fetch categories", err);
-    }
-  };
 
   const handleDelete = async (recipeId) => {
     const result = await Swal.fire({
