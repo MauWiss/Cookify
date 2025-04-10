@@ -1,22 +1,29 @@
 import { useState } from "react";
-import api from "../../api/api";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { registerUser } from "../../api/api";
 
 export default function RegisterPage() {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    username: "",
+    email: "",
+    password: "",
+  });
   const navigate = useNavigate();
 
-  const handleRegister = async (e) => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/auth/register", {
-        username,
-        email,
-        passwordHash: password,
+      const response = await registerUser({
+        username: formData.username,
+        email: formData.email,
+        passwordHash: formData.password,
       });
 
       localStorage.setItem("token", response.data.token);
@@ -37,37 +44,24 @@ export default function RegisterPage() {
           Create Your <span className="text-blue-500">HomeChef 🍳</span> Account
         </h2>
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <div>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {[
+            { name: "username", type: "text", placeholder: "Username" },
+            { name: "email", type: "email", placeholder: "Email" },
+            { name: "password", type: "password", placeholder: "Password" },
+          ].map(({ name, type, placeholder }) => (
             <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder="Username"
+              key={name}
+              name={name}
+              type={type}
+              value={formData[name]}
+              onChange={handleChange}
+              placeholder={placeholder}
               className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
               required
             />
-          </div>
-          <div>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Email"
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Password"
-              className="w-full rounded-lg border border-gray-300 bg-gray-50 px-4 py-3 text-gray-800 placeholder-gray-500 shadow-sm focus:border-blue-500 focus:outline-none dark:border-gray-700 dark:bg-gray-700 dark:text-white"
-              required
-            />
-          </div>
+          ))}
+
           <button
             type="submit"
             className="w-full rounded-lg bg-blue-600 py-3 font-semibold text-white shadow transition hover:bg-blue-700"
