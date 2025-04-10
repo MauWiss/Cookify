@@ -1,20 +1,70 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import api from "../api/api";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+import StarRating from "../components/StarRating";
+import { fetchRecipeProfile, fetchUserRating, postRating } from "../api/api";
 
 const RecipeProfilePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
+
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
-  const navigate = useNavigate();
+  const [userRating, setUserRating] = useState(0);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalRatings, setTotalRatings] = useState(0);
 
   useEffect(() => {
-    api
-      .get(`/recipes/profile/${id}`)
-      .then((res) => setRecipe(res.data))
-      .catch(() => setError("Recipe not found"));
-  }, [id]);
+    const loadData = async () => {
+      try {
+        const [recipeRes, ratingRes] = await Promise.all([
+          fetchRecipeProfile(id),
+          token
+            ? fetchUserRating(id)
+            : Promise.resolve({ data: { rating: 0 } }),
+        ]);
+
+        setRecipe(recipeRes.data);
+        setAverageRating(Number(recipeRes.data.averageRating || 0));
+        setTotalRatings(Number(recipeRes.data.totalRatings || 0));
+        setUserRating(Number(ratingRes.data?.rating ?? 0));
+      } catch (err) {
+        console.error(err);
+        setError("Recipe not found");
+      }
+    };
+
+    loadData();
+  }, [id, token]);
+
+  const handleRatingChange = async (newRating) => {
+    if (!token) {
+      toast.info("Please login to rate this recipe ⭐");
+      return;
+    }
+
+    try {
+      await postRating(id, newRating);
+      toast.success("Rating submitted! 🌟");
+      setUserRating(newRating);
+
+      const updatedTotal = totalRatings + (userRating ? 0 : 1);
+      const updatedAverage = (
+        (averageRating * totalRatings + newRating) /
+        updatedTotal
+      ).toFixed(1);
+
+      setAverageRating(Number(updatedAverage));
+      setTotalRatings(updatedTotal);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to submit rating.");
+    }
+  };
 
   if (error) {
     return (
@@ -41,6 +91,8 @@ const RecipeProfilePage = () => {
 
   return (
     <div className="mx-auto mt-12 max-w-6xl rounded-3xl bg-white px-8 py-10 shadow-2xl dark:bg-gray-900 dark:shadow-gray-800">
+      <ToastContainer />
+
       <button
         onClick={() => navigate(-1)}
         className="mb-6 inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-gray-200 to-gray-300 px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:from-gray-300 hover:to-gray-400 dark:from-gray-700 dark:to-gray-800 dark:text-white dark:hover:from-gray-600"
@@ -63,23 +115,44 @@ const RecipeProfilePage = () => {
             {recipe.title}
           </h1>
 
-          <div className="space-y-2 text-gray-700 dark:text-gray-300">
-            <p>
-              <strong>Published by:</strong> {recipe.publisher || "Unknown"}
+          <div>
+            <StarRating
+              value={userRating}
+              onChange={handleRatingChange}
+              editable={!!token}
+            />
+            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              {totalRatings > 0
+                ? `${averageRating} (${totalRatings} ratings)`
+                : "No ratings yet"}
             </p>
+          </div>
+
+          <div className="space-y-2 text-gray-700 dark:text-gray-300">
+            {recipe.publisher && (
+              <p>
+                <strong>Published by:</strong> {recipe.publisher}
+              </p>
+            )}
             <p>
               <strong>Date:</strong>{" "}
               {new Date(recipe.createdAt).toLocaleDateString()}
             </p>
-            <p>
-              <strong>Cuisine:</strong> {recipe.cuisine}
-            </p>
-            <p>
-              <strong>Cooking Time:</strong> {recipe.cookingTime} min
-            </p>
-            <p>
-              <strong>Servings:</strong> {recipe.servings}
-            </p>
+            {recipe.cuisine && (
+              <p>
+                <strong>Cuisine:</strong> {recipe.cuisine}
+              </p>
+            )}
+            {recipe.cookingTime > 0 && (
+              <p>
+                <strong>Cooking Time:</strong> {recipe.cookingTime} min
+              </p>
+            )}
+            {recipe.servings > 0 && (
+              <p>
+                <strong>Servings:</strong> {recipe.servings}
+              </p>
+            )}
           </div>
 
           <div className="mt-4 flex flex-wrap gap-3">
@@ -114,28 +187,28 @@ const RecipeProfilePage = () => {
       </div>
 
       <div className="mt-12 space-y-10">
-        <div className="prose dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold">Summary</h2>
-          <div
-            dangerouslySetInnerHTML={{
-              __html: recipe.summary || "<em>No summary provided.</em>",
-            }}
-          />
-        </div>
+        {recipe.summary && (
+          <div className="prose dark:prose-invert max-w-none">
+            <h2 className="text-2xl font-bold">Summary</h2>
+            <div dangerouslySetInnerHTML={{ __html: recipe.summary }} />
+          </div>
+        )}
 
-        <div className="prose dark:prose-invert max-w-none">
-          <h2 className="text-2xl font-bold">Instructions</h2>
-          {recipe.instructionsText?.includes("<li>") ? (
-            <div
-              className="space-y-1"
-              dangerouslySetInnerHTML={{ __html: recipe.instructionsText }}
-            />
-          ) : (
-            <pre className="whitespace-pre-wrap rounded-xl bg-gray-100 p-5 text-sm text-gray-800 dark:bg-gray-800 dark:text-gray-100">
-              {recipe.instructionsText}
-            </pre>
-          )}
-        </div>
+        {recipe.instructionsText && (
+          <div className="prose dark:prose-invert max-w-none">
+            <h2 className="text-2xl font-bold">Instructions</h2>
+            {recipe.instructionsText.includes("<li>") ? (
+              <div
+                className="space-y-1"
+                dangerouslySetInnerHTML={{ __html: recipe.instructionsText }}
+              />
+            ) : (
+              <pre className="whitespace-pre-wrap rounded-xl bg-gray-100 p-5 text-sm text-gray-800 dark:bg-gray-800 dark:text-gray-100">
+                {recipe.instructionsText}
+              </pre>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

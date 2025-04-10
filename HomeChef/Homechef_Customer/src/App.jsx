@@ -4,7 +4,7 @@ import Navbar from "./components/Navbar";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
 import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
-import MyRecipesPage from "./pages/PrivateUserPages/MyRecipes/MyRecipesPage";
+import MyRecipesPage from "./pages/PrivateUserPages/MyRecipesPage";
 import PrivateRoute from "./components/PrivateRoute";
 import useNotifications from "./hooks/useNotifications"; // ודא שהקובץ
 //הזה קיים

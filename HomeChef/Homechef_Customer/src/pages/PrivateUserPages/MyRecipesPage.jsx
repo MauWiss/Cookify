@@ -1,29 +1,26 @@
-import { useEffect, useState } from "react";
-import api from "../../../api/api";
+import { useState } from "react";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
-import AddRecipeModal from "../../../components/AddRecipeModal";
-import EditRecipeModal from "../../../components/EditRecipeModal";
-import CategorySelect from "../../../components/CategorySelect";
+import CategorySelect from "../../components/CategorySelect";
+import SearchInput from "../../components/SearchInput";
+import AddRecipeModal from "../../components/AddRecipeModal";
+import EditRecipeModal from "../../components/EditRecipeModal";
+import { useMyRecipesData } from "../../hooks/useMyRecipesData";
 
 export default function MyRecipesPage() {
-  const [recipes, setRecipes] = useState([]);
-  const [selectedCategoryId, setSelectedCategoryId] = useState("");
-  const [loading, setLoading] = useState(true);
   const [editingRecipeId, setEditingRecipeId] = useState(null);
 
-  const fetchRecipes = async () => {
-    setLoading(true);
-    try {
-      const res = await api.get("/MyRecipes/my-recipes");
-      setRecipes(res.data);
-    } catch (err) {
-      console.error("Failed to load recipes", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
+  const {
+    recipes,
+    loading,
+    categories,
+    selectedCategoryId,
+    setSelectedCategoryId,
+    searchTerm,
+    setSearchTerm,
+    removeRecipe,
+    reloadRecipes,
+  } = useMyRecipesData();
 
   const handleDelete = async (recipeId) => {
     const result = await Swal.fire({
@@ -39,22 +36,13 @@ export default function MyRecipesPage() {
     if (!result.isConfirmed) return;
 
     try {
-      await api.delete(`/myrecipes/${recipeId}`);
-      setRecipes((prev) => prev.filter((r) => r.recipeId !== recipeId));
+      await removeRecipe(recipeId);
       Swal.fire("Deleted!", "Your recipe has been deleted.", "success");
     } catch (err) {
       console.error("Failed to delete", err);
       Swal.fire("Error", "Something went wrong.", "error");
     }
   };
-
-  useEffect(() => {
-    fetchRecipes();
-  }, []);
-
-  const filteredRecipes = selectedCategoryId
-    ? recipes.filter((r) => r.categoryName === selectedCategoryId)
-    : recipes;
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
@@ -63,21 +51,29 @@ export default function MyRecipesPage() {
       </h2>
 
       <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-end">
-        <AddRecipeModal onRecipeAdded={fetchRecipes} />
-        <CategorySelect/>
+        <AddRecipeModal onRecipeAdded={reloadRecipes} />
+        <SearchInput
+          searchTerm={searchTerm}
+          onSearchTermChange={setSearchTerm}
+        />
+        <CategorySelect
+          categories={categories}
+          selectedCategoryId={selectedCategoryId}
+          onSelectCategory={setSelectedCategoryId}
+        />
       </div>
 
       {loading ? (
         <div className="text-center text-gray-500 dark:text-gray-300">
           Loading...
         </div>
-      ) : filteredRecipes.length === 0 ? (
+      ) : recipes.length === 0 ? (
         <div className="text-center text-gray-500 dark:text-gray-300">
           No recipes found.
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
-          {filteredRecipes.map((recipe) => (
+          {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
               className="relative overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg dark:bg-gray-800"
@@ -133,13 +129,12 @@ export default function MyRecipesPage() {
         </div>
       )}
 
-      {/* 🔧 Edit Modal */}
       {editingRecipeId && (
         <EditRecipeModal
           recipeId={editingRecipeId}
           onClose={() => setEditingRecipeId(null)}
           onRecipeUpdated={() => {
-            fetchRecipes();
+            reloadRecipes();
             setTimeout(() => setEditingRecipeId(null), 50);
           }}
         />
