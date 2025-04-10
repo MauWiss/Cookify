@@ -19,6 +19,7 @@ api.interceptors.request.use(
   },
   (error) => Promise.reject(error),
 );
+export const logoutUser = () => localStorage.removeItem("token");
 
 // 🔷 Recipes API
 export const fetchRecipes = (term, categoryId) => {
