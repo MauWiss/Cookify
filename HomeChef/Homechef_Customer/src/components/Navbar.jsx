@@ -4,13 +4,12 @@ import { Moon, Sun, LogOut } from "lucide-react";
 import { FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { toast } from "react-toastify";
-import { logoutUser } from "../api/api";
-
+import { useAuth } from "../pages/Auth/AuthContext";
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { token, logout } = useAuth(); // ✅
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
-  const token = localStorage.getItem("token");
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -18,8 +17,8 @@ export default function Navbar() {
   }, [dark]);
 
   const handleLogout = () => {
-    logoutUser(); // ✅ clean abstraction
-    toast.info("Logged out successfully 👋");
+    logout(); // ✅ updates context + removes token
+    toast.success("Logged out successfully 👋");
     navigate("/auth/login");
   };
 
