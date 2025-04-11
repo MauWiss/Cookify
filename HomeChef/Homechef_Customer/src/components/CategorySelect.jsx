@@ -1,27 +1,49 @@
+import '../index.css';
+
 export default function CategorySelect({
   categories,
   selectedCategoryId,
   onSelectCategory,
 }) {
   return (
-    <div className="mb-4 text-left">
-      <label className="mr-2 text-lg text-gray-800 dark:text-white">
-        Filter by Category:
-      </label>
-      <select
-        value={selectedCategoryId ?? ""}
-        onChange={(e) =>
-          onSelectCategory(e.target.value ? Number(e.target.value) : null)
-        }
-        className="rounded-lg border bg-white px-4 py-2 dark:border-white dark:bg-gray-700 dark:text-white"
+    <div className="flex flex-wrap justify-center gap-6 mt-10">
+      {/* כפתור 'All' */}
+      <div
+        onClick={() => onSelectCategory(null)}
+        className="flex flex-col items-center cursor-pointer transition transform hover:scale-105" 
       >
-        <option value="">All</option>
-        {categories.map((cat) => (
-          <option key={cat.id} value={cat.id}>
+        <div className={`w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center text-lg font-bold text-white shadow-md ${
+          selectedCategoryId === null ? "ring-2 ring-blue-300" : ""
+        }`}>
+          All
+        </div>
+        <span className="mt-2 text-sm font-semibold text-gray-700 dark:text-white">
+          All
+        </span>
+      </div>
+
+      {categories.map((cat) => (
+        <div
+          key={cat.id}
+          onClick={() => onSelectCategory(cat.id)}
+          className={`flex flex-col items-center cursor-pointer transition transform hover:scale-105 
+          }`}
+        >
+          <img
+            src={"cat.imageUrl"}
+            alt={cat.name}
+            className={`w-16 h-16 rounded-full object-cover shadow-md ${
+            selectedCategoryId === cat.id ? "ring-2 ring-blue-300" : ""
+          }`}
+          />
+          <span className="mt-2 text-sm font-semibold text-gray-700 dark:text-white">
             {cat.name}
-          </option>
-        ))}
-      </select>
+          </span>
+        </div>
+        
+      ))}
+      
     </div>
+
   );
 }
