@@ -1,90 +1,160 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using HomeChef.Server.Models.DTOs;
+using HomeChefServer.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
-using System.Security.Claims;
+using System.Text.Json;
 
-namespace HomeChefServer.Controllers
+[Route("api/[controller]")]
+[ApiController]
+public class RatingsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RatingsController : ControllerBase
+    private readonly IConfiguration _configuration;
+
+    public RatingsController(IConfiguration configuration)
     {
-        private readonly IConfiguration _configuration;
+        _configuration = configuration;
+    }
 
-        public RatingsController(IConfiguration configuration)
+    // הוספת דירוג למתכון
+    [HttpPost]
+    public async Task<ActionResult> AddRating([FromBody] RatingDTO ratingDto)
+    {
+        // בדיקה אם המשתמש מחובר
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+        if (userIdClaim == null)
         {
-            _configuration = configuration;
+            return Unauthorized("User not logged in.");
         }
 
-        [Authorize]
-        [HttpPost("{recipeId}")]
-        public IActionResult PostRating(int recipeId, [FromBody] int rating)
+        // קבלת מזהה המשתמש מה-Claim
+        int userId = int.Parse(userIdClaim.Value);
+        ratingDto.UserId = userId;
+
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        using var cmd = new SqlCommand("sp_AddRecipeRating", conn)
         {
-            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
+        cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
+        cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
 
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            using var cmd = new SqlCommand("sp_AddOrUpdateRating", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@RecipeId", recipeId);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@Rating", rating);
+        await cmd.ExecuteNonQueryAsync();
 
-            conn.Open();
-            cmd.ExecuteNonQuery();
-            return Ok("Rating saved");
+        // חישוב ממוצע הדירוגים והעדכון בטבלת המתכונים
+        await UpdateRecipeRating(ratingDto.RecipeId);
+
+        return Ok();
+    }
+
+    // עדכון דירוג למתכון
+    [HttpPut]
+    public async Task<ActionResult> UpdateRating([FromBody] RatingDTO ratingDto)
+    {
+        // בדיקה אם המשתמש מחובר
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+        if (userIdClaim == null)
+        {
+            return Unauthorized("User not logged in.");
         }
 
-        [HttpGet("{recipeId}/average")]
-        public IActionResult GetAverageRating(int recipeId)
+        // קבלת מזהה המשתמש מה-Claim
+        int userId = int.Parse(userIdClaim.Value);
+        ratingDto.UserId = userId;
+
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        using var cmd = new SqlCommand("sp_UpdateRecipeRating", conn)
         {
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            using var cmd = new SqlCommand("sp_GetAverageRating", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
+        cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
+        cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
 
-            conn.Open();
-            using var reader = cmd.ExecuteReader();
-            if (reader.Read())
-            {
-                return Ok(new
-                {
-                    RecipeId = recipeId,
-                    AverageRating = reader.GetDouble(1),
-                    TotalRatings = reader.GetInt32(2)
-                });
-            }
+        await cmd.ExecuteNonQueryAsync();
 
-            return Ok(new { RecipeId = recipeId, AverageRating = 0.0, TotalRatings = 0 });
+        // חישוב ממוצע הדירוגים והעדכון בטבלת המתכונים
+        await UpdateRecipeRating(ratingDto.RecipeId);
+
+        return Ok();
+    }
+
+    // מחיקת דירוג למתכון
+    [HttpDelete]
+    public async Task<ActionResult> DeleteRating([FromBody] RatingDTO ratingDto)
+    {
+        // בדיקה אם המשתמש מחובר
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+        if (userIdClaim == null)
+        {
+            return Unauthorized("User not logged in.");
         }
 
-        [Authorize]
-        [HttpGet("{recipeId}/my")]
-        public IActionResult GetUserRating(int recipeId)
+        // קבלת מזהה המשתמש מה-Claim
+        int userId = int.Parse(userIdClaim.Value);
+        ratingDto.UserId = userId;
+
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        using var cmd = new SqlCommand("sp_DeleteRecipeRating", conn)
         {
-            try
-            {
-                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "0");
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
+        cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
 
-                using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-                using var cmd = new SqlCommand("sp_GetUserRatingForRecipe", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@RecipeId", recipeId);
-                cmd.Parameters.AddWithValue("@UserId", userId);
+        await cmd.ExecuteNonQueryAsync();
 
-                conn.Open();
-                var result = cmd.ExecuteScalar();
+        // חישוב ממוצע הדירוגים והעדכון בטבלת המתכונים
+        await UpdateRecipeRating(ratingDto.RecipeId);
 
-                if (result != null && result != DBNull.Value)
-                    return Ok(new { rating = Convert.ToInt32(result) });
+        return Ok();
+    }
 
-                return Ok(new { rating = 0 });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Server error: {ex.Message}");
-            }
+    // שליפת דירוג ממוצע ומספר הדירוגים
+    [HttpGet("{recipeId}")]
+    public async Task<ActionResult<RatingDTO>> GetRatingDetails(int recipeId)
+    {
+        var rating = new RatingDTO();
+
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        using var cmd = new SqlCommand("sp_GetRecipeRatingDetails", conn)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+        using var reader = await cmd.ExecuteReaderAsync();
+        if (await reader.ReadAsync())
+        {
+            rating.AverageRating = reader["AverageRating"] != DBNull.Value ? (double?)reader["AverageRating"] : null;
+            rating.RatingCount = (int)reader["RatingCount"];
         }
 
+        return Ok(rating);
+    }
+
+    // פונקציה לעדכון דירוג ממוצע ומספר הדירוגים בטבלת המתכון
+    private async Task UpdateRecipeRating(int recipeId)
+    {
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        // חישוב ממוצע הדירוגים
+        using var cmd = new SqlCommand("sp_UpdateRecipeRating", conn)
+        {
+            CommandType = CommandType.StoredProcedure
+        };
+        cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+
+        await cmd.ExecuteNonQueryAsync();
     }
 }

@@ -17,16 +17,15 @@ namespace HomeChefServer.Controllers
         {
             _configuration = configuration;
         }
-
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
+        [HttpGet("all")]
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetAllRecipes()
         {
-            var categories = new List<CategoryDTO>();
+            var recipes = new List<RecipeDTO>();
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using var cmd = new SqlCommand("sp_GetAllCategories", conn)
+            using var cmd = new SqlCommand("sp_GetAllRecipes", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
@@ -34,15 +33,59 @@ namespace HomeChefServer.Controllers
             using var reader = await cmd.ExecuteReaderAsync();
             while (await reader.ReadAsync())
             {
-                categories.Add(new CategoryDTO
+                recipes.Add(new RecipeDTO
                 {
-                    Id = (int)reader["Id"],
-                    Name = reader["Name"].ToString()
+                    RecipeId = (int)reader["Id"],
+                    Title = reader["Title"].ToString(),
+                    ImageUrl = reader["ImageUrl"].ToString(),
+                    SourceUrl = reader["SourceUrl"].ToString(),
+                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0,
+                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                    
                 });
             }
 
-            return Ok(categories);
+            return Ok(recipes);
         }
+
+
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<CategoryDTO>>> GetCategories()
+        {
+            try
+            {
+                var categories = new List<CategoryDTO>();
+
+                using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+                await conn.OpenAsync();
+
+                using var cmd = new SqlCommand("sp_GetAllCategories", conn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
+
+                using var reader = await cmd.ExecuteReaderAsync();
+                while (await reader.ReadAsync())
+                {
+                    categories.Add(new CategoryDTO
+                    {
+                        Id = (int)reader["Id"],
+                        Name = reader["Name"].ToString(),
+                        ImageUrl = reader["ImageUrl"].ToString(),
+                        RecipeCount = (int)reader["RecipeCount"]  // אם זה הוספת מספר המתכונים
+                    });
+                }
+
+                return Ok(categories);
+            }
+            catch (Exception ex)
+            {
+                // הדפסת שגיאה ל-logs
+                Console.Error.WriteLine($"Error occurred while fetching categories: {ex.Message}");
+                return StatusCode(500, "Internal server error. Please try again later.");
+            }
+        }
+
         [HttpGet("{id}/recipes")]
         public async Task<IActionResult> GetRecipesByCategory(int id)
         {
@@ -114,8 +157,5 @@ namespace HomeChefServer.Controllers
 
             return Ok(recipes);
         }
-
-
-
     }
 }

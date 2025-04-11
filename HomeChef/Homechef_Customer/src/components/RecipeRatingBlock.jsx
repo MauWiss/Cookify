@@ -1,25 +1,31 @@
-// ✅ components/RecipeRatingBlock.jsx
-
 import React from "react";
-import StarRating from "./StarRating";
+import ReactStars from "react-rating-stars-component";
+import { toast } from "react-toastify";
 
-const RecipeRatingBlock = ({
-  userRating,
-  averageRating,
-  totalRatings,
-  editable,
-  onChange,
-}) => {
+const StarRating = ({ value = 0, onChange = () => {}, editable = true }) => {
+  const token = localStorage.getItem("token");
+
+  const handleChange = (newValue) => {
+    if (!token) {
+      toast.info("Please login to rate ⭐");
+      return;
+    }
+    onChange(newValue);
+  };
+
   return (
-    <div className="my-6">
-      <StarRating value={userRating} onChange={onChange} editable={editable} />
-      <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-        {totalRatings > 0
-          ? `${averageRating} (${totalRatings} ratings)`
-          : "No ratings yet"}
-      </p>
+    <div className="flex flex-col items-start text-yellow-500">
+      <ReactStars
+        count={5}
+        value={value}
+        onChange={handleChange}
+        size={28}
+        isHalf={true}
+        edit={editable}
+        activeColor="#facc15"
+      />
     </div>
   );
 };
 
-export default RecipeRatingBlock;
+export default StarRating;

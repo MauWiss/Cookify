@@ -2,16 +2,15 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://localhost:7019/api",
-  // baseURL: "https://homechefserver.azurewebsites.net/api",
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Automatically attach token to every request
+// אוטומטית מצרף את ה-token לכל בקשה
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
+    const token = localStorage.getItem("token"); // אם יש לך Token ב-localStorage
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -35,6 +34,7 @@ export const fetchRecipeProfile = (recipeId) =>
 
 // 🔷 Categories
 export const fetchCategories = () => api.get("/categories");
+export const fetchAllRecipes = () => api.get("/recipes/all"); // שליפה של כל המתכונים
 
 // 🔷 Favorites
 export const fetchFavorites = () => api.get("/Favorites/favorites");
@@ -54,11 +54,31 @@ export const updateReview = (reviewId, reviewText) =>
     headers: { "Content-Type": "application/json" },
   });
 export const deleteReview = (reviewId) => api.delete(`/reviews/${reviewId}`);
-
 // 🔷 Ratings
-export const fetchUserRating = (recipeId) => api.get(`/ratings/${recipeId}/my`);
-export const postRating = (recipeId, rating) =>
-  api.post(`/ratings/${recipeId}`, { rating });
+// הוספת דירוג למתכון
+export const postRating = (recipeId, rating) => {
+  return api.post(`/ratings`, { recipeId, rating });
+};
+
+// עדכון דירוג למתכון
+export const updateRating = (recipeId, rating) => {
+  return api.put(`/ratings`, { recipeId, rating });
+};
+
+// מחיקת דירוג למתכון
+export const deleteRating = (recipeId) => {
+  return api.delete(`/ratings`, { data: { recipeId } });
+};
+
+// שליפת דירוג ממוצע ומספר הדירוגים של מתכון
+export const getRatingDetails = (recipeId) => {
+  return api.get(`/ratings/${recipeId}`);
+};
+
+// שליפת דירוג המשתמש עבור מתכון ספציפי
+export const fetchUserRating = (recipeId) => {
+  return api.get(`/ratings/${recipeId}/my`);
+};
 
 // 🔷 My Recipes
 export const fetchMyRecipes = () => api.get("/myrecipes/my-recipes");
@@ -85,14 +105,13 @@ export const uploadBase64Image = (file) => {
 };
 
 // 🔷 Auth
-// 🔷 Auth
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
 
 export const registerUser = (userData) => api.post("/auth/register", userData);
 
 export const deleteRecipe = (id) => {
-  return api.delete(`/admin/${id}`);  
+  return api.delete(`/admin/${id}`);
 };
 
 export default api;

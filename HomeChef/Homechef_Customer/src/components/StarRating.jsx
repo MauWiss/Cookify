@@ -1,17 +1,8 @@
-// ✅ components/StarRating.jsx
-
 import React from "react";
 import ReactStars from "react-rating-stars-component";
-import { toast } from "react-toastify";
 
 const StarRating = ({ value = 0, onChange = () => {}, editable = true }) => {
-  const token = localStorage.getItem("token");
-
   const handleChange = (newValue) => {
-    if (!token) {
-      toast.info("Please login to rate ⭐");
-      return;
-    }
     onChange(newValue);
   };
 
