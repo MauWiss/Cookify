@@ -24,7 +24,7 @@ export default function Homepage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-
+  const categoryCounts = recipes.length
   useEffect(() => {
     const delay = setTimeout(() => {
       reloadRecipes(searchTerm, selectedCategoryId);
@@ -54,6 +54,10 @@ export default function Homepage() {
     }
   };
 
+  const selectedCategory = categories.find(
+    (cat) => cat.id === selectedCategoryId
+  );
+
   return (
     <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
       <ToastContainer />
@@ -66,6 +70,7 @@ export default function Homepage() {
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
+        categoryCounts={categoryCounts}
       />
 
       {loading ? (
@@ -89,11 +94,10 @@ export default function Homepage() {
               />
               <button
                 onClick={() => handleFavorite(recipe.recipeId)}
-                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
-                  isFavorite(recipe.recipeId)
-                    ? "bg-red-500 text-white hover:bg-red-600"
-                    : "bg-white text-red-500 hover:bg-red-100"
-                } hover:scale-110`}
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${isFavorite(recipe.recipeId)
+                  ? "bg-red-500 text-white hover:bg-red-600"
+                  : "bg-white text-red-500 hover:bg-red-100"
+                  } hover:scale-110`}
               >
                 {isFavorite(recipe.recipeId) ? (
                   <FaHeart size={18} />
