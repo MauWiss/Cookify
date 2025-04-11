@@ -5,6 +5,7 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [role, setRole] = useState(localStorage.getItem("role"))
 
   useEffect(() => {
     // Optional: react to changes from other tabs
@@ -13,18 +14,23 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", syncToken);
   }, []);
 
-  const login = (newToken) => {
+  const login = (newToken, newRole) => {
     localStorage.setItem("token", newToken);
+    localStorage.setItem("role", newRole);
     setToken(newToken);
+    setRole(newRole);
+    console.log("role")
   };
-
+  
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setToken(null);
+    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, login, logout }}>
+    <AuthContext.Provider value={{ token, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

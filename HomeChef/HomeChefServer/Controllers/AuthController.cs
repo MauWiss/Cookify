@@ -9,6 +9,7 @@ using Microsoft.Win32;
 using FirebaseAdmin.Auth;
 using NuGet.Protocol.Plugins;
 using HomeChef.Server.Models;
+using NuGet.Common;
 
 
 namespace HomeChefServer.Controllers
@@ -35,6 +36,8 @@ namespace HomeChefServer.Controllers
             return Convert.ToBase64String(hash);
         }
 
+        
+
         // התחברות
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLoginDTO login)
@@ -51,7 +54,19 @@ namespace HomeChefServer.Controllers
                 return Unauthorized("User is not active.");
 
             var token = _authService.GenerateJwtToken(user);
-            return Ok(new { token });
+            return Ok(new
+            {
+                token = token,
+                user = new
+                {
+                    id = user.Id,
+                    email = user.Email,
+                    username = user.Username,
+                    role = user.IsAdmin ? "admin" : "user" 
+                }
+            }
+
+            );
         }
 
         [HttpPost("google")]
@@ -116,7 +131,8 @@ namespace HomeChefServer.Controllers
                     {
                         id = user.Id,
                         email = user.Email,
-                        username = user.Username
+                        username = user.Username,
+                        role = user.IsAdmin ? "admin" : "user"
                     }
                 });
             }
@@ -147,6 +163,7 @@ namespace HomeChefServer.Controllers
                 cmd.Parameters.AddWithValue("@Username", register.Username);
                 cmd.Parameters.AddWithValue("@Email", register.Email);
                 cmd.Parameters.AddWithValue("@PasswordHash", hashedPassword);
+                Console.WriteLine(HashPassword("123456"));
 
                 var returnValue = cmd.Parameters.Add("@ReturnValue", SqlDbType.Int);
                 returnValue.Direction = ParameterDirection.ReturnValue;

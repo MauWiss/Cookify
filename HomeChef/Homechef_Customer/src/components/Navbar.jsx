@@ -9,7 +9,7 @@ import { useAuth } from "../pages/Auth/AuthContext";
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, logout } = useAuth();
+  const { token, logout, role } = useAuth();
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
 
   // Sync dark mode
@@ -44,6 +44,10 @@ export default function Navbar() {
           Home
         </Link>
 
+        {token && role === "admin" && (
+        <Link to="/admin" className="text-yellow-400">Admin Panel</Link>
+      )}
+
         {token && (
           <>
             <Link className={active("/favorites")} to="/favorites">
@@ -58,6 +62,8 @@ export default function Navbar() {
             </Link>
           </>
         )}
+
+
 
         {!token ? (
           <>

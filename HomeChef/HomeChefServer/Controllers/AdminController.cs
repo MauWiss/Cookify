@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HomeChefServer.Models.DTOs;
 using HomeChef.Server.Services;
-using HomeChefServer.Models.DTOs;
+using HomeChef.Server.Models;
 using System.Data;
 using System.Data.SqlClient;
+using Dapper;
 
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -34,39 +35,22 @@ namespace HomeChefServer.Controllers
 
         }
 
-        [HttpGet("recipes")]
-        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(int id)
         {
-            List<RecipeDTO> recipes = new List<RecipeDTO>();
-
-            using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
 
-            using SqlCommand cmd = new SqlCommand("sp_GetRecipesPaged", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
+            using var cmd = new SqlCommand("DELETE FROM NewRecipes WHERE Id = @Id", conn);
+            cmd.Parameters.AddWithValue("@Id", id);
 
-            cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
-            cmd.Parameters.AddWithValue("@PageSize", pageSize);
+            var rowsAffected = await cmd.ExecuteNonQueryAsync();
+            if (rowsAffected == 0) return NotFound();
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                recipes.Add(new RecipeDTO
-                {
-                    RecipeId = (int)reader["Id"],
-                    Title = reader["Title"].ToString(),
-                    ImageUrl = reader["ImageUrl"].ToString(),
-                    SourceUrl = reader["SourceUrl"].ToString(),
-                    Servings = (int)reader["Servings"],
-                    CookingTime = (int)reader["CookingTime"],
-                    CategoryName = reader["CategoryName"].ToString()
-                });
-            }
-
-            return Ok(recipes);
+            return NoContent(); // 204
         }
+
+
 
     }
 }

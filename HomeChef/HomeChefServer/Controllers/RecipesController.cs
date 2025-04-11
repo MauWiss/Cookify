@@ -24,9 +24,13 @@ namespace HomeChefServer.Controllers
         public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
         {
             List<RecipeDTO> recipes = new List<RecipeDTO>();
+           
 
             using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
+
+            
+
 
             using SqlCommand cmd = new SqlCommand("sp_GetRecipesPaged", conn)
             {
@@ -51,7 +55,7 @@ namespace HomeChefServer.Controllers
                 });
             }
 
-            return Ok(recipes);
+            return Ok( recipes);
         }
 
 

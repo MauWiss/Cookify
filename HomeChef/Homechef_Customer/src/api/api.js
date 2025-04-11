@@ -77,4 +77,8 @@ export const logoutUser = () => {
   delete api.defaults.headers.common["Authorization"];
 };
 
+export const deleteRecipe = (id) => {
+  return api.delete(`/admin/${id}`);  
+};
+
 export default api;
