@@ -1,27 +1,31 @@
+import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
+
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, logout } = useAuth(); // ✅
+  const { token, logout } = useAuth();
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
 
+  // Sync dark mode
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
 
+  // Logout action
   const handleLogout = () => {
-    logout(); // ✅ updates context + removes token
+    logout();
     toast.success("Logged out successfully 👋");
     navigate("/auth/login");
   };
 
+  // Helper for highlighting current page
   const active = (path) =>
     location.pathname === path
       ? "text-blue-500 font-semibold underline underline-offset-4"
@@ -29,10 +33,12 @@ export default function Navbar() {
 
   return (
     <nav className="flex flex-wrap items-center justify-between bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
+      {/* Logo */}
       <h1 className="text-2xl font-bold tracking-wide text-gray-900 dark:text-white">
         HomeChef 🍳
       </h1>
 
+      {/* Links */}
       <div className="flex flex-wrap items-center gap-6 text-lg font-medium">
         <Link className={active("/")} to="/">
           Home
@@ -75,6 +81,7 @@ export default function Navbar() {
           </button>
         )}
 
+        {/* Dark Mode Toggle */}
         <button
           onClick={() => setDark((prev) => !prev)}
           className="text-gray-700 transition hover:text-yellow-400 dark:text-white"

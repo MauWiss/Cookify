@@ -14,12 +14,15 @@ import { AuthProvider } from "./pages/Auth/AuthContext";
 import AdminPage from "./pages/AdminPage";
 
 export default function App() {
-  useNotifications(); // optional: handles SignalR or real-time
+  useNotifications(); // optional: signalR or real-time notifications
 
   return (
     <AuthProvider>
+      {/* Global Providers */}
       <ToastContainer position="top-center" />
       <Navbar />
+
+      {/* App Routes */}
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/recipes/:id" element={<RecipeProfilePage />} />
