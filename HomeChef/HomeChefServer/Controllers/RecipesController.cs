@@ -53,6 +53,8 @@ namespace HomeChefServer.Controllers
 
             return Ok(recipes);
         }
+
+
         [HttpGet("search")]
         public async Task<ActionResult<IEnumerable<RecipeDTO>>> SearchRecipes(string term)
         {

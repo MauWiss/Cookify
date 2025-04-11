@@ -11,6 +11,7 @@ import RecipeProfilePage from "./pages/RecipeProfilePage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./pages/Auth/AuthContext";
+import AdminPage from "./pages/AdminPage";
 
 export default function App() {
   useNotifications(); // optional: handles SignalR or real-time
@@ -24,6 +25,8 @@ export default function App() {
         <Route path="/recipes/:id" element={<RecipeProfilePage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/register" element={<RegisterPage />} />
+        <Route path="/admin" element={<AdminPage />} />
+
 
         {/* 🔒 Protected Routes */}
         <Route
