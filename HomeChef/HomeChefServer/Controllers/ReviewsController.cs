@@ -22,6 +22,15 @@ namespace HomeChefServer.Controllers
         public IActionResult GetReviews(int recipeId)
         {
             var reviews = new List<ReviewDTO>();
+            ReviewDTO myReview = null;
+
+            int? userId = null;
+            if (User.Identity.IsAuthenticated)
+            {
+                var userClaim = User.FindFirst("UserId");
+                if (userClaim != null)
+                    userId = int.Parse(userClaim.Value);
+            }
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             using var cmd = new SqlCommand("sp_GetReviewsByRecipeId", conn);
@@ -32,17 +41,22 @@ namespace HomeChefServer.Controllers
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                reviews.Add(new ReviewDTO
+                var review = new ReviewDTO
                 {
                     ReviewId = (int)reader["ReviewId"],
                     UserId = (int)reader["UserId"],
                     Username = reader["Username"].ToString(),
                     ReviewText = reader["ReviewText"].ToString(),
                     CreatedAt = (DateTime)reader["CreatedAt"]
-                });
+                };
+
+                reviews.Add(review);
+
+                if (userId.HasValue && review.UserId == userId.Value)
+                    myReview = review;
             }
 
-            return Ok(reviews);
+            return Ok(new { reviews, myReview });
         }
 
         [Authorize]
@@ -56,18 +70,29 @@ namespace HomeChefServer.Controllers
             var userId = int.Parse(userClaim.Value);
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            conn.Open();
+
+            // Check if review already exists
+            using (var checkCmd = new SqlCommand("SELECT COUNT(*) FROM RecipeReviews WHERE RecipeId = @RecipeId AND UserId = @UserId", conn))
+            {
+                checkCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                checkCmd.Parameters.AddWithValue("@UserId", userId);
+                int exists = (int)checkCmd.ExecuteScalar();
+                if (exists > 0)
+                    return BadRequest("You already submitted a review for this recipe.");
+            }
+
+            // Insert review
             using var cmd = new SqlCommand("sp_AddReview", conn);
             cmd.CommandType = CommandType.StoredProcedure;
-
             cmd.Parameters.AddWithValue("@RecipeId", recipeId);
             cmd.Parameters.AddWithValue("@UserId", userId);
             cmd.Parameters.AddWithValue("@ReviewText", reviewText);
-
-            conn.Open();
             cmd.ExecuteNonQuery();
 
             return Ok(new { Message = "Review added successfully" });
         }
+
         [Authorize]
         [HttpPut("{reviewId}")]
         public IActionResult UpdateReview(int reviewId, [FromBody] string reviewText)
@@ -120,6 +145,5 @@ namespace HomeChefServer.Controllers
 
             return Ok("Review deleted successfully");
         }
-
     }
 }

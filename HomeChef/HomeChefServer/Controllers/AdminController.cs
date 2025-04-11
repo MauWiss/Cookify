@@ -3,6 +3,7 @@ using HomeChefServer.Models.DTOs;
 using HomeChef.Server.Services;
 using HomeChef.Server.Models;
 using System.Data;
+using Dapper;
 using System.Data.SqlClient;
 using Dapper;
 

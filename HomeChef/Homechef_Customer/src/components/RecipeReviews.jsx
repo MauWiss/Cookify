@@ -1,37 +1,28 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   fetchReviews,
   addReview,
   updateReview,
   deleteReview,
 } from "../api/api";
+import { useAuth } from "../pages/Auth/AuthContext";
 import { toast } from "react-toastify";
 
-// Utility to extract user ID from token
-const getUserIdFromToken = () => {
-  const token = localStorage.getItem("token");
-  if (!token) return null;
-  try {
-    const payload = JSON.parse(atob(token.split(".")[1]));
-    return payload?.UserId || null;
-  } catch {
-    return null;
-  }
-};
-
-const RecipeReviews = ({ recipeId }) => {
+export default function RecipeReviews({ recipeId }) {
+  const { user, token } = useAuth();
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState("");
+  const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState("");
-  const userId = getUserIdFromToken();
 
-  // Load all reviews on mount
+  const myReview = user ? reviews.find((r) => r.userId === user.id) : null;
+
   const loadReviews = async () => {
     try {
       const res = await fetchReviews(recipeId);
       setReviews(res.data);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load reviews", err);
     }
   };
 
@@ -39,112 +30,142 @@ const RecipeReviews = ({ recipeId }) => {
     loadReviews();
   }, [recipeId]);
 
-  // Get current user's review (if exists)
-  const userReview = reviews.find((r) => r.userId === userId);
-
   const handleAddReview = async () => {
+    if (!newReview.trim()) {
+      toast.warning("Review text cannot be empty.");
+      return;
+    }
+
     try {
       await addReview(recipeId, newReview);
-      toast.success("Review added!");
+      toast.success("Review submitted!");
       setNewReview("");
       loadReviews();
     } catch (err) {
-      toast.error("Failed to add review.");
       console.error(err);
+      toast.error("Failed to submit review.");
     }
   };
 
-  const handleUpdateReview = async (reviewId) => {
+  const handleUpdateReview = async () => {
     try {
-      await updateReview(reviewId, editText);
+      await updateReview(myReview.reviewId, editText);
       toast.success("Review updated!");
+      setEditing(false);
       loadReviews();
     } catch (err) {
-      toast.error("Failed to update review.");
       console.error(err);
+      toast.error("Failed to update review.");
     }
   };
 
-  const handleDeleteReview = async (reviewId) => {
+  const handleDeleteReview = async () => {
     try {
-      await deleteReview(reviewId);
-      toast.success("Review deleted!");
+      await deleteReview(myReview.reviewId);
+      toast.success("Review deleted.");
+      setEditing(false);
       loadReviews();
     } catch (err) {
-      toast.error("Failed to delete review.");
       console.error(err);
+      toast.error("Failed to delete review.");
     }
   };
 
   return (
-    <div className="mt-10 space-y-6">
+    <div className="mt-12 space-y-6 rounded-xl bg-white p-6 shadow-md dark:bg-gray-800">
       <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
         Reviews
       </h2>
 
-      {userReview ? (
-        <div className="rounded-xl bg-gray-100 p-4 dark:bg-gray-800">
-          <textarea
-            value={editText || userReview.reviewText}
-            onChange={(e) => setEditText(e.target.value)}
-            className="w-full rounded-lg border p-3 text-sm dark:bg-gray-700 dark:text-white"
-          />
-          <div className="mt-2 flex gap-3">
-            <button
-              onClick={() => handleUpdateReview(userReview.reviewId)}
-              className="rounded-lg bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-            >
-              Update
-            </button>
-            <button
-              onClick={() => handleDeleteReview(userReview.reviewId)}
-              className="rounded-lg bg-red-500 px-4 py-2 text-white hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
+      {/* ✅ My Review (if logged in) */}
+      {user && myReview && (
+        <div className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
+          {editing ? (
+            <>
+              <textarea
+                value={editText}
+                onChange={(e) => setEditText(e.target.value)}
+                className="w-full rounded-md border border-gray-300 p-3 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+              />
+              <div className="flex gap-3">
+                <button
+                  onClick={handleUpdateReview}
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={() => setEditing(false)}
+                  className="rounded bg-gray-400 px-4 py-2 text-white hover:bg-gray-500"
+                >
+                  Cancel
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p className="text-gray-800 dark:text-white">
+                {myReview.reviewText}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setEditing(true);
+                    setEditText(myReview.reviewText);
+                  }}
+                  className="text-blue-500 hover:underline"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={handleDeleteReview}
+                  className="text-red-500 hover:underline"
+                >
+                  Delete
+                </button>
+              </div>
+            </>
+          )}
         </div>
-      ) : (
-        <div className="rounded-xl bg-gray-100 p-4 dark:bg-gray-800">
+      )}
+
+      {/* ✅ Add New Review (only if logged in and didn't write yet) */}
+      {user && !myReview && (
+        <div className="space-y-3">
           <textarea
             value={newReview}
             onChange={(e) => setNewReview(e.target.value)}
-            className="w-full rounded-lg border p-3 text-sm dark:bg-gray-700 dark:text-white"
             placeholder="Write your review..."
+            className="w-full rounded-md border border-gray-300 p-3 dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           />
           <button
             onClick={handleAddReview}
-            className="mt-2 rounded-lg bg-green-500 px-4 py-2 text-white hover:bg-green-600"
+            className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
           >
-            Add Review
+            Submit Review
           </button>
         </div>
       )}
 
-      <div className="space-y-4">
-        {reviews.length === 0 ? (
-          <p className="text-gray-600 dark:text-gray-400">No reviews yet.</p>
-        ) : (
-          reviews.map((r) => (
-            <div
-              key={r.reviewId}
-              className="rounded-xl bg-gray-100 p-4 dark:bg-gray-800"
-            >
-              <p className="font-semibold text-gray-900 dark:text-white">
-                {r.username}:
-              </p>
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {r.reviewText}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+      {/* ✅ All reviews */}
+      <div className="space-y-4 pt-6">
+        {reviews.map((r) => (
+          <div
+            key={r.reviewId}
+            className="border-t border-gray-200 pt-4 dark:border-gray-700"
+          >
+            <div className="flex justify-between">
+              <span className="font-semibold text-gray-800 dark:text-white">
+                {r.username}
+              </span>
+              <span className="text-sm text-gray-500">
                 {new Date(r.createdAt).toLocaleString()}
-              </p>
+              </span>
             </div>
-          ))
-        )}
+            <p className="text-gray-700 dark:text-gray-300">{r.reviewText}</p>
+          </div>
+        ))}
       </div>
     </div>
   );
-};
-
-export default RecipeReviews;
+}

@@ -12,6 +12,7 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider } from "./pages/Auth/AuthContext";
 import AdminPage from "./pages/AdminPage";
+import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
 
 export default function App() {
   useNotifications(); // optional: signalR or real-time notifications
@@ -30,7 +31,6 @@ export default function App() {
         <Route path="/auth/register" element={<RegisterPage />} />
         <Route path="/admin" element={<AdminPage />} />
 
-
         {/* 🔒 Protected Routes */}
         <Route
           path="/favorites"
@@ -45,6 +45,14 @@ export default function App() {
           element={
             <PrivateRoute>
               <MyRecipesPage />
+            </PrivateRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <PrivateRoute>
+              <UserProfilePage />
             </PrivateRoute>
           }
         />

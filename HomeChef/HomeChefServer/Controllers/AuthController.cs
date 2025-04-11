@@ -47,7 +47,7 @@ namespace HomeChefServer.Controllers
             // השוואה של ההאש בפועל
             var hashedPassword = HashPassword(login.Password);
 
-            if (user == null || user.Password != hashedPassword)
+            if (user == null || user.PasswordHash!= hashedPassword)
                 return Unauthorized("Email or password is incorrect.");
 
             if (!user.IsActive)

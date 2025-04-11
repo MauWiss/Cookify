@@ -17,6 +17,7 @@
     "axios": "^1.8.4",
     "canvas-confetti": "^1.9.3",
     "firebase": "^11.6.0",
+    "jwt-decode": "^4.0.0",
     "lucide-react": "^0.484.0",
     "react": "^19.0.0",
     "react-data-table-component": "^7.7.0",
