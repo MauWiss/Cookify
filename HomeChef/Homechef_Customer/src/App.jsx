@@ -12,14 +12,9 @@ import AdminPage from "./pages/AdminPage";
 import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
 import { AuthProvider } from "./pages/Auth/AuthContext";
 
-// Import הקומפוננטה של ToastNotifications
-import ToastNotifications from "./components/ToastNotifications";
-
 export default function App() {
   return (
     <AuthProvider>
-      {/* הוספת הקומפוננטה של ToastNotifications */}
-      <ToastNotifications />
       <Navbar />
 
       {/* App Routes */}
