@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using HomeChef.Server.Services;
 using System.Data;
 using System.Data.SqlClient;
+using System.Security.Cryptography;
+using System.Text;
 
 [ApiController]
 [Route("api/[controller]")]
@@ -23,6 +25,14 @@ public class UserProfileController : ControllerBase
     {
         var userIdClaim = User.FindFirst("UserId");
         return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
+    }
+
+    private string HashPassword(string password)
+    {
+        using var sha256 = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(password);
+        var hash = sha256.ComputeHash(bytes);
+        return Convert.ToBase64String(hash);
     }
 
     // ✅ שליפת פרופיל המשתמש המחובר
@@ -46,7 +56,7 @@ public class UserProfileController : ControllerBase
         });
     }
 
-    // ✅ עדכון פרופיל (תמונה + תיאור)
+    // ✅ עדכון פרופיל (Bio בלבד)
     [HttpPut("update")]
     [Authorize]
     public IActionResult UpdateProfile([FromBody] UpdateUserProfileDTO dto)
@@ -58,7 +68,7 @@ public class UserProfileController : ControllerBase
         command.CommandType = CommandType.StoredProcedure;
 
         command.Parameters.AddWithValue("@Id", userId);
-        command.Parameters.AddWithValue("@ProfilePictureUrl", DBNull.Value); // לא בשימוש אצלך
+        command.Parameters.AddWithValue("@ProfilePictureUrl", DBNull.Value);
         command.Parameters.AddWithValue("@Bio", dto.Bio ?? (object)DBNull.Value);
 
         connection.Open();
@@ -67,31 +77,43 @@ public class UserProfileController : ControllerBase
         return Ok(new { message = "Profile updated successfully." });
     }
 
-    // ✅ עדכון סיסמה
+    // ✅ שינוי סיסמה עם כל הבדיקות
     [HttpPut("update-password")]
     [Authorize]
-    public IActionResult UpdatePassword([FromBody] UpdatePasswordDTO dto)
+    public async Task<IActionResult> UpdatePassword([FromBody] UpdatePasswordDTO dto)
     {
         int userId = GetUserIdFromToken();
 
-        using SqlConnection connection = new(_connectionString);
-        using SqlCommand command = new("sp_UpdatePassword", connection);
-        command.CommandType = CommandType.StoredProcedure;
+        using var conn = new SqlConnection(_connectionString);
+        await conn.OpenAsync();
 
-        command.Parameters.AddWithValue("@Id", userId);
-        command.Parameters.AddWithValue("@OldPassword", dto.OldPassword);
-        command.Parameters.AddWithValue("@NewPassword", dto.NewPassword);
+        // שליפת ההאש הקיים
+        using var getCmd = new SqlCommand("SELECT PasswordHash FROM Users WHERE Id = @Id", conn);
+        getCmd.Parameters.AddWithValue("@Id", userId);
+        var currentHash = (string?)await getCmd.ExecuteScalarAsync();
 
-        connection.Open();
-        var result = command.ExecuteScalar();
+        if (currentHash == null)
+            return StatusCode(500, "User not found.");
 
-        if (result != null && Convert.ToInt32(result) == 1)
-            return Ok(new { message = "Password updated successfully." });
+        // בדיקה: סיסמה ישנה שגויה
+        if (currentHash != HashPassword(dto.OldPassword))
+            return BadRequest(new { message = "Current password is incorrect." });
 
-        return BadRequest(new { message = "Current password is incorrect." });
+        // בדיקה: סיסמה חדשה זהה לישנה
+        if (HashPassword(dto.NewPassword) == currentHash)
+            return BadRequest(new { message = "New password must be different from the current one." });
+
+        // עדכון הסיסמה
+        using var updateCmd = new SqlCommand("sp_UpdatePassword", conn);
+        updateCmd.CommandType = CommandType.StoredProcedure;
+        updateCmd.Parameters.AddWithValue("@Id", userId);
+        updateCmd.Parameters.AddWithValue("@NewPassword", HashPassword(dto.NewPassword));
+        await updateCmd.ExecuteNonQueryAsync();
+
+        return Ok(new { message = "Password updated successfully." });
     }
 
-    // ✅ העלאת תמונת פרופיל בבייס64
+    // ✅ העלאת תמונת פרופיל (base64)
     [HttpPost("upload-picture-base64")]
     [Authorize]
     public async Task<IActionResult> UploadBase64(IFormFile file)
