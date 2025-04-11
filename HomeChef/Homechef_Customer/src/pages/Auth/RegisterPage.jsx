@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { registerUser } from "../../api/api";
+import { useAuth } from "./AuthContext"; // ✅ הוספת קונטקסט
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -11,6 +12,7 @@ export default function RegisterPage() {
     password: "",
   });
   const navigate = useNavigate();
+  const { loginWithToken } = useAuth(); // ✅ גישה לפונקציית התחברות מהקונטקסט
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -19,6 +21,12 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!formData.username || !formData.email || !formData.password) {
+      toast.warning("All fields are required.");
+      return;
+    }
+
     try {
       const response = await registerUser({
         username: formData.username,
@@ -26,7 +34,7 @@ export default function RegisterPage() {
         passwordHash: formData.password,
       });
 
-      localStorage.setItem("token", response.data.token);
+      loginWithToken(response.data.token); // ✅ עדכון הקונטקסט מידית
       toast.success("Registered successfully! 🍳");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {
@@ -39,7 +47,7 @@ export default function RegisterPage() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-16 dark:bg-gray-900">
       <ToastContainer position="top-center" />
 
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl transition-all dark:bg-gray-800">
+      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl dark:bg-gray-800">
         <h2 className="mb-6 text-center text-3xl font-extrabold text-gray-800 dark:text-white">
           Create Your <span className="text-blue-500">HomeChef 🍳</span> Account
         </h2>
