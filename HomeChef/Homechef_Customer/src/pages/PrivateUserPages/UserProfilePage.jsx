@@ -53,7 +53,6 @@ export default function UserProfilePage() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
-
     try {
       const res = await uploadBase64Image(file);
       setProfilePicPreview(res.base64);
@@ -66,7 +65,7 @@ export default function UserProfilePage() {
   if (!profile) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
+    <div className="mx-auto max-w-3xl space-y-10 px-4 py-10">
       <h1 className="text-center text-3xl font-bold">👤 My Profile</h1>
 
       {/* פרטי משתמש */}
@@ -142,6 +141,35 @@ export default function UserProfilePage() {
         >
           Change Password
         </button>
+      </div>
+
+      {/* כרטיסים: קישורים לעמודים נוספים */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="flex flex-col items-start rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+          <h3 className="mb-2 text-lg font-semibold">🍳 My Recipes</h3>
+          <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+            View and manage recipes you've created.
+          </p>
+          <button
+            onClick={() => (window.location.href = "/my-recipes")}
+            className="btn btn-outline btn-primary"
+          >
+            Go to My Recipes
+          </button>
+        </div>
+
+        <div className="flex flex-col items-start rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+          <h3 className="mb-2 text-lg font-semibold">❤️ Favorites</h3>
+          <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
+            Explore recipes you've marked as favorite.
+          </p>
+          <button
+            onClick={() => (window.location.href = "/favorites")}
+            className="btn btn-outline btn-secondary"
+          >
+            View Favorites
+          </button>
+        </div>
       </div>
     </div>
   );
