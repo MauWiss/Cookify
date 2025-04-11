@@ -64,16 +64,19 @@ namespace HomeChefServer.Controllers
         public IActionResult AddReview(int recipeId, [FromBody] string reviewText)
         {
             var userClaim = User.FindFirst("UserId");
-            if (userClaim == null)
-                return Unauthorized("UserId claim not found.");
+            var usernameClaim = User.FindFirst("Username"); // שליפת שם המשתמש
+
+            if (userClaim == null || usernameClaim == null)
+                return Unauthorized("UserId or Username claim not found.");
 
             var userId = int.Parse(userClaim.Value);
+            var username = usernameClaim.Value; // שמור את שם המשתמש במשתנה
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             conn.Open();
 
             // Check if review already exists
-            using (var checkCmd = new SqlCommand("SELECT COUNT(*) FROM RecipeReviews WHERE RecipeId = @RecipeId AND UserId = @UserId", conn))
+            using (var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Reviews WHERE RecipeId = @RecipeId AND UserId = @UserId", conn))
             {
                 checkCmd.Parameters.AddWithValue("@RecipeId", recipeId);
                 checkCmd.Parameters.AddWithValue("@UserId", userId);
@@ -88,10 +91,13 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@RecipeId", recipeId);
             cmd.Parameters.AddWithValue("@UserId", userId);
             cmd.Parameters.AddWithValue("@ReviewText", reviewText);
+            cmd.Parameters.AddWithValue("@Username", username);  
             cmd.ExecuteNonQuery();
 
-            return Ok(new { Message = "Review added successfully" });
+
+            return Ok(new { Message = "Review added successfully", Username = username }); // הוסף את שם המשתמש לתשובה
         }
+
 
         [Authorize]
         [HttpPut("{reviewId}")]

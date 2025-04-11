@@ -10,7 +10,7 @@ namespace HomeChefServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class FavoritesController : ControllerBase
+    public class FavoritesController : ControllerBase   
     {
         private readonly IConfiguration _configuration;
 
