@@ -8,8 +8,20 @@ export const useRecipesData = () => {
   const [error, setError] = useState("");
   const [categories, setCategories] = useState([]);
   const [favorites, setFavorites] = useState([]);
+  const [searchTerm, setSearchTerm] = useState(""); // הוספתי עבור חיפוש
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null); // קטגוריה נבחרת
   const token = localStorage.getItem("token");
 
+  // פונקציה לעיכוב חיפוש (Debounce)
+  const debounce = (func, delay) => {
+    let timer;
+    return (...args) => {
+      clearTimeout(timer);
+      timer = setTimeout(() => func(...args), delay);
+    };
+  };
+
+  // פונקציה לטעינת מתכונים
   const loadRecipes = async (term = "", categoryId = null) => {
     setLoading(true);
     try {
@@ -26,6 +38,7 @@ export const useRecipesData = () => {
     }
   };
 
+  // פונקציה לטעינת המועדפים
   const loadFavorites = async () => {
     if (!token) return;
     try {
@@ -36,6 +49,7 @@ export const useRecipesData = () => {
     }
   };
 
+  // פונקציה לטעינת הקטגוריות
   const loadCategories = async () => {
     try {
       const res = await fetchCategories();
@@ -45,11 +59,25 @@ export const useRecipesData = () => {
     }
   };
 
+  // טעינה מחדש של מתכונים ומועדפים בעת שינוי חיפוש או קטגוריה
   useEffect(() => {
     loadCategories();
-    loadRecipes();
-    loadFavorites();
   }, []);
+
+  // כל פעם שמשתנה חיפוש או קטגוריה, נטען את המתכונים
+  const debouncedLoadRecipes = debounce(loadRecipes, 500);
+
+  useEffect(() => {
+    if (searchTerm || selectedCategoryId) {
+      debouncedLoadRecipes(searchTerm, selectedCategoryId); // חיפוש עם עיכוב
+    } else {
+      loadRecipes(); // חזרה למצב ברירת המחדל
+    }
+  }, [searchTerm, selectedCategoryId]);
+
+  useEffect(() => {
+    loadFavorites();
+  }, [token]); // טעינת מועדפים רק אם יש טוקן
 
   return {
     recipes,
@@ -59,5 +87,7 @@ export const useRecipesData = () => {
     favorites,
     reloadRecipes: loadRecipes,
     reloadFavorites: loadFavorites,
+    setSearchTerm,
+    setSelectedCategoryId,
   };
 };

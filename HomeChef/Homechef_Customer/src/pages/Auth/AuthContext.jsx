@@ -1,17 +1,38 @@
 // src/pages/Auth/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [role, setRole] = useState(localStorage.getItem("role"))
+  const [user, setUser] = useState(null); // משתמש
+  const [role, setRole] = useState(localStorage.getItem("role")); // תפקיד
 
   useEffect(() => {
-    // Optional: react to changes from other tabs
-    const syncToken = () => setToken(localStorage.getItem("token"));
-    window.addEventListener("storage", syncToken);
-    return () => window.removeEventListener("storage", syncToken);
+    const loadUser = () => {
+      const storedToken = localStorage.getItem("token");
+      setToken(storedToken);
+
+      if (storedToken) {
+        try {
+          const decoded = jwtDecode(storedToken);
+          setUser({
+            id: decoded.id,
+            email: decoded.email,
+            username: decoded.username,
+          });
+        } catch {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
+    };
+
+    loadUser();
+    window.addEventListener("storage", loadUser);
+    return () => window.removeEventListener("storage", loadUser);
   }, []);
 
   const login = (newToken, newRole) => {
@@ -19,18 +40,29 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("role", newRole);
     setToken(newToken);
     setRole(newRole);
-    console.log("role")
+
+    try {
+      const decoded = jwtDecode(newToken);
+      setUser({
+        id: decoded.id,
+        email: decoded.email,
+        username: decoded.username,
+      });
+    } catch {
+      setUser(null);
+    }
   };
-  
+
   const logout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("role");
     setToken(null);
+    setUser(null);
     setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, role, login, logout }}>
+    <AuthContext.Provider value={{ token, user, role, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

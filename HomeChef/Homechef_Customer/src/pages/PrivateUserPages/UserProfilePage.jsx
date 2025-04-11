@@ -10,15 +10,12 @@ import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
-import confetti from "canvas-confetti";
 
 export default function UserProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
-  const [bio, setBio] = useState(localStorage.getItem("bio") || "");
-  const [profilePicture, setProfilePicture] = useState(
-    localStorage.getItem("profilePicture") || "",
-  );
+  const [bio, setBio] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
@@ -29,8 +26,6 @@ export default function UserProfilePage() {
         setProfile(data);
         setBio(data.bio || "");
         setProfilePicture(data.profilePictureBase64 || "");
-        localStorage.setItem("bio", data.bio || "");
-        localStorage.setItem("profilePicture", data.profilePictureBase64 || "");
       } catch {
         toast.error("❌ Failed to load profile.");
       }
@@ -38,43 +33,31 @@ export default function UserProfilePage() {
     fetchData();
   }, []);
 
-  const launchConfetti = () => {
-    confetti({
-      particleCount: 100,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ["#00BFFF", "#1E90FF", "#87CEFA"],
-    });
-  };
-
   const handleProfileUpdate = async () => {
     try {
       await updateUserProfile({ bio });
-      localStorage.setItem("bio", bio);
-      toast.success("🎉 Profile updated successfully!");
-      launchConfetti();
+      toast.success("✅ Profile updated");
     } catch {
-      toast.error("Error updating profile");
+      toast.error("❌ Error updating profile");
     }
   };
 
   const handlePasswordChange = async () => {
     if (!oldPassword || !newPassword) {
-      toast.warning("Please fill both password fields.");
+      toast.warning("⚠️ Please fill both password fields.");
       return;
     }
     if (oldPassword === newPassword) {
-      toast.warning("New password must be different from the current one.");
+      toast.warning("⚠️ New password must be different from the current one.");
       return;
     }
     try {
       await updatePassword({ oldPassword, newPassword });
-      toast.success("🔒 Password updated!");
-      launchConfetti();
+      toast.success("✅ Password updated");
       setOldPassword("");
       setNewPassword("");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Error updating password");
+      toast.error(err.response?.data?.message || "❌ Error updating password");
     }
   };
 
@@ -84,36 +67,37 @@ export default function UserProfilePage() {
     try {
       const res = await uploadBase64Image(file);
       setProfilePicture(res.data.base64);
-      localStorage.setItem("profilePicture", res.data.base64);
-      toast.success("📸 Image uploaded successfully!");
-      launchConfetti();
+      toast.success("✅ Image uploaded");
     } catch {
-      toast.error("Failed to upload image");
+      toast.error("❌ Failed to upload image");
     }
   };
 
-  if (!profile) return <div className="p-6">Loading...</div>;
+  if (!profile)
+    return <div className="p-10 text-center">Loading profile...</div>;
+
+  const imageSrc = profilePicture
+    ? `data:image/jpeg;base64,${profilePicture}`
+    : "https://static.vecteezy.com/system/resources/thumbnails/000/364/628/small_2x/Chef_Avatar_Illustration-03.jpg";
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl space-y-8 px-4">
-      <h1 className="flex items-center justify-center gap-2 text-center text-3xl font-bold text-blue-700">
-        <FaUserCircle size={30} /> My Profile
+    <div className="mx-auto mt-10 max-w-2xl space-y-8">
+      <h1 className="flex items-center justify-center gap-2 text-center text-4xl font-bold text-blue-800">
+        <FaUserCircle className="text-5xl text-blue-600" />
+        My Profile
       </h1>
 
-      {user && (
+      {(user?.username || profile.username) && (
         <p className="text-center text-zinc-600 dark:text-zinc-300">
-          Logged in as: <strong>{user.username}</strong> ({user.email})
+          Logged in as: <strong>{user?.username || profile.username}</strong> (
+          {user?.email || profile.email})
         </p>
       )}
 
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
         <div className="flex flex-col items-center gap-4">
           <img
-            src={
-              profilePicture
-                ? `data:image/jpeg;base64,${profilePicture}`
-                : "https://static.vecteezy.com/system/resources/thumbnails/000/364/628/small_2x/Chef_Avatar_Illustration-03.jpg"
-            }
+            src={imageSrc}
             alt="Profile"
             className="h-32 w-32 rounded-full border-4 border-blue-500 object-cover"
           />
@@ -126,26 +110,23 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
         <textarea
-          placeholder="Tell us about yourself..."
+          placeholder="Your bio..."
           value={bio}
-          onChange={(e) => {
-            setBio(e.target.value);
-            localStorage.setItem("bio", e.target.value);
-          }}
+          onChange={(e) => setBio(e.target.value)}
           className="textarea textarea-bordered mb-4 w-full"
         />
         <button
           onClick={handleProfileUpdate}
-          className="btn w-full bg-blue-600 text-white transition hover:bg-blue-700"
+          className="btn btn-primary w-full"
         >
           Save Profile
         </button>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <h2 className="mb-4 text-xl font-semibold text-blue-600">
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
+        <h2 className="mb-4 text-xl font-semibold text-blue-800">
           🔐 Change Password
         </h2>
         <input
@@ -164,22 +145,22 @@ export default function UserProfilePage() {
         />
         <button
           onClick={handlePasswordChange}
-          className="btn w-full bg-blue-500 text-white transition hover:bg-blue-600"
+          className="btn btn-secondary w-full"
         >
           Change Password
         </button>
       </div>
 
-      <div className="flex flex-col justify-between gap-4 rounded-xl bg-white p-6 text-lg shadow dark:bg-zinc-800 md:flex-row">
+      <div className="flex flex-col gap-4 rounded-xl bg-white p-6 text-lg shadow-md dark:bg-zinc-800 md:flex-row">
         <Link
           to="/favorites"
-          className="btn btn-outline btn-info flex w-full items-center justify-center gap-2 md:w-1/2"
+          className="btn btn-outline btn-info flex w-full items-center justify-center gap-2"
         >
           <FaHeart /> My Favorites
         </Link>
         <Link
           to="/my-recipes"
-          className="btn btn-outline btn-primary flex w-full items-center justify-center gap-2 md:w-1/2"
+          className="btn btn-outline btn-warning flex w-full items-center justify-center gap-2"
         >
           <GiCook /> My Recipes
         </Link>

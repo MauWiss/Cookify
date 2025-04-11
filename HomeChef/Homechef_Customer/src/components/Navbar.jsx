@@ -43,8 +43,10 @@ export default function Navbar() {
         </Link>
 
         {token && role === "admin" && (
-        <Link to="/admin" className="text-yellow-400">Admin Panel</Link>
-      )}
+          <Link to="/admin" className="text-yellow-400">
+            Admin Panel
+          </Link>
+        )}
 
         {/* ✅ קישור לפרופיל */}
         {token && (
@@ -59,8 +61,6 @@ export default function Navbar() {
             </div>
           </Link>
         )}
-
-
 
         {!token ? (
           <>
