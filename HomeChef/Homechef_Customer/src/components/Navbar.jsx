@@ -1,8 +1,6 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Moon, Sun, LogOut } from "lucide-react";
-import { FaHeart } from "react-icons/fa";
-import { GiCook } from "react-icons/gi";
 import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
 
@@ -25,7 +23,7 @@ export default function Navbar() {
     navigate("/auth/login");
   };
 
-  // Helper for highlighting current page
+  // Highlight active page
   const active = (path) =>
     location.pathname === path
       ? "text-blue-500 font-semibold underline underline-offset-4"
@@ -44,19 +42,18 @@ export default function Navbar() {
           Home
         </Link>
 
+        {/* ✅ קישור לפרופיל */}
         {token && (
-          <>
-            <Link className={active("/favorites")} to="/favorites">
-              <div className="flex items-center gap-2">
-                Favorites <FaHeart className="text-red-500" />
-              </div>
-            </Link>
-            <Link className={active("/my-recipes")} to="/my-recipes">
-              <div className="flex items-center gap-2">
-                My Recipes <GiCook className="text-orange-500" />
-              </div>
-            </Link>
-          </>
+          <Link className={active("/profile")} to="/profile">
+            <div className="flex items-center gap-2">
+              Profile
+              <img
+                src="/default-avatar.png"
+                alt="Avatar"
+                className="h-6 w-6 rounded-full border border-gray-300"
+              />
+            </div>
+          </Link>
         )}
 
         {!token ? (
