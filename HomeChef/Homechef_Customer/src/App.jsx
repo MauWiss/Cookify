@@ -1,3 +1,4 @@
+import React from "react";
 import { Routes, Route } from "react-router-dom";
 import Homepage from "./pages/Homepage";
 import Navbar from "./components/Navbar";
@@ -6,21 +7,19 @@ import RegisterPage from "./pages/Auth/RegisterPage";
 import FavoritesPage from "./pages/PrivateUserPages/FavoritesPage";
 import MyRecipesPage from "./pages/PrivateUserPages/MyRecipesPage";
 import PrivateRoute from "./components/PrivateRoute";
-import useNotifications from "./hooks/useNotifications";
 import RecipeProfilePage from "./pages/RecipeProfilePage";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-import { AuthProvider } from "./pages/Auth/AuthContext";
 import AdminPage from "./pages/AdminPage";
 import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
+import { AuthProvider } from "./pages/Auth/AuthContext";
+
+// Import הקומפוננטה של ToastNotifications
+import ToastNotifications from "./components/ToastNotifications";
 
 export default function App() {
-  useNotifications(); // optional: signalR or real-time notifications
-
   return (
     <AuthProvider>
-      {/* Global Providers */}
-      <ToastContainer position="top-center" />
+      {/* הוספת הקומפוננטה של ToastNotifications */}
+      <ToastNotifications />
       <Navbar />
 
       {/* App Routes */}

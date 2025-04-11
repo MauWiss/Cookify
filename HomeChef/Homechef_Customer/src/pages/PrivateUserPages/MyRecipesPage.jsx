@@ -6,6 +6,7 @@ import SearchInput from "../../components/SearchInput";
 import AddRecipeModal from "../../components/AddRecipeModal";
 import EditRecipeModal from "../../components/EditRecipeModal";
 import { useMyRecipesData } from "../../hooks/useMyRecipesData";
+import { toast } from "react-toastify"; // Use toast from the global context
 
 export default function MyRecipesPage() {
   const [editingRecipeId, setEditingRecipeId] = useState(null);
@@ -38,9 +39,11 @@ export default function MyRecipesPage() {
     try {
       await removeRecipe(recipeId);
       Swal.fire("Deleted!", "Your recipe has been deleted.", "success");
+      toast.success("Recipe deleted! 🎆💥✨"); // Fireworks effect after deletion
     } catch (err) {
       console.error("Failed to delete", err);
       Swal.fire("Error", "Something went wrong.", "error");
+      toast.error("Failed to delete recipe. 💥✨"); // Fireworks effect on error
     }
   };
 
