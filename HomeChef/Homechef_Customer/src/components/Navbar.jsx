@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Moon, Sun, LogOut } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { toast } from "react-toastify";
@@ -8,20 +9,23 @@ import { useAuth } from "../pages/Auth/AuthContext";
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, logout } = useAuth(); // ✅
+  const { token, logout } = useAuth(); // גישה ל־token מה־AuthContext
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
 
+  // עדכון מצב הערכת נושא ב־localStorage
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
   }, [dark]);
 
+  // טיפול בהתנתקות
   const handleLogout = () => {
-    logout(); // ✅ updates context + removes token
+    logout(); // נקרא מה־AuthContext
     toast.success("Logged out successfully 👋");
     navigate("/auth/login");
   };
 
+  // קביעת סגנון עבור קישור פעיל
   const active = (path) =>
     location.pathname === path
       ? "text-blue-500 font-semibold underline underline-offset-4"

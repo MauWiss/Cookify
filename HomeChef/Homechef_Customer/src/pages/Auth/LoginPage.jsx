@@ -16,13 +16,19 @@ export default function LoginPage() {
 
   const handleLogin = async (e) => {
     e.preventDefault();
+
+    if (!email || !password) {
+      toast.warning("Please enter both email and password.");
+      return;
+    }
+
     try {
       const res = await loginUser(email, password);
       localStorage.setItem("token", res.data.token);
       toast.success("Welcome back!");
       setTimeout(() => navigate("/"), 1500);
-    } catch {
-      toast.error("Login failed. Please check your credentials.");
+    } catch (err) {
+      toast.error("Incorrect email or password. Please try again.");
     }
   };
 

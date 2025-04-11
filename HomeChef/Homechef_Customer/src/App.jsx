@@ -10,13 +10,15 @@ import useNotifications from "./hooks/useNotifications";
 import RecipeProfilePage from "./pages/RecipeProfilePage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { AuthProvider } from "./pages/Auth/AuthContext";
+import { AuthProvider } from "./pages/Auth/AuthContext"; // ייבוא ה־AuthContext
 
 export default function App() {
-  useNotifications(); // optional: handles SignalR or real-time
+  useNotifications(); // Optional: handles SignalR or real-time
 
   return (
     <AuthProvider>
+      {" "}
+      {/* Provider שמספק את ה־context לכל העמודים */}
       <ToastContainer position="top-center" />
       <Navbar />
       <Routes>

@@ -1,32 +1,34 @@
-import { createContext, useContext, useEffect, useState } from "react";
+// AuthContext.js
+import React, { createContext, useContext, useState, useEffect } from "react";
 
+// יצירת Context
 const AuthContext = createContext();
 
+// hook לגישה ל־context
+export const useAuth = () => {
+  return useContext(AuthContext);
+};
+
+// Provider של ה־AuthContext
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
 
+  // פונקציית התחברות
   const login = (newToken) => {
-    localStorage.setItem("token", newToken);
     setToken(newToken);
+    localStorage.setItem("token", newToken);
   };
 
+  // פונקציית התנתקות
   const logout = () => {
-    localStorage.removeItem("token");
     setToken(null);
+    localStorage.removeItem("token");
   };
 
-  useEffect(() => {
-    const syncToken = () => setToken(localStorage.getItem("token"));
-    window.addEventListener("storage", syncToken);
-    return () => window.removeEventListener("storage", syncToken);
-  }, []);
-
+  // פונקציה שתשדר את ה־token החדש
   return (
     <AuthContext.Provider value={{ token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-// Custom hook
-export const useAuth = () => useContext(AuthContext);
