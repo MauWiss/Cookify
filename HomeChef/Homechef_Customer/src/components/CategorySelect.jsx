@@ -8,7 +8,7 @@ export default function CategorySelect({
 }) {
   return (
     <div className="flex flex-wrap justify-center gap-6 mt-10">
-      {/* כפתור 'All' */}
+      
       <div
         onClick={() => onSelectCategory(null)}
         className="flex flex-col items-center cursor-pointer transition transform hover:scale-105"
