@@ -1,7 +1,7 @@
 //קבלת user מתוך JWT
 
 import { useEffect, useState } from "react";
-//import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
