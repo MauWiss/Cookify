@@ -47,7 +47,7 @@ namespace HomeChef.Server.Services
                     Id = (int)reader["Id"],
                     Username = reader["Username"].ToString(),
                     Email = reader["Email"].ToString(),
-                    Password = reader["PasswordHash"].ToString(),
+                    PasswordHash = reader["PasswordHash"].ToString(),
                     IsAdmin = (bool)reader["IsAdmin"],
                     IsActive = (bool)reader["IsActive"]
                 };

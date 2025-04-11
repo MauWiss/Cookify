@@ -43,7 +43,7 @@ export const addFavorite = (recipeId) =>
 export const removeFavorite = (recipeId) =>
   api.delete(`/Favorites/${recipeId}/favorite`);
 
-// 🔷 Reviews ✅✅
+// 🔷 Reviews
 export const fetchReviews = (recipeId) => api.get(`/reviews/${recipeId}`);
 export const addReview = (recipeId, reviewText) =>
   api.post(`/reviews/${recipeId}`, reviewText, {
@@ -68,13 +68,27 @@ export const addMyRecipe = (recipeData) => api.post("/myrecipes", recipeData);
 export const updateMyRecipe = (recipeId, updatedData) =>
   api.put(`/myrecipes/${recipeId}`, updatedData);
 
+// 🔷 User Profile
+export const getUserProfile = () => api.get("/userprofile/me");
+export const updateUserProfile = (data) => api.put("/userprofile/update", data);
+export const updatePassword = (data) =>
+  api.put("/userprofile/update-password", data);
+
+export const uploadBase64Image = (file) => {
+  const formData = new FormData();
+  formData.append("file", file);
+  return api.post("/userprofile/upload-picture-base64", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
+// 🔷 Auth
 // 🔷 Auth
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });
+
 export const registerUser = (userData) => api.post("/auth/register", userData);
-export const logoutUser = () => {
-  localStorage.removeItem("token");
-  delete api.defaults.headers.common["Authorization"];
-};
 
 export default api;

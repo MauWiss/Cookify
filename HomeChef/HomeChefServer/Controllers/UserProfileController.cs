@@ -97,4 +97,38 @@ public class UserProfileController : ControllerBase
 
         return NotFound();
     }
+
+    [HttpPost("upload-picture-base64")]
+    [Authorize]
+    public async Task<IActionResult> UploadBase64(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("No file uploaded.");
+
+        try
+        {
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            var bytes = memoryStream.ToArray();
+            var base64String = Convert.ToBase64String(bytes);
+
+            int userId = int.Parse(User.FindFirst("id")!.Value);
+
+            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand("UPDATE Users SET ProfilePictureBase64 = @Base64 WHERE Id = @Id", conn);
+
+            cmd.Parameters.AddWithValue("@Base64", base64String);
+            cmd.Parameters.AddWithValue("@Id", userId);
+
+            conn.Open();
+            await cmd.ExecuteNonQueryAsync();
+
+            return Ok(new { base64 = base64String });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error saving base64 image: {ex.Message}");
+        }
+    }
+
 }
