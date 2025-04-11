@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HomeChef.Server.Services;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -8,18 +9,41 @@ using System.Data.SqlClient;
 public class UserProfileController : ControllerBase
 {
     private readonly IConfiguration _configuration;
+    private readonly IAuthService _authService;
     private readonly string _connectionString;
 
-    public UserProfileController(IConfiguration configuration)
+    public UserProfileController(IConfiguration configuration, IAuthService authService)
     {
         _configuration = configuration;
+        _authService = authService;
         _connectionString = _configuration.GetConnectionString("DefaultConnection");
     }
 
     private int GetUserIdFromToken()
     {
-        var userIdClaim = User.FindFirst("id");
+        var userIdClaim = User.FindFirst("UserId");
         return userIdClaim != null ? int.Parse(userIdClaim.Value) : 0;
+    }
+
+    // ✅ שליפת פרופיל המשתמש המחובר
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetProfile()
+    {
+        int userId = GetUserIdFromToken();
+        var user = await _authService.GetUserByIdAsync(userId);
+
+        if (user == null)
+            return NotFound();
+
+        return Ok(new
+        {
+            username = user.Username,
+            email = user.Email,
+            profilePictureBase64 = user.ProfilePictureBase64,
+            bio = user.Bio,
+            createdAt = user.CreatedAt
+        });
     }
 
     // ✅ עדכון פרופיל (תמונה + תיאור)
@@ -34,7 +58,7 @@ public class UserProfileController : ControllerBase
         command.CommandType = CommandType.StoredProcedure;
 
         command.Parameters.AddWithValue("@Id", userId);
-        command.Parameters.AddWithValue("@ProfilePictureUrl", dto.ProfilePictureUrl ?? (object)DBNull.Value);
+        command.Parameters.AddWithValue("@ProfilePictureUrl", DBNull.Value); // לא בשימוש אצלך
         command.Parameters.AddWithValue("@Bio", dto.Bio ?? (object)DBNull.Value);
 
         connection.Open();
@@ -67,37 +91,7 @@ public class UserProfileController : ControllerBase
         return BadRequest(new { message = "Current password is incorrect." });
     }
 
-    // ✅ שליפת פרופיל המשתמש המחובר
-    [HttpGet("me")]
-    [Authorize]
-    public IActionResult GetProfile()
-    {
-        int userId = GetUserIdFromToken();
-
-        using SqlConnection connection = new(_connectionString);
-        using SqlCommand command = new("SELECT Username, Email, ProfilePictureUrl, Bio, CreatedAt FROM Users WHERE Id = @Id", connection);
-
-        command.Parameters.AddWithValue("@Id", userId);
-        connection.Open();
-
-        using var reader = command.ExecuteReader();
-        if (reader.Read())
-        {
-            var user = new
-            {
-                Username = reader["Username"].ToString(),
-                Email = reader["Email"].ToString(),
-                ProfilePictureUrl = reader["ProfilePictureUrl"]?.ToString(),
-                Bio = reader["Bio"]?.ToString(),
-                CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
-            };
-
-            return Ok(user);
-        }
-
-        return NotFound();
-    }
-
+    // ✅ העלאת תמונת פרופיל בבייס64
     [HttpPost("upload-picture-base64")]
     [Authorize]
     public async Task<IActionResult> UploadBase64(IFormFile file)
@@ -112,9 +106,9 @@ public class UserProfileController : ControllerBase
             var bytes = memoryStream.ToArray();
             var base64String = Convert.ToBase64String(bytes);
 
-            int userId = int.Parse(User.FindFirst("id")!.Value);
+            int userId = GetUserIdFromToken();
 
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+            using var conn = new SqlConnection(_connectionString);
             using var cmd = new SqlCommand("UPDATE Users SET ProfilePictureBase64 = @Base64 WHERE Id = @Id", conn);
 
             cmd.Parameters.AddWithValue("@Base64", base64String);
@@ -130,5 +124,4 @@ public class UserProfileController : ControllerBase
             return StatusCode(500, $"Error saving base64 image: {ex.Message}");
         }
     }
-
 }

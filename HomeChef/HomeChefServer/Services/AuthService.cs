@@ -56,6 +56,33 @@ namespace HomeChef.Server.Services
             return null;
         }
 
+        public async Task<User> GetUserByIdAsync(int id)
+        {
+            using var conn = new SqlConnection(_connectionString);
+            await conn.OpenAsync();
+
+            using var cmd = new SqlCommand("SELECT * FROM Users WHERE Id = @Id", conn);
+            cmd.Parameters.AddWithValue("@Id", id);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                return new User
+                {
+                    Id = (int)reader["Id"],
+                    Username = reader["Username"].ToString(),
+                    Email = reader["Email"].ToString(),
+                    PasswordHash = reader["PasswordHash"].ToString(),
+                    IsAdmin = (bool)reader["IsAdmin"],
+                    IsActive = (bool)reader["IsActive"],
+                    ProfilePictureBase64 = reader["ProfilePictureBase64"]?.ToString(),
+                    Bio = reader["Bio"]?.ToString(),
+                    CreatedAt = Convert.ToDateTime(reader["CreatedAt"])
+                };
+            }
+
+            return null;
+        }
 
 
 
@@ -83,4 +110,5 @@ namespace HomeChef.Server.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
+
 }
