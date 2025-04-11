@@ -20,12 +20,29 @@ export default function RecipeReviews({ recipeId }) {
   const loadReviews = async () => {
     try {
       const res = await fetchReviews(recipeId);
-      setReviews(res.data.reviews || []);
-      setMyReview(res.data.myReview || null);
+      const data = res.data || [];
+
+      // 1. קובעים את כל הביקורות ב-state
+      setReviews(data);
+
+      // 2. מחפשים את הביקורת של המשתמש הנוכחי
+      if (user) {
+        console.log(user.id)
+        const foundMyReview = data.find(
+          r => parseInt(r.userId, 10) === parseInt(user.id, 10)
+        );
+        console.log(foundMyReview)
+
+        setMyReview(foundMyReview || null);
+       
+      } else {
+        setMyReview(null);
+      }
     } catch (err) {
       console.error("Failed to load reviews", err);
     }
   };
+
 
   useEffect(() => {
     loadReviews();
@@ -42,11 +59,14 @@ export default function RecipeReviews({ recipeId }) {
       toast.success("Review submitted! 🎉💥✨"); // Fireworks effect
       setNewReview("");
       loadReviews();
+
+
     } catch (err) {
+
       console.error(err);
       toast.error(
         err.response?.data ||
-          "Failed to submit review. You may have already submitted one. 💥🎆",
+        "Failed to submit review. You may have already submitted one. 💥🎆",
       );
     }
   };

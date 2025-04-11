@@ -17,10 +17,12 @@ export const AuthProvider = ({ children }) => {
       if (storedToken) {
         try {
           const decoded = jwtDecode(storedToken);
+          console.log("decoded token:", decoded);
+
           setUser({
-            id: decoded.id,
+            id: decoded.UserId,
             email: decoded.email,
-            username: decoded.username,
+            username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
           });
         } catch {
           setUser(null);
@@ -31,6 +33,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     loadUser();
+    
     window.addEventListener("storage", loadUser);
     return () => window.removeEventListener("storage", loadUser);
   }, []);
@@ -42,11 +45,13 @@ export const AuthProvider = ({ children }) => {
     setRole(newRole);
 
     try {
-      const decoded = jwtDecode(newToken);
+      const decoded = jwtDecode(storedToken);
+      console.log("decoded token:", decoded);
+
       setUser({
-        id: decoded.id,
+        id: decoded.UserId,
         email: decoded.email,
-        username: decoded.username,
+        username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
       });
     } catch {
       setUser(null);
