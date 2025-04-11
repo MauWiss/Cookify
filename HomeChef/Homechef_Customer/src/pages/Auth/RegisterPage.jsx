@@ -1,9 +1,10 @@
+// src/pages/Auth/RegisterPage.jsx
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { registerUser } from "../../api/api";
-import { useAuth } from "./AuthContext"; // ✅ הוספת קונטקסט
+import { useAuth } from "./AuthContext";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -11,8 +12,9 @@ export default function RegisterPage() {
     email: "",
     password: "",
   });
+
   const navigate = useNavigate();
-  const { loginWithToken } = useAuth(); // ✅ גישה לפונקציית התחברות מהקונטקסט
+  const { login } = useAuth(); // ✅ import login function from context
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -22,11 +24,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.username || !formData.email || !formData.password) {
-      toast.warning("All fields are required.");
-      return;
-    }
-
     try {
       const response = await registerUser({
         username: formData.username,
@@ -34,7 +31,7 @@ export default function RegisterPage() {
         passwordHash: formData.password,
       });
 
-      loginWithToken(response.data.token); // ✅ עדכון הקונטקסט מידית
+      login(response.data.token); // ✅ Login via context
       toast.success("Registered successfully! 🍳");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {

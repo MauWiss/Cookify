@@ -1,9 +1,17 @@
+// src/pages/Auth/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext();
 
-export function AuthProvider({ children }) {
+export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
+
+  useEffect(() => {
+    // Optional: react to changes from other tabs
+    const syncToken = () => setToken(localStorage.getItem("token"));
+    window.addEventListener("storage", syncToken);
+    return () => window.removeEventListener("storage", syncToken);
+  }, []);
 
   const login = (newToken) => {
     localStorage.setItem("token", newToken);
@@ -15,20 +23,11 @@ export function AuthProvider({ children }) {
     setToken(null);
   };
 
-  useEffect(() => {
-    const syncToken = () => {
-      const storedToken = localStorage.getItem("token");
-      setToken(storedToken);
-    };
-    window.addEventListener("storage", syncToken);
-    return () => window.removeEventListener("storage", syncToken);
-  }, []);
-
   return (
     <AuthContext.Provider value={{ token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
-}
+};
 
 export const useAuth = () => useContext(AuthContext);
