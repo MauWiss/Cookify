@@ -7,6 +7,10 @@ import { addFavorite, removeFavorite } from "../api/api";
 import SearchInput from "../components/SearchInput";
 import CategorySelect from "../components/CategorySelect";
 import { useRecipesData } from "../hooks/useRecipesData";
+<<<<<<< HEAD
+
+=======
+>>>>>>> 3919c1f4a95b7963666759b1153f2688ceec5630
 
 export default function Homepage() {
   const navigate = useNavigate();
