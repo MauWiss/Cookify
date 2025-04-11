@@ -3,6 +3,8 @@ import { useEffect, useState } from "react";
 import { Moon, Sun, LogOut } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
+import { FaClock, FaUtensils, FaHeart, FaRegHeart } from "react-icons/fa";
+import { GiCook } from "react-icons/gi";
 
 export default function Navbar() {
   const location = useLocation();
@@ -60,6 +62,21 @@ export default function Navbar() {
               />
             </div>
           </Link>
+        )}
+
+        {token && (
+          <>
+            <Link className={active("/favorites")} to="/favorites">
+              <div className="flex items-center gap-2">
+                Favorites <FaHeart className="text-red-500" />
+              </div>
+            </Link>
+            <Link className={active("/my-recipes")} to="/my-recipes">
+              <div className="flex items-center gap-2">
+                My Recipes <GiCook className="text-orange-500" />
+              </div>
+            </Link>
+          </>
         )}
 
         {!token ? (
