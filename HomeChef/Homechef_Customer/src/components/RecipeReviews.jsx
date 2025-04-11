@@ -11,16 +11,17 @@ import { toast } from "react-toastify";
 export default function RecipeReviews({ recipeId }) {
   const { user, token } = useAuth();
   const [reviews, setReviews] = useState([]);
+  const [myReview, setMyReview] = useState(null);
+
   const [newReview, setNewReview] = useState("");
   const [editing, setEditing] = useState(false);
   const [editText, setEditText] = useState("");
 
-  const myReview = user ? reviews.find((r) => r.userId === user.id) : null;
-
   const loadReviews = async () => {
     try {
       const res = await fetchReviews(recipeId);
-      setReviews(res.data);
+      setReviews(res.data.reviews || []);
+      setMyReview(res.data.myReview || null);
     } catch (err) {
       console.error("Failed to load reviews", err);
     }
@@ -43,7 +44,10 @@ export default function RecipeReviews({ recipeId }) {
       loadReviews();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to submit review.");
+      toast.error(
+        err.response?.data ||
+          "Failed to submit review. You may have already submitted one.",
+      );
     }
   };
 
@@ -77,7 +81,7 @@ export default function RecipeReviews({ recipeId }) {
         Reviews
       </h2>
 
-      {/* ✅ My Review (if logged in) */}
+      {/* ✅ My Review (if logged in and already wrote) */}
       {user && myReview && (
         <div className="space-y-3 rounded-xl border border-gray-200 p-4 dark:border-gray-700">
           {editing ? (
