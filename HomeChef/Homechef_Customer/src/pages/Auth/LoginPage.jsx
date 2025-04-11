@@ -48,9 +48,10 @@ export default function LoginPage() {
         },
       );
 
-      login(res.data.token); // 💡 עדכון ה־context
+      login(res.data.token, res.data.user.role); 
       toast.success("Logged in with Google!");
       setTimeout(() => navigate("/"), 1500);
+      console.log(res.data.user.role);
     } catch (err) {
       console.error("Google login error:", err);
       toast.error("Google login failed.");

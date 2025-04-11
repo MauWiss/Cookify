@@ -91,4 +91,8 @@ export const loginUser = (email, password) =>
 
 export const registerUser = (userData) => api.post("/auth/register", userData);
 
+export const deleteRecipe = (id) => {
+  return api.delete(`/admin/${id}`);  
+};
+
 export default api;

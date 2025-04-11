@@ -6,7 +6,11 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
+<<<<<<< HEAD
+  const [role, setRole] = useState(localStorage.getItem("role"))
+=======
   const [user, setUser] = useState(null);
+>>>>>>> 3633f9d46186ae350fd09fea0fe68c4916980ba4
 
   useEffect(() => {
     const loadUser = () => {
@@ -34,25 +38,40 @@ export const AuthProvider = ({ children }) => {
     return () => window.removeEventListener("storage", loadUser);
   }, []);
 
-  const login = (newToken) => {
+  const login = (newToken, newRole) => {
     localStorage.setItem("token", newToken);
+    localStorage.setItem("role", newRole);
     setToken(newToken);
+<<<<<<< HEAD
+    setRole(newRole);
+    console.log("role")
+=======
     const decoded = jwtDecode(newToken);
     setUser({
       id: decoded.id,
       email: decoded.email,
       username: decoded.username,
     });
+>>>>>>> 3633f9d46186ae350fd09fea0fe68c4916980ba4
   };
-
+  
   const logout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("role");
     setToken(null);
+<<<<<<< HEAD
+    setRole(null);
+  };
+
+  return (
+    <AuthContext.Provider value={{ token, role, login, logout }}>
+=======
     setUser(null);
   };
 
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
+>>>>>>> 3633f9d46186ae350fd09fea0fe68c4916980ba4
       {children}
     </AuthContext.Provider>
   );
