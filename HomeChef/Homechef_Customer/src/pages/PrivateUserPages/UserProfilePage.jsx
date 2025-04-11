@@ -6,16 +6,15 @@ import {
   updatePassword,
   uploadBase64Image,
 } from "../../api/api";
-
 import { useAuth } from "../../hooks/useAuth";
 
 export default function UserProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState("");
-  const [profilePicture, setProfilePicture] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [profilePicPreview, setProfilePicPreview] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -23,7 +22,7 @@ export default function UserProfilePage() {
         const data = await getUserProfile();
         setProfile(data);
         setBio(data.bio || "");
-        setProfilePicture(data.profilePictureBase64 || "");
+        setProfilePicPreview(data.profilePictureBase64 || "");
       } catch {
         toast.error("Failed to load profile.");
       }
@@ -43,6 +42,8 @@ export default function UserProfilePage() {
   const handlePasswordChange = async () => {
     try {
       await updatePassword({ oldPassword, newPassword });
+      setOldPassword("");
+      setNewPassword("");
       toast.success("Password updated");
     } catch {
       toast.error("Incorrect current password");
@@ -52,35 +53,44 @@ export default function UserProfilePage() {
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     try {
-      const base64 = await uploadBase64Image(file);
-      setProfilePicture(base64);
-      toast.success("Image uploaded");
+      const res = await uploadBase64Image(file);
+      setProfilePicPreview(res.base64);
+      toast.success("Image uploaded successfully");
     } catch {
-      toast.error("Failed to upload image");
+      toast.error("Image upload failed");
     }
   };
 
   if (!profile) return <div className="p-6">Loading...</div>;
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8 px-4 py-10">
       <h1 className="text-center text-3xl font-bold">👤 My Profile</h1>
 
-      {/* ✅ הצגת שם משתמש ואימייל */}
-      {user && (
-        <p className="text-center text-zinc-600 dark:text-zinc-300">
-          Logged in as: <strong>{user.username}</strong> ({user.email})
+      {/* פרטי משתמש */}
+      <div className="space-y-2 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+        <p>
+          <span className="font-semibold">Username:</span> {profile.username}
         </p>
-      )}
+        <p>
+          <span className="font-semibold">Email:</span> {profile.email}
+        </p>
+        <p>
+          <span className="font-semibold">Joined:</span>{" "}
+          {new Date(profile.createdAt).toLocaleDateString()}
+        </p>
+      </div>
 
-      {/* תמונה + העלאה */}
+      {/* תמונת פרופיל */}
       <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+        <h2 className="mb-4 text-xl font-semibold">🖼 Profile Picture</h2>
         <div className="flex flex-col items-center gap-4">
           <img
-            src={`data:image/jpeg;base64,${profilePicture}`}
+            src={`data:image/jpeg;base64,${profilePicPreview}`}
             alt="Profile"
-            className="h-32 w-32 rounded-full border-4 border-purple-500 object-cover"
+            className="h-32 w-32 rounded-full border-4 border-purple-500 object-cover shadow"
           />
           <input
             type="file"
@@ -91,35 +101,37 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* טופס עריכה */}
+      {/* Bio */}
       <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+        <h2 className="mb-4 text-xl font-semibold">📝 Bio</h2>
         <textarea
-          placeholder="Your bio..."
+          className="textarea textarea-bordered mb-4 w-full"
+          placeholder="Tell us about yourself..."
+          rows={3}
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          className="textarea textarea-bordered mb-4 w-full"
         />
         <button
           onClick={handleProfileUpdate}
           className="btn btn-primary w-full"
         >
-          Save Profile
+          Save Bio
         </button>
       </div>
 
-      {/* טופס סיסמה */}
+      {/* Change Password */}
       <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
         <h2 className="mb-4 text-xl font-semibold">🔐 Change Password</h2>
         <input
           type="password"
-          placeholder="Current password"
+          placeholder="Current Password"
           className="input input-bordered mb-3 w-full"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
         />
         <input
           type="password"
-          placeholder="New password"
+          placeholder="New Password"
           className="input input-bordered mb-4 w-full"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}

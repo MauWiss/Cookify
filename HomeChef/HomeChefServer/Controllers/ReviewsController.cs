@@ -55,19 +55,29 @@ namespace HomeChefServer.Controllers
 
             var userId = int.Parse(userClaim.Value);
 
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            using var cmd = new SqlCommand("sp_AddReview", conn);
-            cmd.CommandType = CommandType.StoredProcedure;
+            try
+            {
+                using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+                using var cmd = new SqlCommand("sp_AddReview", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
 
-            cmd.Parameters.AddWithValue("@RecipeId", recipeId);
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@ReviewText", reviewText);
+                cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
+                cmd.Parameters.AddWithValue("@ReviewText", reviewText);
 
-            conn.Open();
-            cmd.ExecuteNonQuery();
+                conn.Open();
+                cmd.ExecuteNonQuery();
 
-            return Ok(new { Message = "Review added successfully" });
+                return Ok(new { Message = "Review added successfully" });
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("User already submitted"))
+                    return BadRequest("You already submitted a review for this recipe.");
+                return StatusCode(500, "Database error: " + ex.Message);
+            }
         }
+
         [Authorize]
         [HttpPut("{reviewId}")]
         public IActionResult UpdateReview(int reviewId, [FromBody] string reviewText)
@@ -120,6 +130,5 @@ namespace HomeChefServer.Controllers
 
             return Ok("Review deleted successfully");
         }
-
     }
 }
