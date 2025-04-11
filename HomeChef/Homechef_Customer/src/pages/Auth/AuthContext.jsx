@@ -6,7 +6,8 @@ const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, role, setUser] = useState(localStorage.getItem("role"));
+  const [user, setUser] = useState(null); // משתמש
+  const [role, setRole] = useState(localStorage.getItem("role")); // תפקיד
 
   useEffect(() => {
     const loadUser = () => {
@@ -39,7 +40,17 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("role", newRole);
     setToken(newToken);
     setRole(newRole);
-    console.log("role");
+
+    try {
+      const decoded = jwtDecode(newToken);
+      setUser({
+        id: decoded.id,
+        email: decoded.email,
+        username: decoded.username,
+      });
+    } catch {
+      setUser(null);
+    }
   };
 
   const logout = () => {
@@ -47,6 +58,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("role");
     setToken(null);
     setUser(null);
+    setRole(null);
   };
 
   return (
