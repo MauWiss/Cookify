@@ -7,14 +7,17 @@ import {
   uploadBase64Image,
 } from "../../api/api";
 import { useAuth } from "../../hooks/useAuth";
+import { Link } from "react-router-dom";
+import { FaHeart, FaUserCircle } from "react-icons/fa";
+import { GiCook } from "react-icons/gi";
 
 export default function UserProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
-  const [profilePicPreview, setProfilePicPreview] = useState("");
 
   useEffect(() => {
     async function fetchData() {
@@ -22,9 +25,9 @@ export default function UserProfilePage() {
         const data = await getUserProfile();
         setProfile(data);
         setBio(data.bio || "");
-        setProfilePicPreview(data.profilePictureBase64 || "");
+        setProfilePicture(data.profilePictureBase64 || "");
       } catch {
-        toast.error("Failed to load profile.");
+        toast.error("❌ Failed to load profile.");
       }
     }
     fetchData();
@@ -33,20 +36,28 @@ export default function UserProfilePage() {
   const handleProfileUpdate = async () => {
     try {
       await updateUserProfile({ bio });
-      toast.success("Profile updated");
+      toast.success("✅ Profile updated");
     } catch {
-      toast.error("Error updating profile");
+      toast.error("❌ Error updating profile");
     }
   };
 
   const handlePasswordChange = async () => {
+    if (!oldPassword || !newPassword) {
+      toast.warning("⚠️ Please fill both password fields.");
+      return;
+    }
+    if (oldPassword === newPassword) {
+      toast.warning("⚠️ New password must be different from the current one.");
+      return;
+    }
     try {
       await updatePassword({ oldPassword, newPassword });
+      toast.success("✅ Password updated");
       setOldPassword("");
       setNewPassword("");
-      toast.success("Password updated");
-    } catch {
-      toast.error("Incorrect current password");
+    } catch (err) {
+      toast.error(err.response?.data?.message || "❌ Error updating password");
     }
   };
 
@@ -55,41 +66,43 @@ export default function UserProfilePage() {
     if (!file) return;
     try {
       const res = await uploadBase64Image(file);
-      setProfilePicPreview(res.base64);
-      toast.success("Image uploaded successfully");
+      setProfilePicture(res.data.base64);
+      toast.success("✅ Image uploaded");
     } catch {
-      toast.error("Image upload failed");
+      toast.error("❌ Failed to upload image");
     }
   };
 
-  if (!profile) return <div className="p-6">Loading...</div>;
+  if (!profile)
+    return <div className="p-10 text-center">Loading profile...</div>;
+
+  const imageSrc = profilePicture
+    ? `data:image/jpeg;base64,${profilePicture}`
+    : "https://static.vecteezy.com/system/resources/thumbnails/000/364/628/small_2x/Chef_Avatar_Illustration-03.jpg";
 
   return (
-    <div className="mx-auto max-w-3xl space-y-10 px-4 py-10">
-      <h1 className="text-center text-3xl font-bold">👤 My Profile</h1>
+    <div className="mx-auto mt-10 max-w-2xl space-y-8">
+      {/* Title */}
+      <h1 className="flex items-center justify-center gap-2 text-center text-4xl font-bold text-purple-800">
+        <FaUserCircle className="text-5xl text-purple-600" />
+        My Profile
+      </h1>
 
-      {/* פרטי משתמש */}
-      <div className="space-y-2 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <p>
-          <span className="font-semibold">Username:</span> {profile.username}
+      {/* User Info */}
+      {(user?.username || profile.username) && (
+        <p className="text-center text-zinc-600 dark:text-zinc-300">
+          Logged in as: <strong>{user?.username || profile.username}</strong> (
+          {user?.email || profile.email})
         </p>
-        <p>
-          <span className="font-semibold">Email:</span> {profile.email}
-        </p>
-        <p>
-          <span className="font-semibold">Joined:</span>{" "}
-          {new Date(profile.createdAt).toLocaleDateString()}
-        </p>
-      </div>
+      )}
 
-      {/* תמונת פרופיל */}
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <h2 className="mb-4 text-xl font-semibold">🖼 Profile Picture</h2>
+      {/* Profile Image Upload */}
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
         <div className="flex flex-col items-center gap-4">
           <img
-            src={`data:image/jpeg;base64,${profilePicPreview}`}
+            src={imageSrc}
             alt="Profile"
-            className="h-32 w-32 rounded-full border-4 border-purple-500 object-cover shadow"
+            className="h-32 w-32 rounded-full border-4 border-purple-500 object-cover"
           />
           <input
             type="file"
@@ -101,36 +114,36 @@ export default function UserProfilePage() {
       </div>
 
       {/* Bio */}
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <h2 className="mb-4 text-xl font-semibold">📝 Bio</h2>
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
         <textarea
-          className="textarea textarea-bordered mb-4 w-full"
-          placeholder="Tell us about yourself..."
-          rows={3}
+          placeholder="Your bio..."
           value={bio}
           onChange={(e) => setBio(e.target.value)}
+          className="textarea textarea-bordered mb-4 w-full"
         />
         <button
           onClick={handleProfileUpdate}
           className="btn btn-primary w-full"
         >
-          Save Bio
+          Save Profile
         </button>
       </div>
 
       {/* Change Password */}
-      <div className="rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <h2 className="mb-4 text-xl font-semibold">🔐 Change Password</h2>
+      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
+        <h2 className="mb-4 text-xl font-semibold text-purple-800">
+          🔐 Change Password
+        </h2>
         <input
           type="password"
-          placeholder="Current Password"
+          placeholder="Current password"
           className="input input-bordered mb-3 w-full"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
         />
         <input
           type="password"
-          placeholder="New Password"
+          placeholder="New password"
           className="input input-bordered mb-4 w-full"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
@@ -143,33 +156,20 @@ export default function UserProfilePage() {
         </button>
       </div>
 
-      {/* כרטיסים: קישורים לעמודים נוספים */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div className="flex flex-col items-start rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-          <h3 className="mb-2 text-lg font-semibold">🍳 My Recipes</h3>
-          <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-            View and manage recipes you've created.
-          </p>
-          <button
-            onClick={() => (window.location.href = "/my-recipes")}
-            className="btn btn-outline btn-primary"
-          >
-            Go to My Recipes
-          </button>
-        </div>
-
-        <div className="flex flex-col items-start rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-          <h3 className="mb-2 text-lg font-semibold">❤️ Favorites</h3>
-          <p className="mb-4 text-sm text-zinc-600 dark:text-zinc-400">
-            Explore recipes you've marked as favorite.
-          </p>
-          <button
-            onClick={() => (window.location.href = "/favorites")}
-            className="btn btn-outline btn-secondary"
-          >
-            View Favorites
-          </button>
-        </div>
+      {/* Favorites & My Recipes */}
+      <div className="flex flex-col gap-4 rounded-xl bg-white p-6 text-lg shadow-md dark:bg-zinc-800 md:flex-row">
+        <Link
+          to="/favorites"
+          className="btn btn-outline btn-info flex w-full items-center justify-center gap-2"
+        >
+          <FaHeart /> My Favorites
+        </Link>
+        <Link
+          to="/my-recipes"
+          className="btn btn-outline btn-warning flex w-full items-center justify-center gap-2"
+        >
+          <GiCook /> My Recipes
+        </Link>
       </div>
     </div>
   );
