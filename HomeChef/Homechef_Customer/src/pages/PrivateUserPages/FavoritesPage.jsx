@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { FaClock, FaUtensils, FaHeart } from "react-icons/fa";
 import { toast, ToastContainer } from "react-toastify";
@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 export default function FavoritesPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  
 
   const {
     favorites,
@@ -19,7 +20,17 @@ export default function FavoritesPage() {
     selectedCategoryId,
     setSelectedCategoryId,
     deleteFavorite,
+    reloadRecipes,
   } = useFavoritesData();
+
+  const categoryCounts = favorites.length;
+
+  useEffect(() => {
+      const delay = setTimeout(() => {
+        reloadRecipes(selectedCategoryId);
+      }, 500);
+      return () => clearTimeout(delay);
+    }, [selectedCategoryId]);
 
   const handleRemoveFavorite = async (recipeId) => {
     const result = await Swal.fire({
@@ -65,6 +76,7 @@ export default function FavoritesPage() {
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
+        categoryCounts={categoryCounts}
       />
 
       {loading ? (

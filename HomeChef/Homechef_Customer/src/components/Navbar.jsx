@@ -104,7 +104,7 @@ export default function Navbar() {
             <div className="flex items-center gap-2">
               
               <img
-                src= {user.profileImage}
+                src= {user?.profileImage || "/default-avatar.png"}
                 alt="Avatar"
                 className="h-6 w-6 rounded-full border border-gray-300"
               />

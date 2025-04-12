@@ -23,14 +23,14 @@ export const AuthProvider = ({ children }) => {
           console.log("decoded token:", decoded);
   
           const data = await getUserProfile();
+          console.log(data);
   
           setUser({
             id: decoded.UserId,
             email: decoded.Email,
             username: decoded.Username,
-            profileImage: data.data.profilePictureBase64,
+            profileImage: `data:image/jpeg;base64,${data.data.profilePictureBase64 || ""}`,
           });
-          console.log(user)
         } catch (error) {
           console.error("Failed to load user:", error);
           setUser(null);
@@ -53,7 +53,7 @@ export const AuthProvider = ({ children }) => {
     setRole(newRole);
 
     try {
-      const decoded = jwtDecode(storedToken);
+      const decoded = jwtDecode(newToken);
       console.log("decoded token:", decoded);
 
       setUser({

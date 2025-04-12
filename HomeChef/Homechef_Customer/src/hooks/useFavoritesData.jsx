@@ -7,7 +7,7 @@ export const useFavoritesData = () => {
   const [loading, setLoading] = useState(false);
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
 
-  const loadFavorites = async (categoryId = null) => {
+  const loadFavorites = async (categoryId) => {
     setLoading(true);
     try {
       const res = await fetchFavorites(categoryId);
@@ -46,6 +46,7 @@ export const useFavoritesData = () => {
     loading,
     categories,
     selectedCategoryId,
+    reloadRecipes:loadFavorites,
     setSelectedCategoryId,
     deleteFavorite,
   };
