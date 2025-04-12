@@ -26,7 +26,7 @@ export default function LoginPage() {
 
     try {
       const res = await loginUser(email, password);
-      login(res.data.token); // 💡 עדכון ה־context
+      login(res.data.token, res.data.user.role);// 💡 עדכון ה־context
       toast.success("Welcome back!");
       setTimeout(() => navigate("/"), 1500);
     } catch (err) {

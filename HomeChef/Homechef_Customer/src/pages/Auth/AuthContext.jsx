@@ -23,7 +23,9 @@ export const AuthProvider = ({ children }) => {
             id: decoded.UserId,
             email: decoded.email,
             username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+            profileImage: decoded.ProfilePictureBase64
           });
+        
         } catch {
           setUser(null);
         }
