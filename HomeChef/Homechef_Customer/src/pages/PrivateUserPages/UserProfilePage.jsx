@@ -6,8 +6,7 @@ import {
   updatePassword,
   uploadBase64Image,
 } from "../../api/api";
-
-import { useAuth } from "../Auth/AuthContext.jsx";
+import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
 import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
@@ -24,9 +23,10 @@ export default function UserProfilePage() {
     async function fetchData() {
       try {
         const data = await getUserProfile();
+        console.log(data)
         setProfile(data);
-        setBio(data.bio || "");
-        setProfilePicture(data.profilePictureBase64 || "");
+        setBio(data.data.bio || "");
+        setProfilePicture(data.data.profilePictureBase64 || "");
       } catch {
         toast.error("❌ Failed to load profile.");
       }
@@ -88,27 +88,33 @@ export default function UserProfilePage() {
         My Profile
       </h1>
 
-      {(user?.username || profile.username) && (
+      {(user?.username || profile.data.username) && (
         <p className="text-center text-zinc-600 dark:text-zinc-300">
-          Logged in as: <strong>{user?.username || profile.username}</strong> (
-          {user?.email || profile.email})
+          Logged in as: <strong>{profile.data.username}</strong>
         </p>
       )}
 
       <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
         <div className="flex flex-col items-center gap-4">
-          <img
-            src={imageSrc}
-            alt="Profile"
-            className="h-32 w-32 rounded-full border-4 border-blue-500 object-cover"
-          />
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="file-input file-input-bordered w-full max-w-xs"
-          />
+          {imageSrc && (
+            <img
+              src={imageSrc}
+              alt="Uploaded"
+              className="w-32 h-32 rounded-full object-cover shadow-md"
+            />
+          )}
+
+          <label className="cursor-pointer text-blue-500 underline hover:text-blue-700">
+            {imageSrc ? "Change Image" : "Upload Image"}
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageUpload}
+              className="hidden"
+            />
+          </label>
         </div>
+
       </div>
 
       <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
@@ -120,7 +126,7 @@ export default function UserProfilePage() {
         />
         <button
           onClick={handleProfileUpdate}
-          className="btn btn-primary w-full"
+          className="btn btn-primary w-full cursor-pointer text-blue-500 underline hover:text-blue-700"
         >
           Save Profile
         </button>
@@ -133,7 +139,7 @@ export default function UserProfilePage() {
         <input
           type="password"
           placeholder="Current password"
-          className="input input-bordered mb-3 w-full"
+          className="input input-bordered mb-3 w-full "
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
         />
@@ -146,7 +152,7 @@ export default function UserProfilePage() {
         />
         <button
           onClick={handlePasswordChange}
-          className="btn btn-secondary w-full"
+          className="btn btn-secondary w-full cursor-pointer text-blue-500 underline hover:text-blue-700"
         >
           Change Password
         </button>
