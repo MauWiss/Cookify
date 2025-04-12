@@ -6,7 +6,8 @@ import {
   updatePassword,
   uploadBase64Image,
 } from "../../api/api";
-import { useAuth } from "../../hooks/useAuth";
+
+import { useAuth } from "../Auth/AuthContext.jsx";
 import { Link } from "react-router-dom";
 import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
