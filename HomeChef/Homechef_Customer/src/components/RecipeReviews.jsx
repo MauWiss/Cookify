@@ -6,7 +6,7 @@ import {
   deleteReview,
 } from "../api/api";
 import { useAuth } from "../pages/Auth/AuthContext";
-import { toast } from "react-toastify"; // Toastify for fireworks effect
+import { toast } from "react-toastify";
 
 export default function RecipeReviews({ recipeId }) {
   const { user, token } = useAuth();
@@ -39,14 +39,14 @@ export default function RecipeReviews({ recipeId }) {
 
     try {
       await addReview(recipeId, newReview);
-      toast.success("Review submitted! 🎉💥✨"); // Fireworks effect
+      toast.success("Review submitted!");
       setNewReview("");
       loadReviews();
     } catch (err) {
       console.error(err);
       toast.error(
         err.response?.data ||
-          "Failed to submit review. You may have already submitted one. 💥🎆",
+          "Failed to submit review. You may have already submitted one.",
       );
     }
   };
@@ -54,24 +54,24 @@ export default function RecipeReviews({ recipeId }) {
   const handleUpdateReview = async () => {
     try {
       await updateReview(myReview.reviewId, editText);
-      toast.success("Review updated! 💥✨"); // Fireworks effect
+      toast.success("Review updated!");
       setEditing(false);
       loadReviews();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update review. 💥✨");
+      toast.error("Failed to update review.");
     }
   };
 
   const handleDeleteReview = async () => {
     try {
       await deleteReview(myReview.reviewId);
-      toast.success("Review deleted. 🎆💥"); // Fireworks effect
+      toast.success("Review deleted.");
       setEditing(false);
       loadReviews();
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete review. 💥✨");
+      toast.error("Failed to delete review.");
     }
   };
 
@@ -94,7 +94,7 @@ export default function RecipeReviews({ recipeId }) {
               <div className="flex gap-3">
                 <button
                   onClick={handleUpdateReview}
-                  className="transform rounded bg-blue-600 px-4 py-2 text-white transition-all duration-300 hover:scale-110 hover:bg-blue-700"
+                  className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
                   Save
                 </button>
@@ -117,13 +117,13 @@ export default function RecipeReviews({ recipeId }) {
                     setEditing(true);
                     setEditText(myReview.reviewText);
                   }}
-                  className="text-blue-500 transition-all duration-300 hover:text-blue-700 hover:underline"
+                  className="text-blue-500 hover:underline"
                 >
                   Edit
                 </button>
                 <button
                   onClick={handleDeleteReview}
-                  className="text-red-500 transition-all duration-300 hover:text-red-700 hover:underline"
+                  className="text-red-500 hover:underline"
                 >
                   Delete
                 </button>
@@ -144,7 +144,7 @@ export default function RecipeReviews({ recipeId }) {
           />
           <button
             onClick={handleAddReview}
-            className="transform rounded bg-green-600 px-4 py-2 text-white transition-all duration-300 hover:scale-110 hover:bg-green-700"
+            className="rounded bg-green-600 px-4 py-2 text-white hover:bg-green-700"
           >
             Submit Review
           </button>
