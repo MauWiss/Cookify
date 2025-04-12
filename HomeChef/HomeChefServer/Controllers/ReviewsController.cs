@@ -22,15 +22,6 @@ namespace HomeChefServer.Controllers
         public IActionResult GetReviews(int recipeId)
         {
             var reviews = new List<ReviewDTO>();
-            ReviewDTO myReview = null;
-
-            int? userId = null;
-            if (User.Identity.IsAuthenticated)
-            {
-                var userClaim = User.FindFirst("UserId");
-                if (userClaim != null)
-                    userId = int.Parse(userClaim.Value);
-            }
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             using var cmd = new SqlCommand("sp_GetReviewsByRecipeId", conn);
@@ -41,61 +32,54 @@ namespace HomeChefServer.Controllers
             using var reader = cmd.ExecuteReader();
             while (reader.Read())
             {
-                var review = new ReviewDTO
+                reviews.Add(new ReviewDTO
                 {
                     ReviewId = (int)reader["ReviewId"],
                     UserId = (int)reader["UserId"],
                     Username = reader["Username"].ToString(),
                     ReviewText = reader["ReviewText"].ToString(),
                     CreatedAt = (DateTime)reader["CreatedAt"]
-                };
-
-                reviews.Add(review);
-
-                if (userId.HasValue && review.UserId == userId.Value)
-                    myReview = review;
+                });
             }
 
-            return Ok(new { reviews, myReview });
+            return Ok(reviews);
         }
+
+
+
+
+
 
         [Authorize]
         [HttpPost("{recipeId}")]
-        public IActionResult AddReview(int recipeId, [FromBody] ReviewDTO dto)
+        public IActionResult AddReview(int recipeId, [FromBody] string reviewText)
         {
+            foreach (var claim in User.Claims)
+            {
+                Console.WriteLine($"{claim.Type} = {claim.Value}");
+            }
             var userClaim = User.FindFirst("UserId");
-            var usernameClaim = User.FindFirst("Username");
+            var userNameClaim = User.FindFirst("Username");
 
-            if (userClaim == null || usernameClaim == null)
-                return Unauthorized("UserId or Username claim not found.");
+            if (userClaim == null)
+                return Unauthorized("UserId claim not found.");
 
             var userId = int.Parse(userClaim.Value);
-            var username = usernameClaim.Value;
-            var reviewText = dto.ReviewText;
-
+            var userName = userNameClaim.Value;
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            conn.Open();
-
-            using (var checkCmd = new SqlCommand("SELECT COUNT(*) FROM Reviews WHERE RecipeId = @RecipeId AND UserId = @UserId", conn))
-            {
-                checkCmd.Parameters.AddWithValue("@RecipeId", recipeId);
-                checkCmd.Parameters.AddWithValue("@UserId", userId);
-                int exists = (int)checkCmd.ExecuteScalar();
-                if (exists > 0)
-                    return BadRequest("You already submitted a review for this recipe.");
-            }
-
             using var cmd = new SqlCommand("sp_AddReview", conn);
             cmd.CommandType = CommandType.StoredProcedure;
+
             cmd.Parameters.AddWithValue("@RecipeId", recipeId);
             cmd.Parameters.AddWithValue("@UserId", userId);
             cmd.Parameters.AddWithValue("@ReviewText", reviewText);
-            cmd.Parameters.AddWithValue("@Username", username);
+            cmd.Parameters.AddWithValue("@Username", userName);
+
+            conn.Open();
             cmd.ExecuteNonQuery();
 
-            return Ok(new { Message = "Review added successfully", Username = username });
+            return Ok(new { Message = "Review added successfully" });
         }
-
 
 
         [Authorize]
@@ -150,5 +134,6 @@ namespace HomeChefServer.Controllers
 
             return Ok("Review deleted successfully");
         }
+
     }
 }
