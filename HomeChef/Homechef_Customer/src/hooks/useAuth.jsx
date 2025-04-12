@@ -12,8 +12,8 @@ export const useAuth = () => {
       const decoded = jwtDecode(token);
       setUser({
         id: decoded.UserId,
-        email: decoded.email,
-        username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+        email: decoded.Email,
+        username: decoded.Username,
       });
     }
   }, []);

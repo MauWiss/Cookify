@@ -24,7 +24,7 @@ export default function Homepage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  const categoryCounts = recipes.length
+  const categoryCounts = recipes.length;
   useEffect(() => {
     const delay = setTimeout(() => {
       reloadRecipes(searchTerm, selectedCategoryId);

@@ -9,7 +9,7 @@ import { GiCook } from "react-icons/gi";
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, logout, role } = useAuth();
+  const { token, logout, role, user } = useAuth();
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
 
   // Sync dark mode
@@ -50,19 +50,7 @@ export default function Navbar() {
           </Link>
         )}
 
-        {/* ✅ קישור לפרופיל */}
-        {token && (
-          <Link className={active("/profile")} to="/profile">
-            <div className="flex items-center gap-2">
-              Profile
-              <img
-                src="/default-avatar.png"
-                alt="Avatar"
-                className="h-6 w-6 rounded-full border border-gray-300"
-              />
-            </div>
-          </Link>
-        )}
+        
 
         {token && (
           <>
@@ -109,6 +97,20 @@ export default function Navbar() {
         >
           {dark ? <Sun size={22} /> : <Moon size={22} />}
         </button>
+
+        {/* ✅ קישור לפרופיל */}
+        {token && (
+          <Link className={active("/profile")} to="/profile">
+            <div className="flex items-center gap-2">
+              
+              <img
+                src= {user.profileImage}
+                alt="Avatar"
+                className="h-6 w-6 rounded-full border border-gray-300"
+              />
+            </div>
+          </Link>
+        )}
       </div>
     </nav>
   );
