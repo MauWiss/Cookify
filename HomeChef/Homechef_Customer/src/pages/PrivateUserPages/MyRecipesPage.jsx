@@ -49,13 +49,9 @@ export default function MyRecipesPage() {
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-gray-900 dark:bg-[#202124] dark:text-[#f5f5f5]">
-      <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-        My Recipes 👨‍🍳
-      </h2>
-
-      <AddRecipeModal onRecipeAdded={reloadRecipes} />
-      <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
-
+      <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white text-center">
+        My Recipes 
+      </h1>
       <CategorySelect
         categories={categories}
         selectedCategoryId={selectedCategoryId}
@@ -70,6 +66,9 @@ export default function MyRecipesPage() {
         <div className="text-center text-red-500">No recipes found.</div>
       ) : (
         <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+          <AddRecipeModal
+            onRecipeAdded={reloadRecipes}
+          />
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
