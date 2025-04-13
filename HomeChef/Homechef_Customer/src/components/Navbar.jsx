@@ -45,31 +45,28 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
-      <div className="flex items-center justify-between w-full">
-        <h1 className="text-2xl font-bold tracking-wide text-gray-900 dark:text-white">
-          HomeChef 🍳
-        </h1>
+      <div className="relative flex items-center justify-between w-full">
+        {/* לוגו */}
+        <img
+          src="../src/images/Logo-bowl.png" // אם בתיקיית public
+          alt="Logo"
+          className="h-10 w-auto"
+        />
 
-        <button
-          className="sm:hidden text-gray-700 dark:text-white"
-          onClick={() => setMenuOpen((prev) => !prev)}
-        >
-          <FaBars size={24} />
-        </button>
-
-        <div className="hidden sm:flex items-center gap-6 text-lg font-medium">
-          <Link className={active("/")} to="/">Home</Link>
+        {/* קישורים באמצע */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex gap-6 text-lg font-medium">
+          <Link className={`${active("/")} no-underline`} to="/">Home</Link>
           {token && role === "admin" && (
-            <Link to="/admin" className="text-yellow-400">Admin Panel</Link>
+            <Link to="/admin" className={`${active("/admin")} no-underline`}>Admin Panel</Link>
           )}
           {token && (
             <>
-              <Link className={active("/favorites")} to="/favorites">
+              <Link className={`${active("/favorites")} no-underline`} to="/favorites">
                 <div className="flex items-center gap-2">
                   Favorites <FaHeart className="text-red-500" />
                 </div>
               </Link>
-              <Link className={active("/my-recipes")} to="/my-recipes">
+              <Link className={`${active("/my-recipes")} no-underline`} to="/my-recipes">
                 <div className="flex items-center gap-2">
                   My Recipes <GiCook className="text-orange-500" />
                 </div>
@@ -78,12 +75,20 @@ export default function Navbar() {
           )}
           {!token ? (
             <>
-              <Link className={active("/auth/login")} to="/auth/login">Login</Link>
-              <Link className={active("/auth/register")} to="/auth/register">Register</Link>
+              <Link className={`${active("/auth/login")} no-underline`} to="/auth/login">Login</Link>
+              <Link className={`${active("/auth/register")} no-underline`} to="/auth/register">Register</Link>
             </>
           ) : null}
+        </div>
 
-
+        {/* פרופיל + תפריט */}
+        <div className="flex items-center gap-4">
+          <button
+            className="sm:hidden text-gray-700 dark:text-white"
+            onClick={() => setMenuOpen((prev) => !prev)}
+          >
+            <FaBars size={24} />
+          </button>
 
           {token && (
             <div className="relative" ref={profileRef}>
@@ -96,29 +101,20 @@ export default function Navbar() {
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
                 />
-                <span className="text-sm text-gray-700 dark:text-white">{user?.username}</span>
+                <span className="text-sm text-gray-700 dark:text-white hover:text-purple-800 hover:scale-105 transition-all duration-300">{user?.username}</span>
               </button>
               {profileMenuOpen && (
                 <div className="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800 z-50">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 no-underline"
                     onClick={() => setProfileMenuOpen(false)}
                   >
                     Profile
                   </Link>
                   <button
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-800 dark:text-red-400"
-                  >
-                    Logout
-                  </button>
-                  <button
                     onClick={() => setDark(prev => !prev)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2 no-underline"
                   >
                     {dark ? (
                       <>
@@ -130,7 +126,15 @@ export default function Navbar() {
                       </>
                     )}
                   </button>
-
+                  <button
+                    onClick={() => {
+                      setProfileMenuOpen(false);
+                      handleLogout();
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-800 dark:text-red-400"
+                  >
+                    Logout
+                  </button>
                 </div>
               )}
             </div>
@@ -142,7 +146,7 @@ export default function Navbar() {
         <div className="mt-4 flex flex-col gap-4 sm:hidden text-lg font-medium">
           <Link className={active("/")} to="/">Home</Link>
           {token && role === "admin" && (
-            <Link to="/admin" className="text-yellow-400">Admin Panel</Link>
+            <Link to="/admin" className="text-yellow-400 no-underline">Admin Panel</Link>
           )}
           {token && (
             <>
@@ -172,12 +176,6 @@ export default function Navbar() {
               Logout
             </button>
           )}
-          <button
-            onClick={() => setDark((prev) => !prev)}
-            className="text-gray-700 dark:text-white"
-          >
-            {dark ? <Sun size={22} /> : <Moon size={22} />}
-          </button>
           {token && (
             <div className="flex flex-col border-t border-gray-300 pt-3 gap-2">
               <div className="flex items-center gap-3 px-4">
@@ -196,6 +194,20 @@ export default function Navbar() {
                 Profile
               </Link>
               <button
+                onClick={() => setDark(prev => !prev)}
+                className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2"
+              >
+                {dark ? (
+                  <>
+                    Light <Sun size={22} />
+                  </>
+                ) : (
+                  <>
+                    Dark <Moon size={22} />
+                  </>
+                )}
+              </button>
+              <button
                 onClick={() => {
                   setMenuOpen(false);
                   handleLogout();
@@ -206,7 +218,6 @@ export default function Navbar() {
               </button>
             </div>
           )}
-
         </div>
       )}
     </nav>
