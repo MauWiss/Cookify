@@ -5,6 +5,8 @@ import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
 import { FaBars, FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
+import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+
 
 export default function Navbar() {
   const location = useLocation();
@@ -14,6 +16,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -46,14 +49,14 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
       <div className="relative flex items-center justify-between w-full">
-        {/* לוגו בצד ימין */}
+        {/* Logo left side*/}
         <img
           src="../src/images/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
         />
 
-        {/* קישורים באמצע */}
+        {/* middle links*/}
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex gap-6 text-lg font-medium">
           <Link className={`${active("/")} no-underline`} to="/">Home</Link>
           {token && role === "admin" && (
@@ -81,7 +84,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/* אייקון תפריט ופרופיל בצד שמאל */}
+        {/*right side*/}
         <div className="flex items-center gap-4">
           <button
             className="sm:hidden text-gray-700 dark:text-white"
@@ -103,6 +106,12 @@ export default function Navbar() {
                 />
                 <span className="text-sm text-gray-700 dark:text-white hover:text-purple-800 hover:scale-105 transition-all duration-300">
                   {user?.username}
+                </span>
+                <span
+                  className="flex items-center gap-1 cursor-pointer"
+                  onClick={() => setOpen(prev => !prev)}
+                >
+                   {open ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
               </button>
 
@@ -145,7 +154,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* תפריט מובייל */}
+      {/* Mobile*/}
       {menuOpen && (
         <div className="mt-4 flex flex-col gap-4 sm:hidden text-lg font-medium">
           <Link className={active("/")} to="/">Home</Link>
