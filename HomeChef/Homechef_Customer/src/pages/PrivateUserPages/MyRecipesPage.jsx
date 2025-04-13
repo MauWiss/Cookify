@@ -48,7 +48,7 @@ export default function MyRecipesPage() {
   };
 
   return (
-    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
+    <div className="min-h-screen bg-white px-6 py-8 text-gray-900 dark:bg-[#202124] dark:text-[#f5f5f5]">
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
         My Recipes 👨‍🍳
       </h2>
