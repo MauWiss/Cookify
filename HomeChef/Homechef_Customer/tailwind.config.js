@@ -5,6 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
+        profile: {
+          DEFAULT: "#f9f9f9", // מצב רגיל – לבן־אפרפר
+          dark: "#2a2b2e", // מצב כהה – אפור־כהה־נעים
+        },
         background: {
           DEFAULT: "#ffffff",
           dark: "#202124",
