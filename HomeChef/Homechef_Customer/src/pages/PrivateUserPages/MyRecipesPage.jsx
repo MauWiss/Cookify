@@ -3,10 +3,10 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import Swal from "sweetalert2";
 import CategorySelect from "../../components/CategorySelect";
 import SearchInput from "../../components/SearchInput";
-import AddRecipeModal from "../../components/AddRecipeModal";
+import AddRecipeWizard from "../../components/AddRecipeModal"; // <-- ודא שזה הוויזארד החדש
 import EditRecipeModal from "../../components/EditRecipeModal";
 import { useMyRecipesData } from "../../hooks/useMyRecipesData";
-import { toast } from "react-toastify"; // Use toast from the global context
+import { toast } from "react-toastify";
 
 export default function MyRecipesPage() {
   const [editingRecipeId, setEditingRecipeId] = useState(null);
@@ -39,19 +39,25 @@ export default function MyRecipesPage() {
     try {
       await removeRecipe(recipeId);
       Swal.fire("Deleted!", "Your recipe has been deleted.", "success");
-      toast.success("Recipe deleted! 🎆💥✨"); // Fireworks effect after deletion
+      toast.success("Recipe deleted! 🎆💥✨");
     } catch (err) {
       console.error("Failed to delete", err);
       Swal.fire("Error", "Something went wrong.", "error");
-      toast.error("Failed to delete recipe. 💥✨"); // Fireworks effect on error
+      toast.error("Failed to delete recipe. 💥✨");
     }
   };
 
   return (
     <div className="min-h-screen bg-white px-6 py-8 text-gray-900 dark:bg-[#202124] dark:text-[#f5f5f5]">
-      <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white text-center">
-        My Recipes 
+      <h1 className="mb-4 text-center text-3xl font-bold text-gray-900 dark:text-white">
+        My Recipes
       </h1>
+
+      {/* ✅ כפתור הוספה תמיד מופיע */}
+      <div className="mb-6 flex justify-center">
+        <AddRecipeWizard onRecipeAdded={reloadRecipes} />
+      </div>
+
       <CategorySelect
         categories={categories}
         selectedCategoryId={selectedCategoryId}
@@ -59,16 +65,13 @@ export default function MyRecipesPage() {
       />
 
       {loading ? (
-        <div className="flex justify-center">
+        <div className="mt-10 flex justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
         </div>
       ) : recipes.length === 0 ? (
-        <div className="text-center text-red-500">No recipes found.</div>
+        <div className="mt-10 text-center text-red-500">No recipes found.</div>
       ) : (
-        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-          <AddRecipeModal
-            onRecipeAdded={reloadRecipes}
-          />
+        <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
