@@ -75,8 +75,8 @@ export default function AddRecipeModal({ onRecipeAdded }) {
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="rounded-lg bg-blue-600 px-2 py-1 font-semibold text-white hover:bg-blue-700">
-        + Add Recipe
+      <Dialog.Trigger className=" bg-blue-600  text-white dark:bg-card-dark border-border dark:text-white dark:border-border-dark relative overflow-hidden rounded-2xl border shadow-lg transition duration-300 hover:shadow-2xl hover:bg-blue-700" >
+        <h1 className="text-2xl font-bold">+ Add Recipe</h1>
       </Dialog.Trigger>
 
       <Dialog.Portal>
