@@ -73,7 +73,7 @@ export default function MyRecipesPage() {
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
+              className="bg-card dark:bg-card-dark border-border dark:border-border-dark relative overflow-hidden rounded-2xl border shadow-lg transition duration-300 hover:shadow-2xl"
             >
               <a
                 href={recipe.sourceUrl}
