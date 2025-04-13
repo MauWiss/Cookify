@@ -1,7 +1,6 @@
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { Moon, Sun } from "lucide-react";
-import { Moon, Sun } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
 import { FaBars, FaHeart } from "react-icons/fa";
@@ -28,7 +27,9 @@ export default function Navbar() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const handleLogout = () => {
@@ -39,8 +40,8 @@ export default function Navbar() {
 
   const active = (path) =>
     location.pathname === path
-      ? "text-text dark:text-text-dark font-semibold"
-      : "text-text dark:text-text-dark hover:text-primary dark:hover:text-primary-dark transition";
+      ? "text-blue-500 font-semibold underline underline-offset-4"
+      : "text-gray-800 hover:text-blue-500 dark:text-white dark:hover:text-blue-400 transition";
 
   return (
     <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
@@ -73,12 +74,10 @@ export default function Navbar() {
             </>
           )}
           {!token && (
-          {!token && (
             <>
               <Link className={`${active("/auth/login")} no-underline`} to="/auth/login">Login</Link>
               <Link className={`${active("/auth/register")} no-underline`} to="/auth/register">Register</Link>
             </>
-          )}
           )}
         </div>
 
@@ -176,7 +175,7 @@ export default function Navbar() {
             <button
               onClick={handleLogout}
               title="Logout"
-              className="px-4 py-2 text-left text-red-600 hover:underline"
+              className="text-left px-4 py-2 text-red-600 hover:underline"
             >
               Logout
             </button>
@@ -188,7 +187,7 @@ export default function Navbar() {
             {dark ? <Sun size={22} /> : <Moon size={22} />}
           </button>
           {token && (
-            <div className="flex flex-col gap-2 border-t border-gray-300 pt-3">
+            <div className="flex flex-col border-t border-gray-300 pt-3 gap-2">
               <div className="flex items-center gap-3 px-4">
                 <img
                   src={user?.profileImage || "/default-avatar.png"}
@@ -209,7 +208,7 @@ export default function Navbar() {
                   setMenuOpen(false);
                   handleLogout();
                 }}
-                className="px-4 py-2 text-left text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-800"
+                className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:hover:bg-red-800 dark:text-red-400"
               >
                 Logout
               </button>
@@ -220,4 +219,3 @@ export default function Navbar() {
     </nav>
   );
 }
-
