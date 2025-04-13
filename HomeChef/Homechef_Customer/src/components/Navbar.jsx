@@ -57,11 +57,17 @@ export default function Navbar() {
 
         <div className="hidden items-center gap-6 text-lg font-medium sm:flex">
           <Link className={active("/")} to="/">
-            Home
+            <div className="flex items-center gap-2">
+              Home <span className="text-xl">🏠</span>
+            </div>
           </Link>
+
           {token && role === "admin" && (
-            <Link to="/admin" className="text-yellow-400">
-              Admin Panel
+            <Link
+              to="/admin"
+              className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400"
+            >
+              Admin Panel🛠️
             </Link>
           )}
           {token && (
