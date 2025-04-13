@@ -42,7 +42,7 @@ export default function Navbar() {
       : "text-text dark:text-text-dark hover:text-primary dark:hover:text-primary-dark transition";
 
   return (
-    <nav className="relative z-50 border-b border-[#e5e7eb] bg-[#f3f4f6] px-6 py-4 shadow-sm transition-colors duration-300 dark:border-[#2c2c2c] dark:bg-[#1c1d1f]">
+    <nav className="relative z-50 border-b border-[#d1d5db] bg-[#e5e7eb] px-6 py-4 shadow-sm transition-colors duration-300 dark:border-[#2c2c2c] dark:bg-[#1c1d1f]">
       <div className="flex items-center justify-between">
         <h1 className="text-text dark:text-text-dark text-2xl font-bold tracking-wide">
           HomeChef 🍳
