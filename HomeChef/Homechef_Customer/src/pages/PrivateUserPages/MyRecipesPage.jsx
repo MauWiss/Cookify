@@ -48,32 +48,26 @@ export default function MyRecipesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
+    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
       <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
         My Recipes 👨‍🍳
       </h2>
 
-      
-        <AddRecipeModal onRecipeAdded={reloadRecipes} />
-        <SearchInput
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-        />
-      
+      <AddRecipeModal onRecipeAdded={reloadRecipes} />
+      <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
+
       <CategorySelect
-          categories={categories}
-          selectedCategoryId={selectedCategoryId}
-          onSelectCategory={setSelectedCategoryId}
-        />
+        categories={categories}
+        selectedCategoryId={selectedCategoryId}
+        onSelectCategory={setSelectedCategoryId}
+      />
 
       {loading ? (
         <div className="flex justify-center">
-        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
-      </div>
-      ) : recipes.length === 0 ? (
-        <div className="text-center text-red-500">
-          No recipes found.
+          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
         </div>
+      ) : recipes.length === 0 ? (
+        <div className="text-center text-red-500">No recipes found.</div>
       ) : (
         <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (

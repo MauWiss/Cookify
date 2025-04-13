@@ -24,8 +24,9 @@ export default function Homepage() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
-  
+
   const categoryCounts = recipes.length;
+
   useEffect(() => {
     const delay = setTimeout(() => {
       reloadRecipes(searchTerm, selectedCategoryId);
@@ -48,7 +49,7 @@ export default function Homepage() {
         await addFavorite(recipeId);
         toast.success("Added to favorites ❤️");
       }
-      reloadFavorites(); // לרענן את המועדפים
+      reloadFavorites();
     } catch (err) {
       console.error(err);
       toast.error("Failed to update favorites.");
@@ -56,16 +57,16 @@ export default function Homepage() {
   };
 
   const selectedCategory = categories.find(
-    (cat) => cat.id === selectedCategoryId
+    (cat) => cat.id === selectedCategoryId,
   );
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
+    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
       <ToastContainer />
 
       <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
-      <hr></hr>
+      {/* 🚫 הסרנו את הקו כאן */}
 
       <CategorySelect
         categories={categories}
@@ -76,16 +77,16 @@ export default function Homepage() {
 
       {loading ? (
         <div className="flex justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <div className="border-primary dark:border-primary-dark h-8 w-8 animate-spin rounded-full border-b-2 border-t-2"></div>
         </div>
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : (
-        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
+              className="bg-card dark:bg-card-dark border-border dark:border-border-dark relative overflow-hidden rounded-2xl border shadow-lg transition duration-300 hover:shadow-2xl"
             >
               <img
                 onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
@@ -95,10 +96,11 @@ export default function Homepage() {
               />
               <button
                 onClick={() => handleFavorite(recipe.recipeId)}
-                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${isFavorite(recipe.recipeId)
-                  ? "bg-red-500 text-white hover:bg-red-600"
-                  : "bg-white text-red-500 hover:bg-red-100"
-                  } hover:scale-110`}
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
+                  isFavorite(recipe.recipeId)
+                    ? "bg-red-500 text-white hover:bg-red-600"
+                    : "dark:bg-card dark:hover:bg-muted bg-white text-red-500 hover:bg-red-100"
+                } hover:scale-110`}
               >
                 {isFavorite(recipe.recipeId) ? (
                   <FaHeart size={18} />
@@ -108,13 +110,13 @@ export default function Homepage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3 className="text-lg font-semibold transition hover:text-blue-500 dark:text-white">
+                <h3 className="hover:text-primary dark:hover:text-primary-dark cursor-pointer text-lg font-semibold transition">
                   {recipe.title}
                 </h3>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
+                <div className="text-muted dark:text-muted-dark text-sm">
                   {recipe.categoryName}
                 </div>
-                <div className="mt-1 flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-muted dark:text-muted-dark mt-1 flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">
                     <FaClock /> {recipe.cookingTime || "?"} min
                   </span>
