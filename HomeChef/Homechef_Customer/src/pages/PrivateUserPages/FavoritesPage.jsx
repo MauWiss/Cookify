@@ -65,7 +65,7 @@ export default function FavoritesPage() {
     <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
       <ToastContainer />
 
-      <h2 className="mb-6 flex items-center justify-center gap-2 text-center text-2xl font-bold text-gray-800 dark:text-white">
+      <h2 className="text-text dark:text-text-dark mb-6 flex items-center justify-center gap-2 text-center text-2xl font-bold">
         My Favorite Recipes <FaHeart className="text-red-500" />
       </h2>
 
@@ -80,18 +80,18 @@ export default function FavoritesPage() {
 
       {loading ? (
         <div className="flex justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+          <div className="border-primary dark:border-primary-dark h-8 w-8 animate-spin rounded-full border-b-2 border-t-2"></div>
         </div>
       ) : filteredFavorites.length === 0 ? (
-        <p className="text-center text-gray-500 dark:text-gray-400">
+        <p className="text-muted dark:text-muted-dark text-center">
           You haven't added any recipes to your favorites yet.
         </p>
       ) : (
-        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {filteredFavorites.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-2xl bg-gray-200 shadow-lg transition hover:shadow-2xl dark:bg-gray-800"
+              className="bg-card dark:bg-card-dark border-border dark:border-border-dark relative overflow-hidden rounded-2xl border shadow-lg transition hover:shadow-2xl"
             >
               <img
                 src={recipe.imageUrl}
@@ -111,14 +111,14 @@ export default function FavoritesPage() {
               <div className="space-y-2 p-4">
                 <h3
                   onClick={() => handleNavigate(recipe.recipeId)}
-                  className="cursor-pointer text-lg font-semibold text-gray-900 hover:text-blue-500 dark:text-white"
+                  className="text-text hover:text-primary dark:text-text-dark dark:hover:text-primary-dark cursor-pointer text-lg font-semibold"
                 >
                   {recipe.title}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-muted dark:text-muted-dark text-sm">
                   {recipe.categoryName}
                 </p>
-                <div className="flex items-center gap-4 text-sm text-gray-600 dark:text-gray-300">
+                <div className="text-muted dark:text-muted-dark flex items-center gap-4 text-sm">
                   <span className="flex items-center gap-1">
                     <FaClock /> {recipe.cookingTime || "?"} min
                   </span>
