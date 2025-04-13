@@ -23,6 +23,15 @@ namespace HomeChefServer.Controllers
         {
             var reviews = new List<ReviewDTO>();
 
+
+
+
+
+
+
+
+
+
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             using var cmd = new SqlCommand("sp_GetReviewsByRecipeId", conn);
             cmd.CommandType = CommandType.StoredProcedure;
@@ -40,15 +49,15 @@ namespace HomeChefServer.Controllers
                     ReviewText = reader["ReviewText"].ToString(),
                     CreatedAt = (DateTime)reader["CreatedAt"]
                 });
+
+
+
+
+
             }
 
             return Ok(reviews);
         }
-
-
-
-
-
 
         [Authorize]
         [HttpPost("{recipeId}")]
@@ -66,7 +75,20 @@ namespace HomeChefServer.Controllers
 
             var userId = int.Parse(userClaim.Value);
             var userName = userNameClaim.Value;
+
+
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+
+
+
+
+
+
+
+
+
+
+
             using var cmd = new SqlCommand("sp_AddReview", conn);
             cmd.CommandType = CommandType.StoredProcedure;
 
@@ -80,6 +102,7 @@ namespace HomeChefServer.Controllers
 
             return Ok(new { Message = "Review added successfully" });
         }
+
 
 
         [Authorize]

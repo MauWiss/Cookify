@@ -6,6 +6,7 @@ import RecipeInfoSection from "../components/RecipeInfoSection";
 import RecipeReviews from "../components/RecipeReviews";
 import { fetchRecipeProfile, fetchUserRating, postRating } from "../api/api";
 
+
 const RecipeProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,15 +26,11 @@ const RecipeProfilePage = () => {
       try {
         const [recipeRes, ratingRes] = await Promise.all([
           fetchRecipeProfile(id),
-          token
-            ? fetchUserRating(id)
-            : Promise.resolve({ data: { rating: 0 } }),
+        
         ]);
 
         setRecipe(recipeRes.data);
-        setAverageRating(Number(recipeRes.data.averageRating || 0));
-        setTotalRatings(Number(recipeRes.data.totalRatings || 0));
-        setUserRating(Number(ratingRes.data?.rating ?? 0));
+        
       } catch (err) {
         console.error(err);
         setError("Recipe not found");
@@ -101,13 +98,7 @@ const RecipeProfilePage = () => {
     <div className="mx-auto mt-12 max-w-6xl rounded-2xl bg-white px-6 py-8 shadow-xl dark:bg-gray-900">
       <ToastContainer />
       <RecipeInfoSection recipe={recipe} />
-      <RecipeRatingBlock
-        userRating={userRating}
-        averageRating={averageRating}
-        totalRatings={totalRatings}
-        editable={!!token}
-        onChange={handleRatingChange}
-      />
+      
       <RecipeReviews recipeId={id} />
     </div>
   );
