@@ -88,7 +88,7 @@ export default function FavoritesPage() {
           You haven't added any recipes to your favorites yet.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4">
+        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {filteredFavorites.map((recipe) => (
             <div
               key={recipe.recipeId}

@@ -53,33 +53,33 @@ export default function MyRecipesPage() {
         My Recipes 👨‍🍳
       </h2>
 
-      <div className="mb-6 flex flex-col items-start gap-3 sm:flex-row sm:items-end">
+      
         <AddRecipeModal onRecipeAdded={reloadRecipes} />
         <SearchInput
           searchTerm={searchTerm}
           onSearchTermChange={setSearchTerm}
         />
-        <CategorySelect
+      
+      <CategorySelect
           categories={categories}
           selectedCategoryId={selectedCategoryId}
           onSelectCategory={setSelectedCategoryId}
         />
-      </div>
 
       {loading ? (
-        <div className="text-center text-gray-500 dark:text-gray-300">
-          Loading...
-        </div>
+        <div className="flex justify-center">
+        <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
+      </div>
       ) : recipes.length === 0 ? (
-        <div className="text-center text-gray-500 dark:text-gray-300">
+        <div className="text-center text-red-500">
           No recipes found.
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-3">
+        <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
-              className="relative overflow-hidden rounded-xl bg-white shadow-md transition hover:shadow-lg dark:bg-gray-800"
+              className="relative overflow-hidden rounded-2xl bg-gray-100 shadow-lg transition duration-300 hover:shadow-2xl dark:bg-gray-800"
             >
               <a
                 href={recipe.sourceUrl}
