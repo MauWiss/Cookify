@@ -11,7 +11,6 @@ import { useNavigate } from "react-router-dom";
 export default function FavoritesPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
-  
 
   const {
     favorites,
@@ -26,11 +25,11 @@ export default function FavoritesPage() {
   const categoryCounts = favorites.length;
 
   useEffect(() => {
-      const delay = setTimeout(() => {
-        reloadRecipes(selectedCategoryId);
-      }, 500);
-      return () => clearTimeout(delay);
-    }, [selectedCategoryId]);
+    const delay = setTimeout(() => {
+      reloadRecipes(selectedCategoryId);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [selectedCategoryId]);
 
   const handleRemoveFavorite = async (recipeId) => {
     const result = await Swal.fire({
@@ -63,7 +62,7 @@ export default function FavoritesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-white px-6 py-8 dark:bg-gray-900">
+    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
       <ToastContainer />
 
       <h2 className="mb-6 flex items-center justify-center gap-2 text-center text-2xl font-bold text-gray-800 dark:text-white">

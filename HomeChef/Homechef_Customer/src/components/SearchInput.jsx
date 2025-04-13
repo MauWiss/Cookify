@@ -2,15 +2,15 @@ import { FaSearch } from "react-icons/fa";
 
 export default function SearchInput({ searchTerm, onSearchTermChange }) {
   return (
-    <div className="mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl bg-gray-100 p-1 shadow-md dark:bg-gray-800">
+    <div className="bg-card dark:bg-card-dark border-border dark:border-border-dark mx-auto mb-8 flex max-w-xl items-center overflow-hidden rounded-xl border p-1 shadow-md">
       <input
         type="text"
         placeholder="Search for a recipe..."
         value={searchTerm}
         onChange={(e) => onSearchTermChange(e.target.value)}
-        className="flex-grow bg-transparent px-4 py-2 text-base font-semibold tracking-wide text-gray-800 placeholder-gray-700 outline-none dark:text-white dark:placeholder-gray-300"
+        className="text-text dark:text-text-dark placeholder-muted dark:placeholder-muted-dark flex-grow bg-transparent px-4 py-2 text-base font-semibold tracking-wide outline-none"
       />
-      <FaSearch className="mx-3 text-gray-400" />
+      <FaSearch className="text-muted dark:text-muted-dark mx-3" />
     </div>
   );
 }
