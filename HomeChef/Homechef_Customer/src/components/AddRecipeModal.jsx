@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import * as Dialog from "@radix-ui/react-dialog";
 import confetti from "canvas-confetti";
 
-export default function AddRecipeWizard({ onRecipeAdded }) {
+export default function AddRecipeWizard({ onRecipeAdded, className = "" }) {
   const [open, setOpen] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -92,7 +92,7 @@ export default function AddRecipeWizard({ onRecipeAdded }) {
 
   return (
     <Dialog.Root open={open} onOpenChange={setOpen}>
-      <Dialog.Trigger className="rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white shadow-md hover:bg-blue-700">
+      <Dialog.Trigger className={`w-full h-full ${className}`}>
         + Add Recipe
       </Dialog.Trigger>
 
@@ -106,7 +106,7 @@ export default function AddRecipeWizard({ onRecipeAdded }) {
           </Dialog.Close>
 
           <Dialog.Title className="mb-4 text-center text-2xl font-bold text-gray-800 dark:text-white">
-            🧾 Add New Recipe
+             Add New Recipe
           </Dialog.Title>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -248,7 +248,7 @@ export default function AddRecipeWizard({ onRecipeAdded }) {
                           ),
                         )
                       }
-                      required
+                      
                       className="w-1/2 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
                     >
                       <option value="">Select Ingredient</option>

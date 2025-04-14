@@ -62,7 +62,7 @@ export default function FavoritesPage() {
   );
 
   return (
-    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
+    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen py-6 sm:px-6 md:px-12 lg:px-48">
       <ToastContainer />
 
       <h2 className="text-text dark:text-text-dark mb-6 flex items-center justify-center gap-2 text-center text-2xl font-bold">

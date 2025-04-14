@@ -61,7 +61,7 @@ export default function Homepage() {
   );
 
   return (
-    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen px-6 py-8">
+    <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen py-6 sm:px-6 md:px-12 lg:px-48">
       <ToastContainer />
 
       <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
@@ -82,7 +82,7 @@ export default function Homepage() {
       ) : error ? (
         <div className="text-center text-red-500">{error}</div>
       ) : (
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
+        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 ">
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
