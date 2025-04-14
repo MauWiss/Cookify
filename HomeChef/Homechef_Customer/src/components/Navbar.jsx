@@ -17,6 +17,8 @@ export default function Navbar() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
   const [open, setOpen] = useState(false);
+  const isHomePage = location.pathname === "/";
+  const isLoggedOut = !token;
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
@@ -57,7 +59,13 @@ export default function Navbar() {
         />
 
         {/* middle links*/}
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex gap-6 text-lg font-medium">
+        <div
+          className={
+            isLoggedOut
+              ? "ml-auto flex gap-6 text-lg font-medium sm:flex"
+              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex gap-6 text-lg font-medium"
+          }
+        >
           <Link className={`${active("/")} no-underline`} to="/">Home</Link>
           {token && role === "admin" && (
             <Link className={`${active("/admin")} no-underline`} to="/admin">Admin Panel</Link>
@@ -111,7 +119,7 @@ export default function Navbar() {
                   className="flex items-center gap-1 cursor-pointer"
                   onClick={() => setOpen(prev => !prev)}
                 >
-                   {open ? <FaChevronUp /> : <FaChevronDown />}
+                  {open ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
               </button>
 
