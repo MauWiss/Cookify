@@ -150,7 +150,7 @@ namespace HomeChefServer.Controllers
                 {
                     ingredients.Add(new IngredientDTO
                     {
-                        Name = reader["Name"].ToString(),
+                        IngredientId = (int)reader["IngredientId"],
                         Quantity = float.Parse(reader["Quantity"].ToString()),
                         Unit = reader["Unit"].ToString()
                     });
