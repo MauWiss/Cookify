@@ -52,12 +52,18 @@ export default function MyRecipesPage() {
       <h1 className="mb-4 text-3xl font-bold text-gray-900 dark:text-white text-center">
         My Recipes 
       </h1>
+  
       <CategorySelect
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
       />
-
+  
+      {/* הכפתור תמיד יוצג */}
+      <div className="mb-4 flex justify-center">
+        <AddRecipeModal onRecipeAdded={reloadRecipes} />
+      </div>
+  
       {loading ? (
         <div className="flex justify-center">
           <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-t-2 border-blue-500"></div>
@@ -66,9 +72,7 @@ export default function MyRecipesPage() {
         <div className="text-center text-red-500">No recipes found.</div>
       ) : (
         <div className="m-16 grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5">
-          <AddRecipeModal
-            onRecipeAdded={reloadRecipes}
-          />
+          
           {recipes.map((recipe) => (
             <div
               key={recipe.recipeId}
@@ -103,7 +107,7 @@ export default function MyRecipesPage() {
                   <span>🍽 {recipe.servings} servings</span>
                 </div>
               </div>
-
+  
               <div className="absolute right-3 top-3 flex gap-2">
                 <button
                   onClick={() => setEditingRecipeId(recipe.recipeId)}
@@ -124,7 +128,7 @@ export default function MyRecipesPage() {
           ))}
         </div>
       )}
-
+  
       {editingRecipeId && (
         <EditRecipeModal
           recipeId={editingRecipeId}
