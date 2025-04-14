@@ -13,54 +13,52 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(localStorage.getItem("role")); // תפקיד
 
   useEffect(() => {
-    const loadUser = async () => {
-      const storedToken = localStorage.getItem("token");
-      setToken(storedToken);
-  
-      if (storedToken) {
-        try {
-          const decoded = jwtDecode(storedToken);
-          console.log("decoded token:", decoded);
-  
-          const data = await getUserProfile();
-          console.log(data);
-  
-          setUser({
-            id: decoded.UserId,
-            email: decoded.Email,
-            username: decoded.Username,
-            profileImage: `data:image/jpeg;base64,${data.data.profilePictureBase64 || ""}`,
-          });
-        } catch (error) {
-          console.error("Failed to load user:", error);
-          setUser(null);
-        }
-      } else {
-        setUser(null);
-      }
-    };
-  
+
+
     loadUser();
-  
+
     window.addEventListener("storage", loadUser);
     return () => window.removeEventListener("storage", loadUser);
   }, []);
-  
+
+  const loadUser = async () => {
+    const storedToken = localStorage.getItem("token");
+    setToken(storedToken);
+
+    if (storedToken) {
+      try {
+        const decoded = jwtDecode(storedToken);
+        console.log("decoded token:", decoded);
+
+        const data = await getUserProfile();
+        console.log(data);
+
+        setUser({
+          id: decoded.UserId,
+          email: decoded.Email,
+          username: decoded.Username,
+          profileImage: `data:image/jpeg;base64,${data.data.profilePictureBase64 || ""}`,
+        });
+      } catch (error) {
+        console.error("Failed to load user:", error);
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
+  };
   const login = (newToken, newRole) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("role", newRole);
     setToken(newToken);
     setRole(newRole);
 
+
+
     try {
       const decoded = jwtDecode(newToken);
       console.log("decoded token:", decoded);
-
-      setUser({
-        id: decoded.UserId,
-        email: decoded.email,
-        username: decoded["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
-      });
+      loadUser();
     } catch {
       setUser(null);
     }
