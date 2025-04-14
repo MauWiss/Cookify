@@ -28,6 +28,7 @@
     "react-router-dom": "^7.5.0",
     "react-toastify": "^11.0.5",
     "sweetalert2": "^11.17.2",
+    "tailwind-scrollbar-hide": "^2.0.0",
     "workbox-core": "^7.3.0",
     "workbox-precaching": "^7.3.0"
   },
