@@ -21,7 +21,7 @@ namespace HomeChefServer.Controllers
 
         // שליפה מדורגת של מתכונים
         [HttpGet("paged")]
-        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 10)
+        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 20)
         {
             List<RecipeDTO> recipes = new List<RecipeDTO>();
            

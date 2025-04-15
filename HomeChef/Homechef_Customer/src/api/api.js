@@ -26,7 +26,9 @@ export const fetchRecipes = (term, categoryId) => {
   } else if (categoryId) {
     return api.get(`/categories/${categoryId}/recipes`);
   }
-  return api.get("/recipes/paged?pageNumber=1&pageSize=100");
+  return api.get("/recipes/paged", {
+    params: { pageNumber: 1, pageSize: 20 }
+  });
 };
 
 export const fetchRecipeProfile = (recipeId) =>
