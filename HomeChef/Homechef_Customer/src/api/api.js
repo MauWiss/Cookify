@@ -120,5 +120,16 @@ export const generateGeminiReply = (message) =>
   api.post("/gemini/chat", message, {
     headers: { "Content-Type": "application/json" },
   });
+export const fetchPexelsImage = async (query) => {
+  try {
+    const res = await api.get(
+      `/gemini/pexels/search?query=${encodeURIComponent(query)}`,
+    );
+    return res.data.imageUrl;
+  } catch (err) {
+    console.error("❌ Failed to fetch image from Pexels:", err);
+    return null;
+  }
+};
 
 export default api;

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { generateGeminiReply } from "../api/api";
+import { generateGeminiReply, fetchPexelsImage } from "../api/api";
 import { FaRobot, FaUser, FaMicrophone, FaStop } from "react-icons/fa";
 import { motion } from "framer-motion";
 
@@ -21,6 +21,27 @@ export default function ChefBot() {
   const chatRef = useRef(null);
   const recognitionRef = useRef(null);
 
+  const extractTitle = (text) => {
+    const titleLine = text.match(/Title: (.+)/i);
+    if (titleLine) return titleLine[1].trim();
+
+    const headingLine = text.match(/^##\s*(.+)/m);
+    if (headingLine) return headingLine[1].trim();
+
+    const firstLine = text.split("\n")[0].trim();
+    return firstLine.length > 0 ? firstLine : null;
+  };
+
+  const isHebrew = (text) => /[\u0590-\u05FF]/.test(text);
+
+  const getImageUrl = (title) => {
+    if (!title) return null;
+    const fallback = "delicious-dish";
+    const finalTitle = isHebrew(title) ? fallback : title;
+    const encoded = encodeURIComponent(finalTitle);
+    return `https://source.unsplash.com/600x400/?food,${encoded}`;
+  };
+
   const sendMessage = async () => {
     if (!input.trim()) return;
     const newMessage = { sender: "user", text: input };
@@ -32,7 +53,13 @@ export default function ChefBot() {
       const res = await generateGeminiReply(input);
       const reply =
         res.data?.content || "Sorry, I couldn't generate a response.";
-      setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
+      const title = extractTitle(reply);
+      const imageUrl = title ? await fetchPexelsImage(title) : null;
+
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: reply, imageUrl },
+      ]);
     } catch (err) {
       toast.error("ChefBot is unavailable right now.");
     } finally {
@@ -47,7 +74,7 @@ export default function ChefBot() {
     }
 
     const recognition = new window.webkitSpeechRecognition();
-    recognition.lang = "he-IL"; // 🟢 Hebrew & English auto-detect
+    recognition.lang = "he-IL";
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
     recognitionRef.current = recognition;
@@ -91,7 +118,13 @@ export default function ChefBot() {
       const res = await generateGeminiReply(text);
       const reply =
         res.data?.content || "Sorry, I couldn't generate a response.";
-      setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
+      const title = extractTitle(reply);
+      const imageUrl = title ? await fetchPexelsImage(title) : null;
+
+      setMessages((prev) => [
+        ...prev,
+        { sender: "bot", text: reply, imageUrl },
+      ]);
     } catch (err) {
       toast.error("ChefBot is unavailable right now.");
     } finally {
@@ -111,7 +144,7 @@ export default function ChefBot() {
 
       <div
         ref={chatRef}
-        className="h-[60vh] space-y-4 overflow-y-auto rounded-2xl border bg-gray-100 p-6 shadow dark:border-gray-700 dark:bg-gray-800"
+        className="h-[60vh] space-y-6 overflow-y-auto rounded-2xl border bg-gray-100 p-6 shadow dark:border-gray-700 dark:bg-gray-800"
       >
         {messages.map((msg, idx) => (
           <motion.div
@@ -119,22 +152,33 @@ export default function ChefBot() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
-            className={`flex items-start gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
+            className={`flex flex-col gap-2 ${msg.sender === "user" ? "items-end" : "items-start"}`}
           >
-            {msg.sender === "bot" && (
-              <FaRobot className="mt-1 text-xl text-green-500" />
-            )}
             <div
-              className={`max-w-[80%] whitespace-pre-line rounded-xl px-4 py-3 text-sm shadow-md transition-all duration-300 ${
-                msg.sender === "user"
-                  ? "rounded-br-none bg-blue-600 text-white"
-                  : "rounded-bl-none bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
-              }`}
+              className={`flex items-start gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
             >
-              {msg.text}
+              {msg.sender === "bot" && (
+                <FaRobot className="mt-1 text-xl text-green-500" />
+              )}
+              <div
+                className={`max-w-[80%] whitespace-pre-line rounded-xl px-4 py-3 text-sm shadow-md transition-all duration-300 ${
+                  msg.sender === "user"
+                    ? "rounded-br-none bg-blue-600 text-white"
+                    : "rounded-bl-none bg-white text-gray-900 dark:bg-gray-700 dark:text-white"
+                }`}
+              >
+                {msg.text}
+              </div>
+              {msg.sender === "user" && (
+                <FaUser className="mt-1 text-xl text-blue-500" />
+              )}
             </div>
-            {msg.sender === "user" && (
-              <FaUser className="mt-1 text-xl text-blue-500" />
+            {msg.imageUrl && (
+              <img
+                src={msg.imageUrl}
+                alt="Generated food"
+                className="w-full max-w-md rounded-xl shadow"
+              />
             )}
           </motion.div>
         ))}
@@ -157,7 +201,7 @@ export default function ChefBot() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="e.g. Suggest a pasta recipe with tuna and lemon"
-          className="flex-1 rounded-xl border p-3 focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900"
+          className="flex-1 rounded-xl border p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
         />
         <button
           onClick={sendMessage}
