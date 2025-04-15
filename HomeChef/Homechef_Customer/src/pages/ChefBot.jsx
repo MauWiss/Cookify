@@ -3,7 +3,7 @@ import { useAuth } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { generateGeminiReply } from "../api/api";
-import { FaRobot, FaUser } from "react-icons/fa";
+import { FaRobot, FaUser, FaMicrophone, FaStop } from "react-icons/fa";
 import { motion } from "framer-motion";
 
 export default function ChefBot() {
@@ -17,7 +17,9 @@ export default function ChefBot() {
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const chatRef = useRef(null);
+  const recognitionRef = useRef(null);
 
   const sendMessage = async () => {
     if (!input.trim()) return;
@@ -38,6 +40,65 @@ export default function ChefBot() {
     }
   };
 
+  const handleVoiceInput = () => {
+    if (!("webkitSpeechRecognition" in window)) {
+      toast.error("Your browser does not support voice input.");
+      return;
+    }
+
+    const recognition = new window.webkitSpeechRecognition();
+    recognition.lang = "he-IL"; // 🟢 Hebrew & English auto-detect
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+    recognitionRef.current = recognition;
+
+    recognition.onstart = () => {
+      setIsListening(true);
+    };
+
+    recognition.onresult = (event) => {
+      const transcript = event.results[0][0].transcript;
+      setInput(transcript);
+      sendMessageWithText(transcript);
+      setIsListening(false);
+    };
+
+    recognition.onerror = (event) => {
+      toast.error("Voice recognition error: " + event.error);
+      setIsListening(false);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+    }
+  };
+
+  const sendMessageWithText = async (text) => {
+    const newMessage = { sender: "user", text };
+    setMessages((prev) => [...prev, newMessage]);
+    setLoading(true);
+
+    try {
+      const res = await generateGeminiReply(text);
+      const reply =
+        res.data?.content || "Sorry, I couldn't generate a response.";
+      setMessages((prev) => [...prev, { sender: "bot", text: reply }]);
+    } catch (err) {
+      toast.error("ChefBot is unavailable right now.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     chatRef.current?.scrollTo(0, chatRef.current.scrollHeight);
   }, [messages]);
@@ -45,7 +106,7 @@ export default function ChefBot() {
   return (
     <div className="mx-auto max-w-3xl p-4 text-gray-900 dark:text-white">
       <h1 className="mb-6 text-center text-4xl font-extrabold">
-        ChefBot🍽️ <span className="text-blue-500">AI Chat</span>
+        ChefBot 🍽️ <span className="text-blue-500">AI Chat</span>
       </h1>
 
       <div
@@ -61,7 +122,7 @@ export default function ChefBot() {
             className={`flex items-start gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
           >
             {msg.sender === "bot" && (
-              <FaRobot className="mt-1 text-xl text-blue-500" />
+              <FaRobot className="mt-1 text-xl text-green-500" />
             )}
             <div
               className={`max-w-[80%] whitespace-pre-line rounded-xl px-4 py-3 text-sm shadow-md transition-all duration-300 ${
@@ -82,6 +143,11 @@ export default function ChefBot() {
             ChefBot is typing...
           </div>
         )}
+        {isListening && (
+          <div className="text-sm font-semibold text-green-500">
+            🎙️ Listening...
+          </div>
+        )}
       </div>
 
       <div className="mt-4 flex items-center gap-2">
@@ -91,7 +157,7 @@ export default function ChefBot() {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
           placeholder="e.g. Suggest a pasta recipe with tuna and lemon"
-          className="flex-1 rounded-xl border p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
+          className="flex-1 rounded-xl border p-3 focus:outline-none focus:ring-2 focus:ring-green-500 dark:border-gray-700 dark:bg-gray-900"
         />
         <button
           onClick={sendMessage}
@@ -100,6 +166,21 @@ export default function ChefBot() {
         >
           Send
         </button>
+        {!isListening ? (
+          <button
+            onClick={handleVoiceInput}
+            className="rounded-full bg-gray-300 px-3 py-2 text-black hover:bg-gray-400 dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600"
+          >
+            <FaMicrophone />
+          </button>
+        ) : (
+          <button
+            onClick={stopListening}
+            className="rounded-full bg-red-500 px-3 py-2 text-white hover:bg-red-600"
+          >
+            <FaStop />
+          </button>
+        )}
       </div>
     </div>
   );
