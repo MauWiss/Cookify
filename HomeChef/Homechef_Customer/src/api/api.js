@@ -123,7 +123,7 @@ export const generateGeminiReply = (message) =>
 export const fetchPexelsImage = async (query) => {
   try {
     const res = await api.get(
-      `/gemini/pexels/search?query=${encodeURIComponent(query)}`,
+      `/gemini/search?query=${encodeURIComponent(query)}`,
     );
     return res.data.imageUrl;
   } catch (err) {

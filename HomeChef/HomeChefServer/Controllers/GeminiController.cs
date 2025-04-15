@@ -29,15 +29,26 @@ namespace HomeChefServer.Controllers
             }
         }
 
-        [HttpGet("pexels/search")]
-        public async Task<IActionResult> SearchImage([FromQuery] string query)
+
+        [HttpGet("search")]
+        public async Task<IActionResult> Search([FromQuery] string query)
         {
             try
             {
+                // נחלץ מילות מפתח קולינריות עם Gemini (NLP)
+                var keywords = await _geminiService.ExtractFoodKeywordsSmartAsync(query);
+                var cleaned = keywords?.Trim();
+
+                // אם לא הצליח לחלץ או קיבלנו טקסט קצר מדי – נ fallback לתמונה כללית
+                if (string.IsNullOrWhiteSpace(cleaned) || cleaned.Length < 2)
+                {
+                    return Ok(new { imageUrl = "https://source.unsplash.com/600x400/?chef,robot" });
+                }
+
                 var client = new HttpClient();
                 client.DefaultRequestHeaders.Add("Authorization", "sVkbVmdjdjSbsvpUDm7Kgui23ggEqCtfXDHKUwzdbHZl8yQSU4O0oxfE");
 
-                var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(query)}&per_page=1";
+                var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(cleaned)}&per_page=1";
                 var response = await client.GetAsync(url);
                 var json = await response.Content.ReadAsStringAsync();
 
@@ -55,6 +66,8 @@ namespace HomeChefServer.Controllers
                 return StatusCode(500, $"Error fetching image from Pexels: {ex.Message}");
             }
         }
+
+
 
     }
 }

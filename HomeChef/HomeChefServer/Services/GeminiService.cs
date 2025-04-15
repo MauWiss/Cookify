@@ -54,5 +54,23 @@ namespace HomeChefServer.Services
 
             return reply;
         }
+        public async Task<string> ExtractFoodKeywordsSmartAsync(string userSentence)
+        {
+            bool isHebrew = System.Text.RegularExpressions.Regex.IsMatch(userSentence ?? "", @"[א-ת]");
+            string prompt;
+
+            if (isHebrew)
+            {
+                prompt = $"חלץ רק את מילות המפתח הקולינריות מהמשפט הבא: \"{userSentence}\". החזר רק את המילים האלה, מופרדות בפסיקים. לאחר מכן, תרגם את המילים האלה לאנגלית בלבד, מופרדות בפסיקים.";
+            }
+            else
+            {
+                prompt = $"Extract only the food-related keywords (ingredients or dish names) from this sentence: \"{userSentence}\". Return keywords only, separated by commas.";
+            }
+
+            return await SendPromptAsync(prompt);
+        }
+
+
     }
 }
