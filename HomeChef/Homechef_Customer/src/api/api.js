@@ -27,7 +27,7 @@ export const fetchRecipes = (term, categoryId) => {
     return api.get(`/categories/${categoryId}/recipes`);
   }
   return api.get("/recipes/paged", {
-    params: { pageNumber: 1, pageSize: 20 }
+    params: { pageNumber: 1, pageSize: 20 },
   });
 };
 
@@ -115,5 +115,10 @@ export const registerUser = (userData) => api.post("/auth/register", userData);
 export const deleteRecipe = (id) => {
   return api.delete(`/admin/${id}`);
 };
+// Ai page
+export const generateGeminiReply = (message) =>
+  api.post("/gemini/chat", message, {
+    headers: { "Content-Type": "application/json" },
+  });
 
 export default api;
