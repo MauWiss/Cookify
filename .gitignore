@@ -395,6 +395,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
-
+appsettings.json
 # JetBrains Rider
 *.sln.iml
