@@ -92,7 +92,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2">ChatBot 🤖</div>
+                <div className="flex items-center gap-2">ChefBot 🤖</div>
               </Link>
             </>
           )}
@@ -208,7 +208,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2">ChatBot 🤖</div>
+                <div className="flex items-center gap-2">ChefBot 🤖</div>
               </Link>
             </>
           )}
