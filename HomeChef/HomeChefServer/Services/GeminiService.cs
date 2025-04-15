@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -7,13 +8,14 @@ namespace HomeChefServer.Services
     public class GeminiService
     {
         private readonly HttpClient _httpClient;
-        private const string ApiKey = "AIzaSyBqQneLPmfR9GdYCyzHpGsgOLyyttHbmo4";
+        private readonly string _apiKey;
+        private readonly string _apiUrl;
 
-        // ✅ גרסה תקינה עם מודל נתמך
-        private const string ApiUrl = "https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=" + ApiKey;
-
-        public GeminiService()
+        public GeminiService(IConfiguration config)
         {
+            _apiKey = config["GeminiApiKey"];
+            _apiUrl = $"https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key={_apiKey}";
+
             _httpClient = new HttpClient();
             _httpClient.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -36,7 +38,7 @@ namespace HomeChefServer.Services
             var json = JsonSerializer.Serialize(requestBody);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PostAsync(ApiUrl, content);
+            var response = await _httpClient.PostAsync(_apiUrl, content);
             var responseString = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -54,6 +56,7 @@ namespace HomeChefServer.Services
 
             return reply;
         }
+
         public async Task<string> ExtractFoodKeywordsSmartAsync(string userSentence)
         {
             bool isHebrew = System.Text.RegularExpressions.Regex.IsMatch(userSentence ?? "", @"[א-ת]");
@@ -70,7 +73,5 @@ namespace HomeChefServer.Services
 
             return await SendPromptAsync(prompt);
         }
-
-
     }
 }
