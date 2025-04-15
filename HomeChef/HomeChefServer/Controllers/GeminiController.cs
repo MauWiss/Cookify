@@ -9,11 +9,15 @@ namespace HomeChefServer.Controllers
     public class GeminiController : ControllerBase
     {
         private readonly GeminiService _geminiService;
+        private readonly string _pexelsApiKey;
 
-        public GeminiController(GeminiService geminiService)
+        public GeminiController(GeminiService geminiService, IConfiguration config)
         {
             _geminiService = geminiService;
+            _pexelsApiKey = config["PexelsApiKey"];
         }
+
+       
 
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] string userMessage)
@@ -28,6 +32,7 @@ namespace HomeChefServer.Controllers
                 return StatusCode(500, $"Gemini error: {ex.Message}");
             }
         }
+    
 
 
         [HttpGet("search")]
@@ -46,7 +51,8 @@ namespace HomeChefServer.Controllers
                 }
 
                 var client = new HttpClient();
-                client.DefaultRequestHeaders.Add("Authorization", "sVkbVmdjdjSbsvpUDm7Kgui23ggEqCtfXDHKUwzdbHZl8yQSU4O0oxfE");
+                client.DefaultRequestHeaders.Add("Authorization", _pexelsApiKey);
+
 
                 var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(cleaned)}&per_page=1";
                 var response = await client.GetAsync(url);
