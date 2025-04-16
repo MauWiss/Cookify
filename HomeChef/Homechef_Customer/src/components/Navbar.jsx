@@ -55,76 +55,81 @@ export default function Navbar() {
           src="../src/images/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
+          title="logo"
         />
 
         {/* Middle Links */}
         <div
-          className={`items-center gap-6 text-lg font-medium sm:flex ${
-            isLoggedOut
-              ? "ml-auto"
-              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          }`}
+          className={`items-center gap-6 text-lg font-medium sm:flex ${isLoggedOut
+            ? "ml-auto"
+            : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            }`}
         >
           <Link className={`${active("/")} no-underline`} to="/">
             Home
           </Link>
-          {token && role === "admin" && (
-            <Link className={`${active("/admin")} no-underline`} to="/admin">
-              Admin Panel
-            </Link>
-          )}
           {token && (
             <>
-              <Link
-                className={`${active("/favorites")} no-underline`}
-                to="/favorites"
-              >
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  Favorites <FaHeart className="text-red-500" />
+              <Link className={`${active("/favorites")} no-underline`} to="/favorites">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <FaHeart className="text-red-500" />
+                  Favorites
                 </div>
               </Link>
-              <Link
-                className={`${active("/my-recipes")} no-underline`}
-                to="/my-recipes"
-              >
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  My Recipes <GiCook className="text-orange-500" />
+              <Link className={`${active("/my-recipes")} no-underline`} to="/my-recipes">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <GiCook className="text-orange-500" />
+                  My Recipes
                 </div>
               </Link>
-              <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  ChefBot 🤖
+              <Link className={`${active("/chatbot")} no-underline`} to="/chatbot">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  ChefBot
                 </div>
               </Link>
-              <Link className={active("/trivia")} to="/trivia">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  Trivia Game 🧠
-                </div>
-              </Link>
-              <Link className={active("/worldrecipes")} to="/worldrecipes">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  World Recipes 🌍
-                </div>
-              </Link>
+              
+              {/* More Dropdown */}
+              <div className="relative">
+                <button
+                  onClick={() => setOpen((prev) => !prev)}
+                  className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400"
+                >
+                  More
+                  <FaChevronDown size={14} />
+                </button>
+                {open && (
+                  <div className="absolute z-50 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
+                    <Link
+                      to="/trivia"
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >
+                      🧠 Trivia Game
+                    </Link>
+                    <Link
+                      to="/worldrecipes"
+                      onClick={() => setOpen(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                    >
+                      🌍 World Recipes
+                    </Link>
+                  </div>
+                )}
+              </div>
             </>
           )}
           {!token && (
             <>
-              <Link
-                className={`${active("/auth/login")} no-underline`}
-                to="/auth/login"
-              >
+              <Link className={`${active("/auth/login")} no-underline`} to="/auth/login">
                 Login
               </Link>
-              <Link
-                className={`${active("/auth/register")} no-underline`}
-                to="/auth/register"
-              >
+              <Link className={`${active("/auth/register")} no-underline`} to="/auth/register">
                 Register
               </Link>
             </>
           )}
         </div>
+
 
         {/* Right side */}
         <div className="flex items-center gap-4">
@@ -177,6 +182,11 @@ export default function Navbar() {
                       </>
                     )}
                   </button>
+                  {token && role === "admin" && (
+                    <Link className={`${active("/admin")} no-underline flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`} to="/admin">
+                      Admin Panel
+                    </Link>
+                  )}
                   <button
                     onClick={() => {
                       setProfileMenuOpen(false);
