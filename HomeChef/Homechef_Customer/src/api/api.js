@@ -20,7 +20,12 @@ api.interceptors.request.use(
 );
 
 // 🔷 Recipes
-export const fetchRecipes = (term, categoryId, pageNumber = 1, pageSize = 20) => {
+export const fetchRecipes = (
+  term,
+  categoryId,
+  pageNumber = 1,
+  pageSize = 20,
+) => {
   console.log("term =", term, "| typeof =", typeof term);
   term = typeof term === "string" ? term : "";
 
@@ -30,7 +35,7 @@ export const fetchRecipes = (term, categoryId, pageNumber = 1, pageSize = 20) =>
         term,
         pageNumber,
         pageSize,
-      }
+      },
     });
   }
 
@@ -39,7 +44,7 @@ export const fetchRecipes = (term, categoryId, pageNumber = 1, pageSize = 20) =>
       params: {
         pageNumber,
         pageSize,
-      }
+      },
     });
   }
 
@@ -47,10 +52,9 @@ export const fetchRecipes = (term, categoryId, pageNumber = 1, pageSize = 20) =>
     params: {
       pageNumber,
       pageSize,
-    }
+    },
   });
 };
-
 
 export const fetchRecipeProfile = (recipeId) =>
   api.get(`/recipes/profile/${recipeId}`);
@@ -111,22 +115,28 @@ export const addMyRecipe = (recipeData) => api.post("/myrecipes", recipeData);
 export const updateMyRecipe = (recipeId, updatedData) =>
   api.put(`/myrecipes/${recipeId}`, updatedData);
 
-// 🔷 User Profile
-export const getUserProfile = () => api.get("/userprofile/me");
-export const updateUserProfile = (data) => api.put("/userprofile/update", data);
-export const updatePassword = (data) =>
-  api.put("/userprofile/update-password", data);
+// ---------- 🔐 PROFILE APIs ----------
 
+// שליפת פרופיל משתמש
+export const getUserProfile = () => api.get("/userprofile/me");
+
+// עדכון פרופיל (ביוגרפיה ותמונה)
+export const updateUserProfile = (data) => api.put("/userprofile/update", data);
+
+// שינוי סיסמה
+export const updatePassword = (data) =>
+  api.put("/userprofile/change-password", data);
+
+// העלאת תמונה כ־Base64
 export const uploadBase64Image = (file) => {
-  const formData = new FormData();
-  formData.append("file", file);
-  return api.post("/userprofile/upload-picture-base64", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onloadend = () =>
+      resolve({ data: { base64: reader.result.split(",")[1] } });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
   });
 };
-
 // 🔷 Auth
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });

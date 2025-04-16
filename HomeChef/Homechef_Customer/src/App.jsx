@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route } from "react-router-dom";
 import Homepage from "./pages/Homepage";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 import Navbar from "./components/Navbar";
 import LoginPage from "./pages/Auth/LoginPage";
 import RegisterPage from "./pages/Auth/RegisterPage";
@@ -39,6 +42,8 @@ export default function App() {
           toggleDark={() => setIsDarkMode(!isDarkMode)}
           isDark={isDarkMode}
         />
+        <ToastContainer position="top-right" autoClose={3000} />
+
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/recipes/:id" element={<RecipeProfilePage />} />

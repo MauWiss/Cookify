@@ -15,97 +15,110 @@ export default function UserProfilePage() {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState("");
-  const [profilePicture, setProfilePicture] = useState("");
+  const [profilePictureBase64, setProfilePictureBase64] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const data = await getUserProfile();
-        console.log(data)
-        setProfile(data);
-        setBio(data.data.bio || "");
-        setProfilePicture(data.data.profilePictureBase64 || "");
-      } catch {
+        const res = await getUserProfile();
+        setProfile(res.data);
+        setBio(res.data.bio || "");
+        setProfilePictureBase64(res.data.profilePictureBase64 || "");
+      } catch (error) {
         toast.error("❌ Failed to load profile.");
       }
     }
     fetchData();
   }, []);
 
-  const handleProfileUpdate = async () => {
-    try {
-      await updateUserProfile({ bio });
-      toast.success("✅ Profile updated");
-    } catch {
-      toast.error("❌ Error updating profile");
-    }
-  };
-
-  const handlePasswordChange = async () => {
-    if (!oldPassword || !newPassword) {
-      toast.warning("⚠️ Please fill both password fields.");
-      return;
-    }
-    if (oldPassword === newPassword) {
-      toast.warning("⚠️ New password must be different from the current one.");
-      return;
-    }
-    try {
-      await updatePassword({ oldPassword, newPassword });
-      toast.success("✅ Password updated");
-      setOldPassword("");
-      setNewPassword("");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "❌ Error updating password");
-    }
-  };
-
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
     try {
       const res = await uploadBase64Image(file);
-      setProfilePicture(res.data.base64);
-      toast.success("✅ Image uploaded");
+      const base64 = res.data.base64;
+      setProfilePictureBase64(base64);
+      toast.success("✅ Image uploaded! Click 'Save Picture'");
     } catch {
       toast.error("❌ Failed to upload image");
     }
   };
 
-  if (!profile)
-    return <div className="p-10 text-center">Loading profile...</div>;
+  const handleSavePicture = async () => {
+    try {
+      await updateUserProfile({ profilePictureBase64 });
+      setProfile((prev) => ({
+        ...prev,
+        profilePictureBase64,
+      }));
+      toast.success("✅ Profile picture updated!");
+    } catch {
+      toast.error("❌ Failed to update picture");
+    }
+  };
 
-  const imageSrc = profilePicture
-    ? `data:image/jpeg;base64,${profilePicture}`
-    : "https://static.vecteezy.com/system/resources/thumbnails/000/364/628/small_2x/Chef_Avatar_Illustration-03.jpg";
+  const handleSaveBio = async () => {
+    try {
+      await updateUserProfile({ bio });
+      toast.success("✅ Bio updated!");
+    } catch {
+      toast.error("❌ Failed to update bio");
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword) {
+      toast.warning("⚠️ Please fill both password fields.");
+      return;
+    }
+    if (oldPassword === newPassword) {
+      toast.warning("⚠️ New password must be different.");
+      return;
+    }
+    try {
+      await updatePassword({ oldPassword, newPassword });
+      toast.success("✅ Password updated!");
+      setOldPassword("");
+      setNewPassword("");
+    } catch (err) {
+      toast.error(err.response?.data || "❌ Failed to update password");
+    }
+  };
+
+  const imageSrc = profilePictureBase64
+    ? `data:image/jpeg;base64,${profilePictureBase64}`
+    : "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
+
+  if (!profile)
+    return (
+      <div className="p-10 text-center text-gray-500 dark:text-gray-300">
+        Loading profile...
+      </div>
+    );
 
   return (
-    <div className="mx-auto mt-10 max-w-2xl space-y-8">
-      <h1 className="flex items-center justify-center gap-2 text-center text-4xl font-bold text-blue-800">
-        <FaUserCircle className="text-5xl text-blue-600" />
-        My Profile
+    <div className="mx-auto mt-10 max-w-2xl space-y-8 px-4">
+      <h1 className="flex items-center justify-center gap-2 text-center text-4xl font-bold text-blue-700 dark:text-blue-400">
+        <FaUserCircle /> My Profile
       </h1>
 
-      {(user?.username || profile.data.username) && (
-        <p className="text-center text-zinc-600 dark:text-zinc-300">
-          Logged in as: <strong>{profile.data.username}</strong>
-        </p>
-      )}
+      <p className="text-center text-gray-600 dark:text-gray-300">
+        Logged in as: <strong>{user?.username}</strong>
+      </p>
 
-      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
-        <div className="flex flex-col items-center gap-4">
-          {imageSrc && (
-            <img
-              src={imageSrc}
-              alt="Uploaded"
-              className="w-32 h-32 rounded-full object-cover shadow-md"
-            />
-          )}
+      {/* Profile Image Section */}
+      <div className="space-y-4 rounded-xl bg-white p-6 text-center shadow dark:bg-zinc-800">
+        <img
+          src={imageSrc}
+          alt="Profile"
+          className="mx-auto h-32 w-32 rounded-full border-4 border-blue-500 object-cover shadow"
+        />
 
-          <label className="cursor-pointer text-blue-500 underline hover:text-blue-700">
-            {imageSrc ? "Change Image" : "Upload Image"}
+        <div className="flex flex-col items-center gap-3">
+          <label className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400">
+            Change Picture
             <input
               type="file"
               accept="image/*"
@@ -113,63 +126,74 @@ export default function UserProfilePage() {
               className="hidden"
             />
           </label>
-        </div>
 
+          <button
+            onClick={handleSavePicture}
+            className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+          >
+            Save Picture
+          </button>
+        </div>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
+      {/* Bio */}
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
         <textarea
-          placeholder="Your bio..."
           value={bio}
           onChange={(e) => setBio(e.target.value)}
-          className="textarea textarea-bordered mb-4 w-full"
+          placeholder="Your bio..."
+          className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
         />
         <button
-          onClick={handleProfileUpdate}
-          className="btn btn-primary w-full cursor-pointer text-blue-500 underline hover:text-blue-700"
+          onClick={handleSaveBio}
+          className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
-          Save Profile
+          Save Bio
         </button>
       </div>
 
-      <div className="rounded-xl bg-white p-6 shadow-md dark:bg-zinc-800">
-        <h2 className="mb-4 text-xl font-semibold text-blue-800">
+      {/* Password Change */}
+      <div className="space-y-4 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+        <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-400">
           🔐 Change Password
         </h2>
         <input
           type="password"
-          placeholder="Current password"
-          className="input input-bordered mb-3 w-full "
+          placeholder="Current Password"
           value={oldPassword}
           onChange={(e) => setOldPassword(e.target.value)}
+          className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
         />
         <input
           type="password"
-          placeholder="New password"
-          className="input input-bordered mb-4 w-full"
+          placeholder="New Password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
         />
         <button
-          onClick={handlePasswordChange}
-          className="btn btn-secondary w-full cursor-pointer text-blue-500 underline hover:text-blue-700"
+          onClick={handleChangePassword}
+          className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
         >
           Change Password
         </button>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-xl bg-white p-6 text-lg shadow-md dark:bg-zinc-800 md:flex-row">
+      {/* Shortcuts */}
+      <div className="flex flex-col gap-4 md:flex-row">
         <Link
           to="/favorites"
-          className="btn btn-outline btn-info flex w-full items-center justify-center gap-2"
+          className="flex-1 rounded border border-blue-500 bg-blue-50 px-4 py-2 text-center text-blue-600 hover:bg-blue-100 dark:border-blue-400 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-zinc-700"
         >
-          <FaHeart /> My Favorites
+          <FaHeart className="mr-1 inline" />
+          My Favorites
         </Link>
         <Link
           to="/my-recipes"
-          className="btn btn-outline btn-warning flex w-full items-center justify-center gap-2"
+          className="flex-1 rounded border border-orange-500 bg-orange-50 px-4 py-2 text-center text-orange-600 hover:bg-orange-100 dark:border-orange-400 dark:bg-zinc-900 dark:text-orange-400 dark:hover:bg-zinc-700"
         >
-          <GiCook /> My Recipes
+          <GiCook className="mr-1 inline" />
+          My Recipes
         </Link>
       </div>
     </div>
