@@ -4,19 +4,21 @@ import { fetchTriviaQuestion, submitTriviaScore } from "../api/api";
 import { Link } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { FaHeart, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
+import { useAuth } from "../hooks/useAuth";
 
 export default function TriviaGame() {
+  const { user } = useAuth(); // 🎯 הוספנו את זה בשביל ה־userId
   const [questionData, setQuestionData] = useState(null);
   const [selected, setSelected] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [timer, setTimer] = useState(15);
   const [lives, setLives] = useState(3);
+  const [score, setScore] = useState(0); // 💯 ניקוד
   const [gameOver, setGameOver] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const timerRef = useRef(null);
   const audioRef = useRef(new Audio("/audio/TriviaSound.mp3"));
-  const [score, setScore] = useState(0);
 
   const fetchQuestion = async () => {
     try {
@@ -42,13 +44,10 @@ export default function TriviaGame() {
   }, []);
 
   useEffect(() => {
-    if (gameOver || showAnswer || loading) return;
-
-    if (!isMuted && audioRef.current.paused) {
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.4;
-      audioRef.current.play().catch(() => {});
-    }
+    if (gameOver || showAnswer || loading || isMuted) return;
+    audioRef.current.loop = true;
+    audioRef.current.volume = 0.4;
+    audioRef.current.play().catch(() => {});
   }, [loading, showAnswer, gameOver, isMuted]);
 
   useEffect(() => {
@@ -73,16 +72,19 @@ export default function TriviaGame() {
   const loseLife = () => {
     setLives((prev) => {
       const newLives = prev - 1;
-
       if (newLives <= 0) {
         audioRef.current.pause();
         setGameOver(true);
 
-        submitTriviaScore(score)
-          .then(() => toast.success("✅ Score submitted!"))
-          .catch(() => toast.error("❌ Failed to submit score"));
+        // 🧠 שלח ניקוד אוטומטית רק אם המשתמש מחובר
+        if (user && user.userId) {
+          submitTriviaScore(score, user.userId)
+            .then(() => toast.success("🎉 Score submitted!"))
+            .catch(() => toast.error("⚠️ Failed to submit score."));
+        } else {
+          toast.info("👤 You must be logged in to save your score.");
+        }
       }
-
       return newLives;
     });
   };
@@ -91,13 +93,11 @@ export default function TriviaGame() {
     if (showAnswer || gameOver) return;
     setSelected(option);
     setShowAnswer(true);
-
     const isCorrect =
       option[0].toUpperCase() === questionData.answer.toUpperCase();
-
     if (isCorrect) {
       confetti();
-      setScore((prev) => prev + 1); // מוסיף לניקוד
+      setScore((prev) => prev + 10); // ✅ ניקוד
     } else {
       loseLife();
     }
@@ -105,16 +105,23 @@ export default function TriviaGame() {
 
   const toggleMute = () => {
     setIsMuted((prev) => {
-      const muted = !prev;
-      if (muted) audioRef.current.pause();
-      else audioRef.current.play().catch(() => {});
-      return muted;
+      const newState = !prev;
+      if (newState) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play().catch(() => {});
+      }
+      return newState;
     });
   };
 
   const handleNext = () => {
     fetchQuestion();
   };
+
+  const livesDisplay = Array.from({ length: lives }, (_, i) => (
+    <FaHeart key={i} className="mr-1 inline text-lg text-red-500" />
+  ));
 
   if (loading || !questionData?.question) {
     return (
@@ -128,16 +135,13 @@ export default function TriviaGame() {
     selected && selected[0].toUpperCase() === questionData.answer.toUpperCase();
   const correctText = questionData.correctText;
 
-  const livesDisplay = Array.from({ length: lives }, (_, i) => (
-    <FaHeart key={i} className="mr-1 inline text-lg text-red-500" />
-  ));
-
   return (
     <div className="relative mx-auto max-w-2xl p-6 text-gray-900 dark:text-white">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="mx-auto text-center text-4xl font-extrabold text-blue-600">
+        <h1 className="mx-auto mb-4 text-center text-4xl font-extrabold text-blue-600">
           Trivia Time! 🍽️
         </h1>
+
         <div className="flex items-center gap-3">
           {livesDisplay}
           <button onClick={toggleMute} title="Toggle Music">
@@ -152,6 +156,10 @@ export default function TriviaGame() {
 
       <div className="mb-2 text-right text-lg font-bold text-red-500">
         ⏳ {timer}s
+      </div>
+
+      <div className="text-md mb-2 text-right font-semibold text-blue-600">
+        🧾 Score: {score}
       </div>
 
       <div className="mb-4 text-xl font-semibold">{questionData.question}</div>
@@ -202,37 +210,41 @@ export default function TriviaGame() {
         </div>
       )}
 
+      {/* BUTTONS */}
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <button
           onClick={handleNext}
-          className="rounded-xl bg-blue-600 px-6 py-2 font-bold text-white shadow transition hover:bg-blue-700"
+          className="rounded-xl bg-blue-600 px-6 py-2 font-bold text-white shadow hover:bg-blue-700"
         >
           🔁 Next Question
         </button>
         <Link
           to="/leaderboard"
-          className="rounded-xl bg-yellow-500 px-6 py-2 font-bold text-white shadow transition hover:bg-yellow-600"
+          className="rounded-xl bg-yellow-500 px-6 py-2 font-bold text-white shadow hover:bg-yellow-600"
         >
           🏆 View Leaderboard
         </Link>
       </div>
 
+      {/* GAME OVER */}
       {gameOver && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 text-white">
+        <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white">
           <div className="text-center">
-            <h2 className="mb-4 animate-pulse text-5xl font-extrabold text-red-500 drop-shadow">
+            <h2 className="mb-4 animate-pulse text-4xl font-extrabold">
               💀 Game Over!
             </h2>
-            <p className="mb-6 text-lg text-gray-300">
-              You ran out of lives. Try again?
+            <p className="mb-6 text-lg">
+              Your final score:{" "}
+              <span className="font-bold text-green-400">{score}</span>
             </p>
             <button
               onClick={() => {
                 setLives(3);
+                setScore(0);
                 setGameOver(false);
                 fetchQuestion();
               }}
-              className="rounded-full bg-green-600 px-6 py-2 text-lg font-semibold text-white shadow hover:bg-green-700"
+              className="rounded-xl bg-green-600 px-6 py-2 font-bold text-white hover:bg-green-700"
             >
               🔄 Restart Game
             </button>
