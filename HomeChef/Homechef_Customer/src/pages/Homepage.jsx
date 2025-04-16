@@ -12,24 +12,30 @@ export default function Homepage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+
   const {
     recipes,
     loading,
     error,
     categories,
     favorites,
-    reloadRecipes,
+    hasMore,
+    page,
+    totalCount,
     reloadFavorites,
+    loadMoreRecipes,
+    loadRecipes
   } = useRecipesData();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  
 
   const categoryCounts = recipes.length;
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      reloadRecipes(searchTerm, selectedCategoryId);
+      loadRecipes(searchTerm, selectedCategoryId,  1, false);
     }, 500);
     return () => clearTimeout(delay);
   }, [searchTerm, selectedCategoryId]);
@@ -66,13 +72,11 @@ export default function Homepage() {
 
       <SearchInput searchTerm={searchTerm} onSearchTermChange={setSearchTerm} />
 
-      {/* 🚫 הסרנו את הקו כאן */}
-
       <CategorySelect
         categories={categories}
         selectedCategoryId={selectedCategoryId}
         onSelectCategory={setSelectedCategoryId}
-        categoryCounts={categoryCounts}
+        categoryCounts={totalCount}
       />
 
       {loading ? (
@@ -96,11 +100,10 @@ export default function Homepage() {
               />
               <button
                 onClick={() => handleFavorite(recipe.recipeId)}
-                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${
-                  isFavorite(recipe.recipeId)
+                className={`absolute right-2 top-2 z-10 rounded-full p-2 shadow-md transition-all duration-300 ${isFavorite(recipe.recipeId)
                     ? "bg-red-500 text-white hover:bg-red-600"
                     : "dark:bg-card dark:hover:bg-muted bg-white text-red-500 hover:bg-red-100"
-                } hover:scale-110`}
+                  } hover:scale-110`}
               >
                 {isFavorite(recipe.recipeId) ? (
                   <FaHeart size={18} />
@@ -129,6 +132,17 @@ export default function Homepage() {
           ))}
         </div>
       )}
+      {hasMore && !loading && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => loadMoreRecipes(searchTerm, selectedCategoryId)}
+            className="rounded bg-blue-700 px-6 py-2 text-white hover:bg-blue-800 disabled:bg-gray-400"
+          >
+           Load more
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }

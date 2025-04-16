@@ -114,6 +114,14 @@ builder.Services.AddSwaggerGen(c =>
 
 
 builder.Services.AddScoped<PexelsService>();
+if (!File.Exists("serviceAccountKey.json"))
+{
+    Console.WriteLine("❌ הקובץ serviceAccountKey.json לא נמצא! ודא שהוא קיים ומסומן כ-Copy to Output Directory");
+}
+else
+{
+    Console.WriteLine("✅ הקובץ serviceAccountKey.json נמצא בהצלחה!");
+}
 
 builder.Services.AddSingleton<GeminiService>();
 

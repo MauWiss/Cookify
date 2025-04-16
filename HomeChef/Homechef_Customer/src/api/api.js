@@ -20,16 +20,37 @@ api.interceptors.request.use(
 );
 
 // 🔷 Recipes
-export const fetchRecipes = (term, categoryId) => {
-  if (term?.trim()) {
-    return api.get(`/recipes/search?term=${encodeURIComponent(term)}`);
-  } else if (categoryId) {
-    return api.get(`/categories/${categoryId}/recipes`);
+export const fetchRecipes = (term, categoryId, pageNumber = 1, pageSize = 20) => {
+  console.log("term =", term, "| typeof =", typeof term);
+  term = typeof term === "string" ? term : "";
+
+  if (term.trim()) {
+    return api.get(`/recipes/search`, {
+      params: {
+        term,
+        pageNumber,
+        pageSize,
+      }
+    });
   }
+
+  if (categoryId) {
+    return api.get(`/categories/${categoryId}/recipes`, {
+      params: {
+        pageNumber,
+        pageSize,
+      }
+    });
+  }
+
   return api.get("/recipes/paged", {
-    params: { pageNumber: 1, pageSize: 20 },
+    params: {
+      pageNumber,
+      pageSize,
+    }
   });
 };
+
 
 export const fetchRecipeProfile = (recipeId) =>
   api.get(`/recipes/profile/${recipeId}`);

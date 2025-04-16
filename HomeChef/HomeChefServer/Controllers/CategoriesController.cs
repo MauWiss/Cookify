@@ -87,9 +87,13 @@ namespace HomeChefServer.Controllers
         }
 
         [HttpGet("{id}/recipes")]
-        public async Task<IActionResult> GetRecipesByCategory(int id)
+        public async Task<IActionResult> GetRecipesByCategory(
+    int id,
+    int pageNumber = 1,
+    int pageSize = 20)
         {
             var recipes = new List<RecipeDTO>();
+            int totalCount = 0;
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -99,24 +103,44 @@ namespace HomeChefServer.Controllers
                 CommandType = CommandType.StoredProcedure
             };
             cmd.Parameters.AddWithValue("@CategoryId", id);
+            cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+            cmd.Parameters.AddWithValue("@PageSize", pageSize);
 
             using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+
+            // 🔵 שלב 1: לקרוא את totalCount
+            if (await reader.ReadAsync())
             {
-                recipes.Add(new RecipeDTO
-                {
-                    RecipeId = (int)reader["RecipeId"],
-                    Title = reader["Title"].ToString(),
-                    ImageUrl = reader["ImageUrl"].ToString(),
-                    SourceUrl = reader["SourceUrl"].ToString(),
-                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0,
-                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
-                    CategoryName = reader["CategoryName"].ToString()
-                });
+                totalCount = (int)reader["TotalCount"];
             }
 
-            return Ok(recipes);
+            // 🔵 שלב 2: לעבור לתוצאה השנייה (המתכונים)
+            if (await reader.NextResultAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    recipes.Add(new RecipeDTO
+                    {
+                        RecipeId = (int)reader["RecipeId"],
+                        Title = reader["Title"].ToString(),
+                        ImageUrl = reader["ImageUrl"].ToString(),
+                        SourceUrl = reader["SourceUrl"].ToString(),
+                        CategoryName = reader["CategoryName"].ToString(),
+                        CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                        Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0
+                    });
+                }
+            }
+
+            return Ok(new
+            {
+                recipes,
+                totalCount
+            });
         }
+
+
+
 
         [HttpGet("{categoryId}/favorites")]
         public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetFavoritesByCategory(int categoryId)
