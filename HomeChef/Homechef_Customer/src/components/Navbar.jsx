@@ -60,34 +60,44 @@ export default function Navbar() {
 
         {/* Middle Links */}
         <div
-          className={`items-center gap-6 text-lg font-medium sm:flex ${isLoggedOut
-            ? "ml-auto"
-            : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            }`}
+          className={`items-center gap-6 text-lg font-medium sm:flex ${
+            isLoggedOut
+              ? "ml-auto"
+              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          }`}
         >
           <Link className={`${active("/")} no-underline`} to="/">
             Home
           </Link>
           {token && (
             <>
-              <Link className={`${active("/favorites")} no-underline`} to="/favorites">
+              <Link
+                className={`${active("/favorites")} no-underline`}
+                to="/favorites"
+              >
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <FaHeart className="text-red-500" />
                   Favorites
                 </div>
               </Link>
-              <Link className={`${active("/my-recipes")} no-underline`} to="/my-recipes">
+              <Link
+                className={`${active("/my-recipes")} no-underline`}
+                to="/my-recipes"
+              >
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <GiCook className="text-orange-500" />
                   My Recipes
                 </div>
               </Link>
-              <Link className={`${active("/chatbot")} no-underline`} to="/chatbot">
+              <Link
+                className={`${active("/chatbot")} no-underline`}
+                to="/chatbot"
+              >
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   ChefBot
                 </div>
               </Link>
-              
+
               {/* More Dropdown */}
               <div className="relative">
                 <button
@@ -120,16 +130,21 @@ export default function Navbar() {
           )}
           {!token && (
             <>
-              <Link className={`${active("/auth/login")} no-underline`} to="/auth/login">
+              <Link
+                className={`${active("/auth/login")} no-underline`}
+                to="/auth/login"
+              >
                 Login
               </Link>
-              <Link className={`${active("/auth/register")} no-underline`} to="/auth/register">
+              <Link
+                className={`${active("/auth/register")} no-underline`}
+                to="/auth/register"
+              >
                 Register
               </Link>
             </>
           )}
         </div>
-
 
         {/* Right side */}
         <div className="flex items-center gap-4">
@@ -147,10 +162,15 @@ export default function Navbar() {
                 className="flex items-center gap-2"
               >
                 <img
-                  src={user?.profileImage || "/default-avatar.png"}
-                  alt="Avatar"
+                  src={
+                    user?.profilePictureBase64
+                      ? `data:image/jpeg;base64,${user.profilePictureBase64}`
+                      : "/default-avatar.png"
+                  }
+                  alt="Profile"
                   className="h-8 w-8 rounded-full border border-gray-300"
                 />
+
                 <span className="text-sm text-gray-700 transition-all duration-300 hover:scale-105 hover:text-purple-800 dark:text-white">
                   {user?.username}
                 </span>
@@ -183,7 +203,10 @@ export default function Navbar() {
                     )}
                   </button>
                   {token && role === "admin" && (
-                    <Link className={`${active("/admin")} no-underline flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`} to="/admin">
+                    <Link
+                      className={`${active("/admin")} flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
+                      to="/admin"
+                    >
                       Admin Panel
                     </Link>
                   )}

@@ -1,6 +1,6 @@
-// קבלת user מתוך JWT
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
+import { getUserProfile } from "../api/api";
 
 export const useAuth = () => {
   const [user, setUser] = useState(null);
@@ -9,12 +9,26 @@ export const useAuth = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = jwtDecode(token);
-      setUser({
+
+      const baseUser = {
         id: decoded.UserId,
         email: decoded.Email,
         username: decoded.Username,
-        profilePictureBase64: decoded.profilePictureBase64 || null, // אם תוסיף בעתיד
-      });
+      };
+
+      // ❗ נטען גם את התמונה (וכך זה ישרוד רענון)
+      getUserProfile()
+        .then((res) => {
+          const profile = res.data;
+          setUser({
+            ...baseUser,
+            profilePictureBase64: profile.profilePictureBase64 || null,
+          });
+        })
+        .catch(() => {
+          // fallback רק עם נתוני הטוקן
+          setUser(baseUser);
+        });
     }
   }, []);
 
