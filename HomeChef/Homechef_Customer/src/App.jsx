@@ -11,6 +11,9 @@ import RecipeProfilePage from "./pages/RecipeProfilePage";
 import AdminPage from "./pages/AdminPage";
 import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
 import { AuthProvider } from "./pages/Auth/AuthContext";
+import RecipeChatBot from "./pages/ChefBot";
+import TriviaGame from "./pages/TriviaGame";
+import LeaderboardPage from "./pages/LeaderboardPage";
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -30,7 +33,7 @@ export default function App() {
 
   return (
     <AuthProvider>
-      <div className="bg-background dark:bg-background-dark text-text dark:text-text-dark min-h-screen transition-colors duration-300">
+      <div className="min-h-screen bg-background text-text transition-colors duration-300 dark:bg-background-dark dark:text-text-dark">
         <Navbar
           toggleDark={() => setIsDarkMode(!isDarkMode)}
           isDark={isDarkMode}
@@ -62,6 +65,31 @@ export default function App() {
             element={
               <PrivateRoute>
                 <UserProfilePage />
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/chatbot"
+            element={
+              <PrivateRoute>
+                <RecipeChatBot />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/trivia"
+            element={
+              <PrivateRoute>
+                <TriviaGame />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <PrivateRoute>
+                <LeaderboardPage />
               </PrivateRoute>
             }
           />

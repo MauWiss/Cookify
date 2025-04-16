@@ -136,5 +136,37 @@ export const registerUser = (userData) => api.post("/auth/register", userData);
 export const deleteRecipe = (id) => {
   return api.delete(`/admin/${id}`);
 };
+// Ai page
+export const generateGeminiReply = (message) =>
+  api.post("/gemini/chat", message, {
+    headers: { "Content-Type": "application/json" },
+  });
+export const fetchPexelsImage = async (query) => {
+  try {
+    const res = await api.get(
+      `/gemini/search?query=${encodeURIComponent(query)}`,
+    );
+    return res.data.imageUrl;
+  } catch (err) {
+    console.error("❌ Failed to fetch image from Pexels:", err);
+    return null;
+  }
+};
+// Trivia
+export const fetchTriviaQuestion = () => api.get("/triviagemini/generate");
+
+// שליחת ניקוד
+export const submitTriviaScore = async (score, userId, correctAnswers) => {
+  return await api.post("/TriviaGemini/submit-score", {
+    userId,
+    score,
+    correctAnswers,
+  });
+};
+
+// שליפת טבלת דירוג
+export const fetchLeaderboard = async () => {
+  return await api.get("/TriviaGemini/leaderboard");
+};
 
 export default api;

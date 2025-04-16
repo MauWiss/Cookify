@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.SignalR;
 using HomeChefServer.SignalR;
+using HomeChefServer.Services;
 
 using System.IO; 
 
@@ -120,6 +121,9 @@ else
 {
     Console.WriteLine("✅ הקובץ serviceAccountKey.json נמצא בהצלחה!");
 }
+
+builder.Services.AddSingleton<GeminiService>();
+
 
 FirebaseApp.Create(new AppOptions()
 {

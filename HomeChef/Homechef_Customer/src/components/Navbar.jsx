@@ -7,7 +7,6 @@ import { FaBars, FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 
-
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
@@ -50,7 +49,7 @@ export default function Navbar() {
 
   return (
     <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
-      <div className="relative flex items-center justify-between w-full">
+      <div className="relative flex w-full items-center justify-between">
         {/* Logo left side*/}
         <img
           src="../src/images/Logo-bowl.png"
@@ -63,31 +62,57 @@ export default function Navbar() {
           className={
             isLoggedOut
               ? "ml-auto flex gap-6 text-lg font-medium sm:flex"
-              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 hidden sm:flex gap-6 text-lg font-medium"
+              : "absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 text-lg font-medium sm:flex"
           }
         >
-          <Link className={`${active("/")} no-underline`} to="/">Home</Link>
+          <Link className={`${active("/")} no-underline`} to="/">
+            Home
+          </Link>
           {token && role === "admin" && (
-            <Link className={`${active("/admin")} no-underline`} to="/admin">Admin Panel</Link>
+            <Link className={`${active("/admin")} no-underline`} to="/admin">
+              Admin Panel
+            </Link>
           )}
           {token && (
             <>
-              <Link className={`${active("/favorites")} no-underline`} to="/favorites">
+              <Link
+                className={`${active("/favorites")} no-underline`}
+                to="/favorites"
+              >
                 <div className="flex items-center gap-2">
                   Favorites <FaHeart className="text-red-500" />
                 </div>
               </Link>
-              <Link className={`${active("/my-recipes")} no-underline`} to="/my-recipes">
+              <Link
+                className={`${active("/my-recipes")} no-underline`}
+                to="/my-recipes"
+              >
                 <div className="flex items-center gap-2">
                   My Recipes <GiCook className="text-orange-500" />
                 </div>
+              </Link>
+              <Link className={active("/chatbot")} to="/chatbot">
+                <div className="flex items-center gap-2">ChefBot 🤖</div>
+              </Link>
+              <Link className={active("/trivia")} to="/trivia">
+                Trivia Game 🧠
               </Link>
             </>
           )}
           {!token && (
             <>
-              <Link className={`${active("/auth/login")} no-underline`} to="/auth/login">Login</Link>
-              <Link className={`${active("/auth/register")} no-underline`} to="/auth/register">Register</Link>
+              <Link
+                className={`${active("/auth/login")} no-underline`}
+                to="/auth/login"
+              >
+                Login
+              </Link>
+              <Link
+                className={`${active("/auth/register")} no-underline`}
+                to="/auth/register"
+              >
+                Register
+              </Link>
             </>
           )}
         </div>
@@ -95,7 +120,7 @@ export default function Navbar() {
         {/*right side*/}
         <div className="flex items-center gap-4">
           <button
-            className="sm:hidden text-gray-700 dark:text-white"
+            className="text-gray-700 dark:text-white sm:hidden"
             onClick={() => setMenuOpen((prev) => !prev)}
           >
             <FaBars size={24} />
@@ -112,29 +137,29 @@ export default function Navbar() {
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
                 />
-                <span className="text-sm text-gray-700 dark:text-white hover:text-purple-800 hover:scale-105 transition-all duration-300">
+                <span className="text-sm text-gray-700 transition-all duration-300 hover:scale-105 hover:text-purple-800 dark:text-white">
                   {user?.username}
                 </span>
                 <span
-                  className="flex items-center gap-1 cursor-pointer"
-                  onClick={() => setOpen(prev => !prev)}
+                  className="flex cursor-pointer items-center gap-1"
+                  onClick={() => setOpen((prev) => !prev)}
                 >
                   {open ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
               </button>
 
               {profileMenuOpen && (
-                <div className="absolute right-0 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800 z-50">
+                <div className="absolute right-0 z-50 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
                   <Link
                     to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 no-underline"
+                    className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     onClick={() => setProfileMenuOpen(false)}
                   >
                     Profile
                   </Link>
                   <button
                     onClick={() => setDark((prev) => !prev)}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700 flex items-center gap-2"
+                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                   >
                     {dark ? (
                       <>
@@ -151,7 +176,7 @@ export default function Navbar() {
                       setProfileMenuOpen(false);
                       handleLogout();
                     }}
-                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-800 dark:text-red-400"
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-800"
                   >
                     Logout
                   </button>
@@ -164,10 +189,14 @@ export default function Navbar() {
 
       {/* Mobile*/}
       {menuOpen && (
-        <div className="mt-4 flex flex-col gap-4 sm:hidden text-lg font-medium">
-          <Link className={active("/")} to="/">Home</Link>
+        <div className="mt-4 flex flex-col gap-4 text-lg font-medium sm:hidden">
+          <Link className={active("/")} to="/">
+            Home
+          </Link>
           {token && role === "admin" && (
-            <Link to="/admin" className="text-yellow-400">Admin Panel</Link>
+            <Link to="/admin" className="text-yellow-400">
+              Admin Panel
+            </Link>
           )}
           {token && (
             <>
@@ -181,18 +210,25 @@ export default function Navbar() {
                   My Recipes <GiCook className="text-orange-500" />
                 </div>
               </Link>
+              <Link className={active("/chatbot")} to="/chatbot">
+                <div className="flex items-center gap-2">ChefBot 🤖</div>
+              </Link>
             </>
           )}
           {!token ? (
             <>
-              <Link className={active("/auth/login")} to="/auth/login">Login</Link>
-              <Link className={active("/auth/register")} to="/auth/register">Register</Link>
+              <Link className={active("/auth/login")} to="/auth/login">
+                Login
+              </Link>
+              <Link className={active("/auth/register")} to="/auth/register">
+                Register
+              </Link>
             </>
           ) : (
             <button
               onClick={handleLogout}
               title="Logout"
-              className="text-left px-4 py-2 text-red-600 hover:underline"
+              className="px-4 py-2 text-left text-red-600 hover:underline"
             >
               Logout
             </button>
@@ -204,14 +240,16 @@ export default function Navbar() {
             {dark ? <Sun size={22} /> : <Moon size={22} />}
           </button>
           {token && (
-            <div className="flex flex-col border-t border-gray-300 pt-3 gap-2">
+            <div className="flex flex-col gap-2 border-t border-gray-300 pt-3">
               <div className="flex items-center gap-3 px-4">
                 <img
                   src={user?.profileImage || "/default-avatar.png"}
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
                 />
-                <span className="text-sm text-gray-700 dark:text-white">{user?.username}</span>
+                <span className="text-sm text-gray-700 dark:text-white">
+                  {user?.username}
+                </span>
               </div>
               <Link
                 to="/profile"
@@ -225,7 +263,7 @@ export default function Navbar() {
                   setMenuOpen(false);
                   handleLogout();
                 }}
-                className="text-left px-4 py-2 text-sm text-red-600 hover:bg-red-100 dark:hover:bg-red-800 dark:text-red-400"
+                className="px-4 py-2 text-left text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-800"
               >
                 Logout
               </button>
