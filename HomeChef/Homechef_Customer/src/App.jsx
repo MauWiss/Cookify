@@ -13,6 +13,7 @@ import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
 import { AuthProvider } from "./pages/Auth/AuthContext";
 import RecipeChatBot from "./pages/ChefBot";
 import TriviaGame from "./pages/TriviaGame";
+import LeaderboardPage from "./pages/LeaderboardPage";
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -81,6 +82,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <TriviaGame />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/leaderboard"
+            element={
+              <PrivateRoute>
+                <LeaderboardPage />
               </PrivateRoute>
             }
           />

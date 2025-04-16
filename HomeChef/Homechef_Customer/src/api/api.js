@@ -133,5 +133,8 @@ export const fetchPexelsImage = async (query) => {
 };
 // Trivia
 export const fetchTriviaQuestion = () => api.get("/triviagemini/generate");
+export const fetchLeaderboard = () => {
+  return api.get("/trivia/leaderboard");
+};
 
 export default api;
