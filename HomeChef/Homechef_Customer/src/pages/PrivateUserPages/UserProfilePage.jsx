@@ -4,7 +4,6 @@ import {
   getUserProfile,
   updateUserProfile,
   updatePassword,
-  uploadBase64Image,
 } from "../../api/api";
 import { useAuth } from "../../hooks/useAuth";
 import { Link } from "react-router-dom";
@@ -33,29 +32,30 @@ export default function UserProfilePage() {
     fetchData();
   }, []);
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
-    try {
-      const res = await uploadBase64Image(file);
-      const base64 = res.data.base64;
-      setProfilePictureBase64(base64);
-      toast.success("✅ Image uploaded! Click 'Save Picture'");
-    } catch {
-      toast.error("❌ Failed to upload image");
-    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64String = reader.result.split(",")[1];
+      setProfilePictureBase64(base64String);
+      toast.success("✅ Image loaded — click Save Picture");
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSavePicture = async () => {
+    if (!profilePictureBase64) {
+      toast.warning("⚠️ Please upload a picture first.");
+      return;
+    }
+
     try {
       await updateUserProfile({ profilePictureBase64 });
-      setProfile((prev) => ({
-        ...prev,
-        profilePictureBase64,
-      }));
       toast.success("✅ Profile picture updated!");
-    } catch {
-      toast.error("❌ Failed to update picture");
+    } catch (err) {
+      toast.error("❌ Failed to update picture.");
     }
   };
 
@@ -70,7 +70,7 @@ export default function UserProfilePage() {
 
   const handleChangePassword = async () => {
     if (!oldPassword || !newPassword) {
-      toast.warning("⚠️ Please fill both password fields.");
+      toast.warning("⚠️ Fill both fields.");
       return;
     }
     if (oldPassword === newPassword) {
@@ -108,14 +108,13 @@ export default function UserProfilePage() {
         Logged in as: <strong>{user?.username}</strong>
       </p>
 
-      {/* Profile Image Section */}
+      {/* Profile Picture */}
       <div className="space-y-4 rounded-xl bg-white p-6 text-center shadow dark:bg-zinc-800">
         <img
           src={imageSrc}
           alt="Profile"
           className="mx-auto h-32 w-32 rounded-full border-4 border-blue-500 object-cover shadow"
         />
-
         <div className="flex flex-col items-center gap-3">
           <label className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400">
             Change Picture
@@ -126,7 +125,6 @@ export default function UserProfilePage() {
               className="hidden"
             />
           </label>
-
           <button
             onClick={handleSavePicture}
             className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
@@ -152,7 +150,7 @@ export default function UserProfilePage() {
         </button>
       </div>
 
-      {/* Password Change */}
+      {/* Password */}
       <div className="space-y-4 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
         <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-400">
           🔐 Change Password

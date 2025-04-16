@@ -115,28 +115,13 @@ export const addMyRecipe = (recipeData) => api.post("/myrecipes", recipeData);
 export const updateMyRecipe = (recipeId, updatedData) =>
   api.put(`/myrecipes/${recipeId}`, updatedData);
 
-// ---------- 🔐 PROFILE APIs ----------
-
-// שליפת פרופיל משתמש
+// 🔷 User Profile
 export const getUserProfile = () => api.get("/userprofile/me");
-
-// עדכון פרופיל (ביוגרפיה ותמונה)
 export const updateUserProfile = (data) => api.put("/userprofile/update", data);
 
-// שינוי סיסמה
 export const updatePassword = (data) =>
   api.put("/userprofile/change-password", data);
 
-// העלאת תמונה כ־Base64
-export const uploadBase64Image = (file) => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onloadend = () =>
-      resolve({ data: { base64: reader.result.split(",")[1] } });
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-};
 // 🔷 Auth
 export const loginUser = (email, password) =>
   api.post("/auth/login", { email, password });

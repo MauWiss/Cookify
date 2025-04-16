@@ -77,14 +77,15 @@ namespace HomeChefServer.Controllers
             cmd.CommandType = CommandType.StoredProcedure;
 
             cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@Bio", dto.Bio ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@ProfilePictureBase64", dto.ProfilePictureBase64 ?? (object)DBNull.Value);
+            cmd.Parameters.AddWithValue("@Bio", (object?)dto.Bio ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@ProfilePictureBase64", (object?)dto.ProfilePictureBase64 ?? DBNull.Value);
 
             await conn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
 
             return Ok("Profile updated successfully.");
         }
+
 
         [HttpPut("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto dto)
