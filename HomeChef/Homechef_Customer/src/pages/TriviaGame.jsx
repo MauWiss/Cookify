@@ -126,7 +126,10 @@ export default function TriviaGame() {
   return (
     <div className="relative mx-auto max-w-2xl p-6 text-gray-900 dark:text-white">
       <div className="mb-4 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-blue-600">Trivia Time! 🍽️</h1>
+        <h1 className="mx-auto mb-4 text-center text-4xl font-extrabold text-blue-600">
+          Trivia Time! 🍽️
+        </h1>
+
         <div className="flex items-center gap-3">
           {livesDisplay}
           <button onClick={toggleMute} title="Toggle Music">
