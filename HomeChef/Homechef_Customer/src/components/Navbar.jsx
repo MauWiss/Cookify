@@ -103,7 +103,7 @@ export default function Navbar() {
               </Link>
               <Link className={active("/worldrecipes")} to="/worldrecipes">
                 <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  World Recipes 🌍
+                  National Dish 🌍
                 </div>
               </Link>
             </>
@@ -228,7 +228,7 @@ export default function Navbar() {
               </Link>
               <Link className={active("/worldrecipes")} to="/worldrecipes">
                 <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  World Recipes 🌍
+                  National Dish 🌍
                 </div>
               </Link>
             </>
