@@ -113,6 +113,7 @@ builder.Services.AddSwaggerGen(c =>
 
 
 
+builder.Services.AddScoped<PexelsService>();
 
 builder.Services.AddSingleton<GeminiService>();
 

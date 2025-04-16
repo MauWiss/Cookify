@@ -147,5 +147,10 @@ export const submitTriviaScore = async (score, userId, correctAnswers) => {
 export const fetchLeaderboard = async () => {
   return await api.get("/TriviaGemini/leaderboard");
 };
+// שליפת מתכונים לפי מדינה (AI + Pexels)
+export const fetchRecipesByCountry = async (country) => {
+  const res = await api.get(`/worldrecipes/${country}`);
+  return res.data;
+};
 
 export default api;

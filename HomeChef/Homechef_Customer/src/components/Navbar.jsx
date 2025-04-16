@@ -50,20 +50,20 @@ export default function Navbar() {
   return (
     <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
       <div className="relative flex w-full items-center justify-between">
-        {/* Logo left side*/}
+        {/* Logo */}
         <img
           src="../src/images/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
         />
 
-        {/* middle links*/}
+        {/* Middle Links */}
         <div
-          className={
+          className={`items-center gap-6 text-lg font-medium sm:flex ${
             isLoggedOut
-              ? "ml-auto flex gap-6 text-lg font-medium sm:flex"
-              : "absolute left-1/2 top-1/2 hidden -translate-x-1/2 -translate-y-1/2 gap-6 text-lg font-medium sm:flex"
-          }
+              ? "ml-auto"
+              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          }`}
         >
           <Link className={`${active("/")} no-underline`} to="/">
             Home
@@ -79,7 +79,7 @@ export default function Navbar() {
                 className={`${active("/favorites")} no-underline`}
                 to="/favorites"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
                   Favorites <FaHeart className="text-red-500" />
                 </div>
               </Link>
@@ -87,15 +87,24 @@ export default function Navbar() {
                 className={`${active("/my-recipes")} no-underline`}
                 to="/my-recipes"
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
                   My Recipes <GiCook className="text-orange-500" />
                 </div>
               </Link>
               <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2">ChefBot 🤖</div>
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  ChefBot 🤖
+                </div>
               </Link>
               <Link className={active("/trivia")} to="/trivia">
-                Trivia Game 🧠
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  Trivia Game 🧠
+                </div>
+              </Link>
+              <Link className={active("/worldrecipes")} to="/worldrecipes">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  World Recipes 🌍
+                </div>
               </Link>
             </>
           )}
@@ -117,7 +126,7 @@ export default function Navbar() {
           )}
         </div>
 
-        {/*right side*/}
+        {/* Right side */}
         <div className="flex items-center gap-4">
           <button
             className="text-gray-700 dark:text-white sm:hidden"
@@ -140,10 +149,7 @@ export default function Navbar() {
                 <span className="text-sm text-gray-700 transition-all duration-300 hover:scale-105 hover:text-purple-800 dark:text-white">
                   {user?.username}
                 </span>
-                <span
-                  className="flex cursor-pointer items-center gap-1"
-                  onClick={() => setOpen((prev) => !prev)}
-                >
+                <span className="flex cursor-pointer items-center gap-1">
                   {open ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
               </button>
@@ -187,7 +193,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile*/}
+      {/* Mobile Menu */}
       {menuOpen && (
         <div className="mt-4 flex flex-col gap-4 text-lg font-medium sm:hidden">
           <Link className={active("/")} to="/">
@@ -201,17 +207,29 @@ export default function Navbar() {
           {token && (
             <>
               <Link className={active("/favorites")} to="/favorites">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
                   Favorites <FaHeart className="text-red-500" />
                 </div>
               </Link>
               <Link className={active("/my-recipes")} to="/my-recipes">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
                   My Recipes <GiCook className="text-orange-500" />
                 </div>
               </Link>
               <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2">ChefBot 🤖</div>
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  ChefBot 🤖
+                </div>
+              </Link>
+              <Link className={active("/trivia")} to="/trivia">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  Trivia Game 🧠
+                </div>
+              </Link>
+              <Link className={active("/worldrecipes")} to="/worldrecipes">
+                <div className="flex items-center gap-2 whitespace-nowrap text-base">
+                  World Recipes 🌍
+                </div>
               </Link>
             </>
           )}

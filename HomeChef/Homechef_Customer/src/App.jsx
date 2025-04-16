@@ -14,6 +14,7 @@ import { AuthProvider } from "./pages/Auth/AuthContext";
 import RecipeChatBot from "./pages/ChefBot";
 import TriviaGame from "./pages/TriviaGame";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import WorldRecipes from "./pages/WorldMapPage";
 
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
@@ -90,6 +91,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <LeaderboardPage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/worldrecipes"
+            element={
+              <PrivateRoute>
+                <WorldRecipes />
               </PrivateRoute>
             }
           />
