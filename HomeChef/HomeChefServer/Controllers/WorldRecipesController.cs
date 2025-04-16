@@ -7,7 +7,7 @@ namespace HomeChefServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // רק למשתמשים מחוברים
+    [Authorize]
     public class WorldRecipesController : ControllerBase
     {
         private readonly GeminiService _geminiService;
@@ -21,82 +21,150 @@ namespace HomeChefServer.Controllers
             _pexelsApiKey = config["PexelsApiKey"];
         }
 
+
+        private string ExtractDishFromResponse(string response)
+        {
+            var lines = response.Split('\n');
+            foreach (var line in lines)
+            {
+                if (line.Trim().ToLower().StartsWith("dish:"))
+                    return line.Split(':')[1].Trim();
+            }
+
+            return null;
+        }
+
         [HttpGet("{country}")]
         public async Task<IActionResult> GetNationalDish(string country)
         {
             try
             {
-                // שליחת שאלה ברורה עם בקשה למנה אחת בלבד
-                var prompt = $"What is the most iconic traditional national dish of {country}? Just return the dish name only.";
+                var prompt = $"What is the most iconic traditional national dish of {country}? Explain shortly what it is, and then return the dish name only on a separate line starting with 'Dish:'.";
                 var geminiResponse = await _geminiService.SendPromptAsync(prompt);
 
                 if (string.IsNullOrWhiteSpace(geminiResponse))
-                    return BadRequest("Could not generate a dish from Gemini.");
+                    return BadRequest("Could not get answer from Gemini.");
 
-                var dish = geminiResponse.Trim();
+                var dish = ExtractDishFromResponse(geminiResponse);
+                if (string.IsNullOrWhiteSpace(dish))
+                    return BadRequest("Dish name not found.");
 
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("Authorization", _pexelsApiKey);
 
-                var searchQuery = $"{dish} traditional {country} cuisine plated close up, professional food photo";
-                var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(searchQuery)}&per_page=5";
-
-                var res = await httpClient.GetAsync(url);
-                var json = await res.Content.ReadAsStringAsync();
+                var queries = new[]
+                {
+            $"{dish} {country} traditional food plated close up",
+            $"{dish} {country} cuisine",
+            $"{dish} top down food"
+        };
 
                 string imageUrl = null;
-
-                try
+                foreach (var query in queries)
                 {
-                    using var doc = JsonDocument.Parse(json);
-                    var photos = doc.RootElement.GetProperty("photos");
-
-                    foreach (var photo in photos.EnumerateArray())
-                    {
-                        var alt = photo.GetProperty("alt").GetString()?.ToLowerInvariant();
-                        var urlCandidate = photo.GetProperty("src").GetProperty("large").GetString();
-
-                        // בדיקה שהקישור לא ריק ושה-alt קשור לשם המנה
-                        if (!string.IsNullOrWhiteSpace(urlCandidate) &&
-                            alt != null &&
-                            alt.Contains(dish.ToLowerInvariant()))
-                        {
-                            imageUrl = urlCandidate;
-                            break;
-                        }
-                    }
-
-                    // אם לא נמצאה תמונה מתאימה, נבחר את הראשונה ברשימה (fallback פנימי)
-                    if (string.IsNullOrWhiteSpace(imageUrl) && photos.GetArrayLength() > 0)
-                    {
-                        imageUrl = photos[0].GetProperty("src").GetProperty("large").GetString();
-                    }
-
-                    // ואם עדיין אין – תמונה כללית
-                    if (string.IsNullOrWhiteSpace(imageUrl))
-                    {
-                        imageUrl = "https://source.unsplash.com/600x400/?food";
-                    }
-                }
-                catch
-                {
-                    imageUrl = "https://source.unsplash.com/600x400/?food";
+                    imageUrl = await GetRelevantImageUrl(httpClient, query, dish);
+                    if (!string.IsNullOrWhiteSpace(imageUrl)) break;
                 }
 
+                imageUrl ??= await GetFallbackImage(httpClient, $"{dish} food plated");
+                imageUrl ??= $"https://source.unsplash.com/800x600/?{Uri.EscapeDataString(dish + ",food," + country)}";
 
 
                 return Ok(new
                 {
                     title = dish,
+                    explanation = geminiResponse.Trim(),
                     imageUrl
                 });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
 
+
+        private string CleanGeminiDishName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return "";
+
+            var cleaned = raw.ToLowerInvariant()
+                .Replace("the most iconic", "")
+                .Replace("national dish of", "")
+                .Replace("is", "")
+                .Replace(":", "")
+                .Replace(".", "")
+                .Trim();
+
+            var lines = cleaned.Split(new[] { '\n', '.', ',', ':' }, StringSplitOptions.RemoveEmptyEntries);
+            return lines.LastOrDefault()?.Trim().Split(' ').FirstOrDefault();
+        }
+
+        private async Task<string> GetRelevantImageUrl(HttpClient httpClient, string query, string dish)
+        {
+            var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(query)}&per_page=10";
+            var res = await httpClient.GetAsync(url);
+            var json = await res.Content.ReadAsStringAsync();
+
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var photos = doc.RootElement.GetProperty("photos");
+
+                foreach (var photo in photos.EnumerateArray())
+                {
+                    var alt = photo.GetProperty("alt").GetString()?.ToLowerInvariant() ?? "";
+                    var imageUrl = photo.GetProperty("src").GetProperty("large").GetString();
+
+                    var hasDishName = alt.Contains(dish.ToLowerInvariant());
+                    var hasFoodKeywords = alt.Contains("food") || alt.Contains("plate") || alt.Contains("dish") || alt.Contains("meal") || alt.Contains("cuisine") || alt.Contains("served") || alt.Contains("plated");
+
+                    var hasBadKeywords = alt.Contains("flag") || alt.Contains("people") || alt.Contains("illustration") || alt.Contains("empty") || alt.Contains("cutlery");
+
+                    if (hasDishName && hasFoodKeywords && !hasBadKeywords)
+                    {
+                        return imageUrl;
+                    }
+                }
+            }
+            catch
+            {
+                // fallback null
+            }
+
+            return null;
+        }
+
+
+        private async Task<string> GetFallbackImage(HttpClient httpClient, string query)
+        {
+            var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(query)}&per_page=5";
+            var res = await httpClient.GetAsync(url);
+            var json = await res.Content.ReadAsStringAsync();
+
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var photos = doc.RootElement.GetProperty("photos");
+
+                foreach (var photo in photos.EnumerateArray())
+                {
+                    var alt = photo.GetProperty("alt").GetString()?.ToLowerInvariant() ?? "";
+                    var imageUrl = photo.GetProperty("src").GetProperty("large").GetString();
+
+                    var isFood = alt.Contains("food") || alt.Contains("dish") || alt.Contains("meal");
+
+                    if (isFood)
+                        return imageUrl;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null;
+        }
 
 
     }
