@@ -18,7 +18,7 @@ export default function LeaderboardPage() {
   return (
     <div className="mx-auto max-w-2xl px-6 py-10 text-gray-900 dark:text-white">
       <h1 className="mb-6 text-center text-4xl font-extrabold text-blue-600">
-        🏆 Leaderboard
+        Leaderboard🏆
       </h1>
 
       <div className="rounded-xl border bg-white p-4 shadow-lg dark:border-gray-700 dark:bg-gray-800">
