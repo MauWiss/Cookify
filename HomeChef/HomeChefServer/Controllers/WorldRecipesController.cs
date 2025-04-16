@@ -7,7 +7,7 @@ namespace HomeChefServer.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // רק למשתמשים מחוברים
+    [Authorize]
     public class WorldRecipesController : ControllerBase
     {
         private readonly GeminiService _geminiService;
@@ -26,64 +26,38 @@ namespace HomeChefServer.Controllers
         {
             try
             {
-                // שליחת שאלה ברורה עם בקשה למנה אחת בלבד
                 var prompt = $"What is the most iconic traditional national dish of {country}? Just return the dish name only.";
                 var geminiResponse = await _geminiService.SendPromptAsync(prompt);
 
                 if (string.IsNullOrWhiteSpace(geminiResponse))
-                    return BadRequest("Could not generate a dish from Gemini.");
+                    return BadRequest("Could not generate dish name from Gemini.");
 
-                var dish = geminiResponse.Trim();
+                var dish = CleanGeminiDishName(geminiResponse);
+
+                if (string.IsNullOrWhiteSpace(dish))
+                    return BadRequest("Could not extract a valid dish name.");
 
                 var httpClient = new HttpClient();
                 httpClient.DefaultRequestHeaders.Add("Authorization", _pexelsApiKey);
 
-                var searchQuery = $"{dish} traditional {country} cuisine plated close up, professional food photo";
-                var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(searchQuery)}&per_page=5";
-
-                var res = await httpClient.GetAsync(url);
-                var json = await res.Content.ReadAsStringAsync();
+                var queries = new[]
+                {
+                    $"{dish} {country} traditional food plated close up",
+                    $"{country} national dish {dish}",
+                    $"{dish} {country} food"
+                };
 
                 string imageUrl = null;
 
-                try
+                foreach (var query in queries)
                 {
-                    using var doc = JsonDocument.Parse(json);
-                    var photos = doc.RootElement.GetProperty("photos");
-
-                    foreach (var photo in photos.EnumerateArray())
-                    {
-                        var alt = photo.GetProperty("alt").GetString()?.ToLowerInvariant();
-                        var urlCandidate = photo.GetProperty("src").GetProperty("large").GetString();
-
-                        // בדיקה שהקישור לא ריק ושה-alt קשור לשם המנה
-                        if (!string.IsNullOrWhiteSpace(urlCandidate) &&
-                            alt != null &&
-                            alt.Contains(dish.ToLowerInvariant()))
-                        {
-                            imageUrl = urlCandidate;
-                            break;
-                        }
-                    }
-
-                    // אם לא נמצאה תמונה מתאימה, נבחר את הראשונה ברשימה (fallback פנימי)
-                    if (string.IsNullOrWhiteSpace(imageUrl) && photos.GetArrayLength() > 0)
-                    {
-                        imageUrl = photos[0].GetProperty("src").GetProperty("large").GetString();
-                    }
-
-                    // ואם עדיין אין – תמונה כללית
-                    if (string.IsNullOrWhiteSpace(imageUrl))
-                    {
-                        imageUrl = "https://source.unsplash.com/600x400/?food";
-                    }
-                }
-                catch
-                {
-                    imageUrl = "https://source.unsplash.com/600x400/?food";
+                    imageUrl = await GetImageFromPexels(httpClient, query, dish);
+                    if (!string.IsNullOrWhiteSpace(imageUrl))
+                        break;
                 }
 
-
+                if (string.IsNullOrWhiteSpace(imageUrl))
+                    return BadRequest("No accurate image found for this dish.");
 
                 return Ok(new
                 {
@@ -93,11 +67,52 @@ namespace HomeChefServer.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"Server error: {ex.Message}");
             }
         }
 
+        private string CleanGeminiDishName(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw)) return null;
 
+            var cleaned = raw.ToLowerInvariant()
+                .Replace("the most iconic", "")
+                .Replace("national dish of", "")
+                .Replace("is", "")
+                .Replace(":", "")
+                .Replace(".", "")
+                .Trim();
 
+            var lines = cleaned.Split(new[] { '\n', '.', ',' }, StringSplitOptions.RemoveEmptyEntries);
+            return lines.LastOrDefault()?.Trim().Split(' ').FirstOrDefault();
+        }
+
+        private async Task<string> GetImageFromPexels(HttpClient httpClient, string query, string dish)
+        {
+            var url = $"https://api.pexels.com/v1/search?query={Uri.EscapeDataString(query)}&per_page=6";
+            var res = await httpClient.GetAsync(url);
+            var json = await res.Content.ReadAsStringAsync();
+
+            try
+            {
+                using var doc = JsonDocument.Parse(json);
+                var photos = doc.RootElement.GetProperty("photos");
+
+                foreach (var photo in photos.EnumerateArray())
+                {
+                    var alt = photo.GetProperty("alt").GetString()?.ToLowerInvariant() ?? "";
+                    var image = photo.GetProperty("src").GetProperty("large").GetString();
+
+                    if (alt.Contains(dish.ToLowerInvariant()))
+                        return image;
+                }
+            }
+            catch
+            {
+                return null;
+            }
+
+            return null; // ❌ לא מחזירים סתם את התמונה הראשונה
+        }
     }
 }
