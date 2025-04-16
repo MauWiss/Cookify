@@ -12,6 +12,8 @@ import AdminPage from "./pages/AdminPage";
 import UserProfilePage from "./pages/PrivateUserPages/UserProfilePage";
 import { AuthProvider } from "./pages/Auth/AuthContext";
 import RecipeChatBot from "./pages/ChefBot";
+import TriviaGame from "./pages/TriviaGame";
+
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
@@ -71,6 +73,14 @@ export default function App() {
             element={
               <PrivateRoute>
                 <RecipeChatBot />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/trivia"
+            element={
+              <PrivateRoute>
+                <TriviaGame />
               </PrivateRoute>
             }
           />

@@ -94,6 +94,9 @@ export default function Navbar() {
               <Link className={active("/chatbot")} to="/chatbot">
                 <div className="flex items-center gap-2">ChefBot 🤖</div>
               </Link>
+              <Link className={active("/trivia")} to="/trivia">
+                Trivia Game 🧠
+              </Link>
             </>
           )}
           {!token && (
