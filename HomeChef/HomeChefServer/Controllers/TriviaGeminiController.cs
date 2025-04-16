@@ -18,7 +18,7 @@ namespace HomeChefServer.Controllers
 
         public TriviaGeminiController(GeminiService geminiService, IConfiguration config)
         {
-            _geminiService = geminiService;
+            _geminiService = geminiService; ; ;
             _config = config;
         }
 
