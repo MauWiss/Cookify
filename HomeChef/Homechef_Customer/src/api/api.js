@@ -120,6 +120,7 @@ export const getUserProfile = () => api.get("/userprofile/me");
 export const updateUserProfile = (data) => api.put("/userprofile/update", data);
 export const updateUserProfilePicture = (data) =>
   api.put("/userprofile/update-picture", data);
+
 export const updatePassword = (data) =>
   api.put("/userprofile/change-password", data);
 

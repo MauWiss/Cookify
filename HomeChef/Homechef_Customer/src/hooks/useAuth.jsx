@@ -1,5 +1,4 @@
-//קבלת user מתוך JWT
-
+// קבלת user מתוך JWT
 import { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 
@@ -14,9 +13,10 @@ export const useAuth = () => {
         id: decoded.UserId,
         email: decoded.Email,
         username: decoded.Username,
+        profilePictureBase64: decoded.profilePictureBase64 || null, // אם תוסיף בעתיד
       });
     }
   }, []);
 
-  return { user };
+  return { user, setUser };
 };

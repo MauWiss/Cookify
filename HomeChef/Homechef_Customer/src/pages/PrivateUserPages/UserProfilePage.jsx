@@ -3,6 +3,7 @@ import { toast } from "react-toastify";
 import {
   getUserProfile,
   updateUserProfile,
+  updateUserProfilePicture,
   updatePassword,
 } from "../../api/api";
 import { useAuth } from "../../hooks/useAuth";
@@ -52,9 +53,8 @@ export default function UserProfilePage() {
     }
 
     try {
-      await updateUserProfile({ profilePictureBase64 });
+      await updateUserProfilePicture({ profilePictureBase64 });
 
-      // עדכון גם ב־context (כדי ש־Navbar יתעדכן)
       setUser((prev) => ({
         ...prev,
         profilePictureBase64,
@@ -62,6 +62,7 @@ export default function UserProfilePage() {
 
       toast.success("✅ Profile picture updated!");
     } catch (err) {
+      console.error("Error updating picture:", err);
       toast.error("❌ Failed to update picture.");
     }
   };
