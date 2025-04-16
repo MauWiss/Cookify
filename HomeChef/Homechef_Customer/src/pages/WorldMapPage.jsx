@@ -4,37 +4,23 @@ import { fetchRecipesByCountry } from "../api/api";
 import { Dialog } from "@headlessui/react";
 import { toast } from "react-toastify";
 import * as topojson from "topojson-client";
+import Flag from "react-world-flags";
+import countries from "i18n-iso-countries";
+import enLocale from "i18n-iso-countries/langs/en.json";
+
+countries.registerLocale(enLocale); // רישום אנגלית
 
 export default function WorldMapPage() {
   const globeEl = useRef();
-  const [countries, setCountries] = useState([]);
+  const [countriesData, setCountriesData] = useState([]);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [dish, setDish] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const getFlagEmoji = (countryName) => {
-    const countryCodes = {
-      Israel: "IL",
-      France: "FR",
-      Italy: "IT",
-      Mexico: "MX",
-      Japan: "JP",
-      India: "IN",
-      Spain: "ES",
-      China: "CN",
-      Germany: "DE",
-      Thailand: "TH",
-      USA: "US",
-      Morocco: "MA",
-    };
-    const code = countryCodes[countryName] || null;
-    if (!code) return "🌍";
-    return code
-      .toUpperCase()
-      .replace(/./g, (char) =>
-        String.fromCodePoint(char.charCodeAt(0) + 127397),
-      );
+  const getCountryCode = (countryName) => {
+    const code = countries.getAlpha2Code(countryName?.trim(), "en");
+    return code || "UN"; // fallback
   };
 
   useEffect(() => {
@@ -45,7 +31,7 @@ export default function WorldMapPage() {
           data,
           data.objects.countries,
         ).features;
-        setCountries(features);
+        setCountriesData(features);
       });
   }, []);
 
@@ -53,7 +39,7 @@ export default function WorldMapPage() {
     if (globeEl.current) {
       globeEl.current.pointOfView({ altitude: 2.2 }, 1000);
     }
-  }, [countries]);
+  }, [countriesData]);
 
   const handleCountryClick = async (country) => {
     const name = country.properties.name;
@@ -63,7 +49,7 @@ export default function WorldMapPage() {
     setDish(null);
     try {
       const res = await fetchRecipesByCountry(name);
-      setDish(res); // expecting { title, imageUrl }
+      setDish(res);
     } catch (err) {
       toast.error("❌ Failed to load national dish.");
     } finally {
@@ -87,18 +73,18 @@ export default function WorldMapPage() {
   };
 
   return (
-    <div className="relative h-screen w-full bg-black">
+    <div className="relative h-screen w-full bg-white text-black dark:bg-gray-900 dark:text-white">
       {/* Zoom Controls */}
       <div className="absolute left-4 top-4 z-50 flex flex-col gap-2">
         <button
           onClick={handleZoomIn}
-          className="rounded bg-white p-2 text-black shadow hover:bg-gray-200"
+          className="rounded bg-white p-2 text-black shadow hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
         >
           🔍 +
         </button>
         <button
           onClick={handleZoomOut}
-          className="rounded bg-white p-2 text-black shadow hover:bg-gray-200"
+          className="rounded bg-white p-2 text-black shadow hover:bg-gray-200 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700"
         >
           🔍 −
         </button>
@@ -108,8 +94,8 @@ export default function WorldMapPage() {
       <Globe
         ref={globeEl}
         globeImageUrl="//unpkg.com/three-globe/example/img/earth-blue-marble.jpg"
-        backgroundColor="black"
-        polygonsData={countries}
+        backgroundColor="rgba(0,0,0,0)"
+        polygonsData={countriesData}
         polygonCapColor={() => "rgba(0, 150, 255, 0.25)"}
         polygonSideColor={() => "rgba(0, 100, 255, 0.1)"}
         polygonStrokeColor={() => "#444"}
@@ -124,14 +110,13 @@ export default function WorldMapPage() {
         className="fixed inset-0 z-50"
       >
         <div className="flex min-h-screen items-center justify-center bg-black bg-opacity-50 p-4">
-          <Dialog.Panel className="w-full max-w-xl rounded-xl bg-white p-6 shadow-xl">
-            <Dialog.Title className="mb-4 text-center text-xl font-bold">
-              {selectedCountry && (
-                <>
-                  {getFlagEmoji(selectedCountry)} National Dish of{" "}
-                  {selectedCountry}
-                </>
-              )}
+          <Dialog.Panel className="w-full max-w-xl rounded-xl bg-white p-6 text-black shadow-xl dark:bg-gray-800 dark:text-white">
+            <Dialog.Title className="mb-4 flex items-center justify-center gap-2 text-center text-xl font-bold">
+              National Dish of {selectedCountry}
+              <Flag
+                code={getCountryCode(selectedCountry)}
+                style={{ width: 32, height: 20, borderRadius: 3 }}
+              />
             </Dialog.Title>
 
             {loading ? (
@@ -148,7 +133,9 @@ export default function WorldMapPage() {
                 <h2 className="text-lg font-medium">{dish.title}</h2>
               </div>
             ) : (
-              <p className="text-center text-gray-600">No dish found.</p>
+              <p className="text-center text-gray-600 dark:text-gray-300">
+                No dish found.
+              </p>
             )}
 
             <div className="mt-6 text-center">
