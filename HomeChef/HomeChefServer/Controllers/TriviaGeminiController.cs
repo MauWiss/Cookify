@@ -106,6 +106,28 @@ Explanation: [optional, 1 sentence explanation]";
 
             return Ok(result);
         }
+        [HttpPost("submit-score")]
+        public async Task<IActionResult> SubmitScore([FromBody] TriviaScoreDTO dto)
+        {
+            try
+            {
+                using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+                using var cmd = new SqlCommand("sp_SubmitTriviaScore", conn);
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@UserId", dto.UserId);
+                cmd.Parameters.AddWithValue("@Score", dto.Score);
+
+                conn.Open();
+                await cmd.ExecuteNonQueryAsync();
+
+                return Ok("Score submitted successfully");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error: {ex.Message}");
+            }
+        }
 
 
     }
