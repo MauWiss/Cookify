@@ -1,6 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using HomeChefServer.Services;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authorization;
+using System.Data;
+using System.Data.SqlClient;
+
 
 namespace HomeChefServer.Controllers
 {
@@ -9,11 +13,15 @@ namespace HomeChefServer.Controllers
     public class TriviaGeminiController : ControllerBase
     {
         private readonly GeminiService _geminiService;
+        private readonly IConfiguration _config;
 
-        public TriviaGeminiController(GeminiService geminiService)
+        public TriviaGeminiController(GeminiService geminiService, IConfiguration config)
         {
             _geminiService = geminiService;
+            _config = config;
         }
+
+        
 
         [HttpGet("generate")]
         public async Task<IActionResult> GenerateTrivia()
@@ -49,5 +57,56 @@ Explanation: [optional, 1 sentence explanation]";
                 explanation
             });
         }
+
+        [HttpPost("score/update")]
+        [Authorize]
+        public async Task<IActionResult> UpdateScore([FromBody] bool isCorrect)
+        {
+            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+            if (userId == 0) return Unauthorized();
+
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand("sp_UpdateTriviaScore", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@IsCorrect", isCorrect);
+
+            await conn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+
+            return Ok();
+        }
+
+        [HttpGet("leaderboard")]
+        public async Task<IActionResult> GetLeaderboard()
+        {
+            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
+            using var cmd = new SqlCommand("sp_GetLeaderboard", conn)
+            {
+                CommandType = CommandType.StoredProcedure
+            };
+
+            await conn.OpenAsync();
+            var reader = await cmd.ExecuteReaderAsync();
+
+            var result = new List<object>();
+            while (await reader.ReadAsync())
+            {
+                result.Add(new
+                {
+                    Username = reader["Username"],
+                    TotalQuestions = (int)reader["TotalQuestions"],
+                    CorrectAnswers = (int)reader["CorrectAnswers"],
+                    Accuracy = Math.Round(
+                        ((int)reader["CorrectAnswers"]) * 100.0 / Math.Max(1, (int)reader["TotalQuestions"]), 1)
+                });
+            }
+
+            return Ok(result);
+        }
+
+
     }
 }
