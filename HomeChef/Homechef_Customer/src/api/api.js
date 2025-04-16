@@ -133,8 +133,17 @@ export const fetchPexelsImage = async (query) => {
 };
 // Trivia
 export const fetchTriviaQuestion = () => api.get("/triviagemini/generate");
-export const fetchLeaderboard = () => {
-  return api.get("/trivia/leaderboard");
+// שליפת טבלת דירוג
+export const fetchLeaderboard = async () => {
+  return await api.get("/triviagemini/leaderboard");
+};
+
+// שליחת ניקוד
+export const submitTriviaScore = async (score, userId) => {
+  return await api.post("/TriviaGemini/submit-score", {
+    userId,
+    score,
+  });
 };
 
 export default api;
