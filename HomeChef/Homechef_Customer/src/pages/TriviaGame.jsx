@@ -7,18 +7,19 @@ import { FaHeart, FaVolumeMute, FaVolumeUp } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 
 export default function TriviaGame() {
-  const { user } = useAuth(); // 🎯 הוספנו את זה בשביל ה־userId
+  const { user } = useAuth();
   const [questionData, setQuestionData] = useState(null);
   const [selected, setSelected] = useState("");
   const [showAnswer, setShowAnswer] = useState(false);
   const [loading, setLoading] = useState(true);
   const [timer, setTimer] = useState(15);
   const [lives, setLives] = useState(3);
-  const [score, setScore] = useState(0); // 💯 ניקוד
+  const [score, setScore] = useState(0);
   const [gameOver, setGameOver] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const timerRef = useRef(null);
   const audioRef = useRef(new Audio("/audio/TriviaSound.mp3"));
+  const [correctAnswers, setCorrectAnswers] = useState(0);
 
   const fetchQuestion = async () => {
     try {
@@ -64,6 +65,21 @@ export default function TriviaGame() {
     return () => clearInterval(timerRef.current);
   }, [showAnswer, loading, gameOver]);
 
+  useEffect(() => {
+    if (!gameOver || !user?.userId) return;
+
+    const trySubmitScore = async () => {
+      try {
+        await submitTriviaScore(score, user.userId, correctAnswers);
+        toast.success("🎉 Score submitted!");
+      } catch {
+        console.log("Score not updated – possibly lower than existing.");
+      }
+    };
+
+    trySubmitScore();
+  }, [gameOver]);
+
   const handleTimeout = () => {
     setShowAnswer(true);
     loseLife();
@@ -75,15 +91,6 @@ export default function TriviaGame() {
       if (newLives <= 0) {
         audioRef.current.pause();
         setGameOver(true);
-
-        // 🧠 שלח ניקוד אוטומטית רק אם המשתמש מחובר
-        if (user && user.userId) {
-          submitTriviaScore(score, user.userId)
-            .then(() => toast.success("🎉 Score submitted!"))
-            .catch(() => toast.error("⚠️ Failed to submit score."));
-        } else {
-          toast.info("👤 You must be logged in to save your score.");
-        }
       }
       return newLives;
     });
@@ -97,7 +104,8 @@ export default function TriviaGame() {
       option[0].toUpperCase() === questionData.answer.toUpperCase();
     if (isCorrect) {
       confetti();
-      setScore((prev) => prev + 10); // ✅ ניקוד
+      setScore((prev) => prev + 10);
+      setCorrectAnswers((prev) => prev + 1);
     } else {
       loseLife();
     }
@@ -141,7 +149,6 @@ export default function TriviaGame() {
         <h1 className="mx-auto mb-4 text-center text-4xl font-extrabold text-blue-600">
           Trivia Time! 🍽️
         </h1>
-
         <div className="flex items-center gap-3">
           {livesDisplay}
           <button onClick={toggleMute} title="Toggle Music">
@@ -173,7 +180,7 @@ export default function TriviaGame() {
 
           const bg = showAnswer
             ? isSelected
-              ? isThisCorrect
+              ? isCorrect
                 ? "bg-green-500 text-white"
                 : "bg-red-500 text-white"
               : isThisCorrect
@@ -210,7 +217,6 @@ export default function TriviaGame() {
         </div>
       )}
 
-      {/* BUTTONS */}
       <div className="mt-8 flex flex-wrap justify-center gap-4">
         <button
           onClick={handleNext}
@@ -226,7 +232,6 @@ export default function TriviaGame() {
         </Link>
       </div>
 
-      {/* GAME OVER */}
       {gameOver && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white">
           <div className="text-center">

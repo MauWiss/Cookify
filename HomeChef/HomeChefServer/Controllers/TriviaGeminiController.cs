@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using System.Data;
 using System.Data.SqlClient;
+using HomeChefServer.Models.DTOs;
 
 
 namespace HomeChefServer.Controllers
@@ -58,26 +59,7 @@ Explanation: [optional, 1 sentence explanation]";
             });
         }
 
-        [HttpPost("score/update")]
-        [Authorize]
-        public async Task<IActionResult> UpdateScore([FromBody] bool isCorrect)
-        {
-            var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
-            if (userId == 0) return Unauthorized();
-
-            using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-            using var cmd = new SqlCommand("sp_UpdateTriviaScore", conn)
-            {
-                CommandType = CommandType.StoredProcedure
-            };
-            cmd.Parameters.AddWithValue("@UserId", userId);
-            cmd.Parameters.AddWithValue("@IsCorrect", isCorrect);
-
-            await conn.OpenAsync();
-            await cmd.ExecuteNonQueryAsync();
-
-            return Ok();
-        }
+        
 
         [HttpGet("leaderboard")]
         public async Task<IActionResult> GetLeaderboard()
@@ -91,43 +73,52 @@ Explanation: [optional, 1 sentence explanation]";
             await conn.OpenAsync();
             var reader = await cmd.ExecuteReaderAsync();
 
-            var result = new List<object>();
+            var result = new List<LeaderboardEntryDTO>();
             while (await reader.ReadAsync())
             {
-                result.Add(new
+                result.Add(new LeaderboardEntryDTO
                 {
-                    Username = reader["Username"],
-                    TotalQuestions = (int)reader["TotalQuestions"],
+                  
+                    Username = reader["Username"].ToString(),
+                    Score = (int)reader["Score"],
                     CorrectAnswers = (int)reader["CorrectAnswers"],
-                    Accuracy = Math.Round(
-                        ((int)reader["CorrectAnswers"]) * 100.0 / Math.Max(1, (int)reader["TotalQuestions"]), 1)
+                    SubmittedAt = (DateTime)reader["SubmittedAt"]
                 });
             }
 
             return Ok(result);
         }
+
         [HttpPost("submit-score")]
+        [Authorize]
         public async Task<IActionResult> SubmitScore([FromBody] TriviaScoreDTO dto)
         {
             try
             {
+                var userId = int.Parse(User.FindFirst("UserId")?.Value ?? "0");
+                if (userId == 0) return Unauthorized();
+
                 using var conn = new SqlConnection(_config.GetConnectionString("DefaultConnection"));
-                using var cmd = new SqlCommand("sp_SubmitTriviaScore", conn);
-                cmd.CommandType = CommandType.StoredProcedure;
+                using var cmd = new SqlCommand("sp_SubmitTriviaScore", conn)
+                {
+                    CommandType = CommandType.StoredProcedure
+                };
 
-                cmd.Parameters.AddWithValue("@UserId", dto.UserId);
+                cmd.Parameters.AddWithValue("@UserId", userId);
                 cmd.Parameters.AddWithValue("@Score", dto.Score);
+                cmd.Parameters.AddWithValue("@CorrectAnswers", dto.CorrectAnswers);
 
-                conn.Open();
+                await conn.OpenAsync();
                 await cmd.ExecuteNonQueryAsync();
 
-                return Ok("Score submitted successfully");
+                return Ok("✅ Score submitted successfully");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Error: {ex.Message}");
+                return StatusCode(500, $"❌ Error: {ex.Message}");
             }
         }
+
 
 
     }
