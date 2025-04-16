@@ -1,15 +1,16 @@
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
 import api from "../api/api";
-import { fetchRecipes, deleteRecipe  } from "../api/api"; // ✔️ אם יש פונקציה בשם הזה
+import { fetchRecipes, deleteRecipe } from "../api/api"; // ✔️ אם יש פונקציה בשם הזה
 import { toast } from "react-toastify";
 import { FaTrash } from "react-icons/fa";
-
+import { useRecipesData } from "../hooks/useRecipesData";
 
 export default function AdminPage() {
   const [users, setUsers] = useState([]);
-  const [recipes, setRecipes] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const { page, setPage, loadRecipes, totalCount, recipes } = useRecipesData();
 
 
   useEffect(() => {
@@ -23,20 +24,19 @@ export default function AdminPage() {
         setLoading(false);
       }
     };
-    
 
-    const fetchAllRecipes = async () => {
-      const res = await fetchRecipes(); // לא שולחת term ולא קטגוריה
-      setRecipes(res.data);
-    };
-    fetchAllRecipes();
+    loadRecipes("", null, page);
     fetchUsers();
   }, [])
-  
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+    loadRecipes("", null, newPage);
+  };
 
   const handleDeleteRecipe = async (id) => {
     if (!window.confirm("Are you sure you want to delete this recipe?")) return;
-  
+
     try {
       await deleteRecipe(id);
       setRecipes((prev) => prev.filter(r => r.recipeId !== id)); // הסרה מה-state
@@ -47,7 +47,7 @@ export default function AdminPage() {
     }
   };
 
-  
+
 
   if (loading) return <div>Loading admin data...</div>;
 
@@ -80,7 +80,7 @@ export default function AdminPage() {
       ignoreRowClick: true,
       allowOverflow: true, // ✅ נשאר רק בעמודה – לא עובר לדום
     }
-    
+
   ];
 
   return (
@@ -101,13 +101,14 @@ export default function AdminPage() {
       <section>
         <h2 className="text-xl font-semibold mb-3">Recipes</h2>
         <DataTable
-          title="Recipes"
           columns={recipeColumns}
           data={recipes}
-          progressPending={loading}
           pagination
-          
+          paginationServer
+          paginationTotalRows={totalCount}
+          onChangePage={handlePageChange}
         />
+
       </section>
 
     </div>

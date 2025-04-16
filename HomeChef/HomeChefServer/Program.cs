@@ -112,7 +112,14 @@ builder.Services.AddSwaggerGen(c =>
 
 
 
-
+if (!File.Exists("serviceAccountKey.json"))
+{
+    Console.WriteLine("❌ הקובץ serviceAccountKey.json לא נמצא! ודא שהוא קיים ומסומן כ-Copy to Output Directory");
+}
+else
+{
+    Console.WriteLine("✅ הקובץ serviceAccountKey.json נמצא בהצלחה!");
+}
 
 FirebaseApp.Create(new AppOptions()
 {

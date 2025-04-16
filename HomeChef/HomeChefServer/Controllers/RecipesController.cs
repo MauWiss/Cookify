@@ -19,18 +19,16 @@ namespace HomeChefServer.Controllers
             _configuration = configuration;
         }
 
-        // שליפה מדורגת של מתכונים
         [HttpGet("paged")]
-        public async Task<ActionResult<IEnumerable<RecipeDTO>>> GetRecipesPaged(int pageNumber = 1, int pageSize = 20)
+        public async Task<ActionResult> GetRecipesPaged(
+        int pageNumber = 1,
+        int pageSize = 20)
         {
             List<RecipeDTO> recipes = new List<RecipeDTO>();
-           
+            int totalCount = 0;
 
             using SqlConnection conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
-
-            
-
 
             using SqlCommand cmd = new SqlCommand("sp_GetRecipesPaged", conn)
             {
@@ -41,28 +39,48 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@PageSize", pageSize);
 
             using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+
+            // שלב 1: קריאת totalCount
+            if (await reader.ReadAsync())
             {
-                recipes.Add(new RecipeDTO
-                {
-                    RecipeId = (int)reader["Id"],
-                    Title = reader["Title"].ToString(),
-                    ImageUrl = reader["ImageUrl"].ToString(),
-                    SourceUrl = reader["SourceUrl"].ToString(),
-                    Servings = (int)reader["Servings"],
-                    CookingTime = (int)reader["CookingTime"],
-                    CategoryName = reader["CategoryName"].ToString()
-                });
+                totalCount = (int)reader["TotalCount"];
             }
 
-            return Ok( recipes);
+            // שלב 2: לעבור לתוצאה הבאה (המתכונים)
+            if (await reader.NextResultAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    recipes.Add(new RecipeDTO
+                    {
+                        RecipeId = (int)reader["Id"],
+                        Title = reader["Title"].ToString(),
+                        ImageUrl = reader["ImageUrl"].ToString(),
+                        SourceUrl = reader["SourceUrl"].ToString(),
+                        Servings = (int)reader["Servings"],
+                        CookingTime = (int)reader["CookingTime"],
+                        CategoryName = reader["CategoryName"].ToString()
+                    });
+                }
+            }
+
+            return Ok(new
+            {
+                recipes,
+                totalCount
+            });
         }
 
 
+
         [HttpGet("search")]
-        public async Task<ActionResult<IEnumerable<RecipeDTO>>> SearchRecipes(string term)
+        public async Task<ActionResult> SearchRecipes(
+    string term,
+    int pageNumber = 1,
+    int pageSize = 20)
         {
             var recipes = new List<RecipeDTO>();
+            int totalCount = 0;
 
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
@@ -73,24 +91,43 @@ namespace HomeChefServer.Controllers
             };
 
             cmd.Parameters.AddWithValue("@SearchTerm", term);
+            cmd.Parameters.AddWithValue("@PageNumber", pageNumber);
+            cmd.Parameters.AddWithValue("@PageSize", pageSize);
 
             using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+
+            // שלב 1: שליפת TotalCount
+            if (await reader.ReadAsync())
             {
-                recipes.Add(new RecipeDTO
-                {
-                    RecipeId = (int)reader["RecipeId"],
-                    Title = reader["Title"].ToString(),
-                    ImageUrl = reader["ImageUrl"].ToString(),
-                    SourceUrl = reader["SourceUrl"].ToString(),
-                    CategoryName = reader["CategoryName"].ToString(),
-                    CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
-                    Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0
-                });
+                totalCount = (int)reader["TotalCount"];
             }
 
-            return Ok(recipes);
+            // שלב 2: מעבר לתוצאה הבאה (ResultSet)
+            if (await reader.NextResultAsync())
+            {
+                while (await reader.ReadAsync())
+                {
+                    recipes.Add(new RecipeDTO
+                    {
+                        RecipeId = (int)reader["RecipeId"],
+                        Title = reader["Title"].ToString(),
+                        ImageUrl = reader["ImageUrl"].ToString(),
+                        SourceUrl = reader["SourceUrl"].ToString(),
+                        CategoryName = reader["CategoryName"].ToString(),
+                        CookingTime = reader["CookingTime"] != DBNull.Value ? (int)reader["CookingTime"] : 0,
+                        Servings = reader["Servings"] != DBNull.Value ? (int)reader["Servings"] : 0
+                    });
+                }
+            }
+
+            return Ok(new
+            {
+                recipes,
+                totalCount
+            });
         }
+
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(int id)
