@@ -11,7 +11,7 @@ import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 
 export default function UserProfilePage() {
-  const { user } = useAuth();
+  const { user, setUser } = useAuth();
   const [profile, setProfile] = useState(null);
   const [bio, setBio] = useState("");
   const [profilePictureBase64, setProfilePictureBase64] = useState("");
@@ -53,6 +53,13 @@ export default function UserProfilePage() {
 
     try {
       await updateUserProfile({ profilePictureBase64 });
+
+      // עדכון גם ב־context (כדי ש־Navbar יתעדכן)
+      setUser((prev) => ({
+        ...prev,
+        profilePictureBase64,
+      }));
+
       toast.success("✅ Profile picture updated!");
     } catch (err) {
       toast.error("❌ Failed to update picture.");

@@ -5,4 +5,5 @@
         public string? Bio { get; set; }
         public string? ProfilePictureBase64 { get; set; }
     }
+
 }

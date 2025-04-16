@@ -5,7 +5,6 @@ using System.Data.SqlClient;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using HomeChefServer.DTOs;
 using HomeChefServer.Models.DTOs;
 
 namespace HomeChefServer.Controllers
@@ -85,6 +84,24 @@ namespace HomeChefServer.Controllers
 
             return Ok("Profile updated successfully.");
         }
+        [HttpPut("update-picture")]
+        public async Task<IActionResult> UpdateProfilePicture([FromBody] UpdateProfileDto dto)
+        {
+            var userId = GetUserIdFromToken();
+
+            using var conn = new SqlConnection(_connectionString);
+            using var cmd = new SqlCommand("sp_UpdateUserProfilePicture", conn);
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            cmd.Parameters.AddWithValue("@UserId", userId);
+            cmd.Parameters.AddWithValue("@ProfilePictureBase64", dto.ProfilePictureBase64 ?? (object)DBNull.Value);
+
+            await conn.OpenAsync();
+            await cmd.ExecuteNonQueryAsync();
+
+            return Ok("✅ Profile picture updated.");
+        }
+
 
 
         [HttpPut("change-password")]
