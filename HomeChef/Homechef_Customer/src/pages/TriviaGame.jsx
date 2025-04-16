@@ -66,7 +66,7 @@ export default function TriviaGame() {
   }, [showAnswer, loading, gameOver]);
 
   useEffect(() => {
-    if (!gameOver || !user?.userId) return;
+    if (!gameOver || !user?.id) return;
 
     const trySubmitScore = async () => {
       try {
