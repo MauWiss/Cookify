@@ -16,6 +16,12 @@ const RecipeProfilePage = () => {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const [moreRecipes, setMoreRecipes] = useState([]);
+  const [morePage, setMorePage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [moreLoading, setMoreLoading] = useState(false);
+
+
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);

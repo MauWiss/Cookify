@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { fetchFavorites, removeFavorite, fetchCategories } from "../api/api";
+import { fetchFavorites, removeFavorite, fetchCategories, fetchFavoritesByCategory  } from "../api/api";
 
 export const useFavoritesData = () => {
   const [favorites, setFavorites] = useState([]);
@@ -10,15 +10,20 @@ export const useFavoritesData = () => {
   const loadFavorites = async (categoryId) => {
     setLoading(true);
     try {
-      const res = await fetchFavorites(categoryId);
+      // בהתאם ל־categoryId נבחר endpoint שונה
+      const res = categoryId == null
+        ? await fetchFavorites()                             
+        : await fetchFavoritesByCategory(categoryId);        
+  
       setFavorites(res.data);
+      console.log("Loaded favorites for category:", categoryId);
     } catch (err) {
       console.error("Failed to load favorites", err);
     } finally {
       setLoading(false);
     }
   };
-
+  
   const loadCategories = async () => {
     try {
       const res = await fetchCategories();
@@ -38,7 +43,10 @@ export const useFavoritesData = () => {
   }, []);
 
   useEffect(() => {
+    console.log(selectedCategoryId);
     loadFavorites(selectedCategoryId);
+   
+
   }, [selectedCategoryId]);
 
   return {

@@ -64,7 +64,9 @@ export const fetchCategories = () => api.get("/categories");
 export const fetchAllRecipes = () => api.get("/recipes/all"); // שליפה של כל המתכונים
 
 // 🔷 Favorites
-export const fetchFavorites = () => api.get("/Favorites/favorites");
+export const fetchFavorites = () => api.get(`/Favorites/favorites`);
+// api/api.js
+export const fetchFavoritesByCategory = (categoryId) => api.get(`/favorites/category/${categoryId}`);
 export const addFavorite = (recipeId) =>
   api.post(`/Favorites/${recipeId}/favorite`, {});
 export const removeFavorite = (recipeId) =>

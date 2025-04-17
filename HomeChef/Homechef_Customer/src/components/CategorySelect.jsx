@@ -28,6 +28,11 @@ export default function CategorySelect({
     setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth);
   };
 
+  const handleClick = (id) => {
+    console.log("CategorySelect: בחירה ל־ID =", id);
+    onSelectCategory(id);
+  };
+
   useEffect(() => {
     checkScroll();
     const el = scrollRef.current;
@@ -82,7 +87,7 @@ export default function CategorySelect({
           {categories.map((cat) => (
             <div
               key={cat.id}
-              onClick={() => onSelectCategory(cat.id)}
+              onClick={() => handleClick(cat.id)}
               className="flex flex-col items-center cursor-pointer transition transform hover:scale-105 relative"
             >
               <img
