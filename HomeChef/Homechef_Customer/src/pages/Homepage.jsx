@@ -7,6 +7,8 @@ import { addFavorite, removeFavorite } from "../api/api";
 import SearchInput from "../components/SearchInput";
 import CategorySelect from "../components/CategorySelect";
 import { useRecipesData } from "../hooks/useRecipesData";
+import RecipeRatingBlock from "../components/RecipeRatingBlock";
+
 
 export default function Homepage() {
   const navigate = useNavigate();
@@ -116,6 +118,9 @@ export default function Homepage() {
                 <h3 className="hover:text-primary dark:hover:text-primary-dark cursor-pointer text-lg font-semibold transition">
                   {recipe.title}
                 </h3>
+
+                <RecipeRatingBlock recipeId={recipe.recipeId} />
+
                 <div className="text-muted dark:text-muted-dark text-sm">
                   {recipe.categoryName}
                 </div>

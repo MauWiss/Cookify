@@ -1,6 +1,7 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import RecipeRatingBlock from "../components/RecipeRatingBlock"
 
 const RecipeInfoSection = ({ recipe }) => {
   const navigate = useNavigate();
@@ -57,6 +58,9 @@ const RecipeInfoSection = ({ recipe }) => {
               </p>
             )}
           </div>
+
+          <RecipeRatingBlock recipeId={recipe.id} />
+
 
           <div className="mt-4 flex flex-wrap gap-3">
             {recipe.vegetarian && (

@@ -5,7 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import RecipeInfoSection from "../components/RecipeInfoSection";
 import RecipeReviews from "../components/RecipeReviews";
 import { fetchRecipeProfile } from "../api/api";
-import RecipeRatingBlock from "../components/RecipeRatingBlock"; // ייבוא נכון של RecipeRatingBlock
+import RecipeRating from "../components/RecipeRating";
+
+
 
 const RecipeProfilePage = () => {
   const { id } = useParams();
@@ -63,11 +65,16 @@ const RecipeProfilePage = () => {
   return (
     <div className="mx-auto mt-12 max-w-6xl rounded-2xl bg-white px-6 py-8 shadow-xl dark:bg-gray-900">
       <ToastContainer />
+  
       <RecipeInfoSection recipe={recipe} />
-      <RecipeRatingBlock recipeId={id} token={token} />
+  
+      {/* ⭐ interactive rating here */}
+      <RecipeRating recipeId={id} />
+  
+      {/* 📝 user reviews below */}
       <RecipeReviews recipeId={id} />
     </div>
   );
-};
+}
 
 export default RecipeProfilePage;

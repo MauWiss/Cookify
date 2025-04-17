@@ -104,7 +104,7 @@ export const getRatingDetails = (recipeId) => {
 
 // שליפת דירוג המשתמש עבור מתכון ספציפי
 export const fetchUserRating = (recipeId) => {
-  return api.get(`/ratings/${recipeId}/my`);
+  return api.get(`/ratings/${recipeId}/me`);
 };
 
 // 🔷 My Recipes

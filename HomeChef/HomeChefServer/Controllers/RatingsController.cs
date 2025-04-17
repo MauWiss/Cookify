@@ -16,73 +16,63 @@ public class RatingsController : ControllerBase
         _configuration = configuration;
     }
 
-    // הוספת דירוג למתכון
-    [HttpPost]
-    public async Task<ActionResult> AddRating([FromBody] RatingDTO ratingDto)
+   [HttpPost]
+public async Task<ActionResult> AddRating([FromBody] RatingDTO ratingDto)
+{
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (userIdClaim == null)
     {
-        // בדיקה אם המשתמש מחובר
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-        if (userIdClaim == null)
-        {
-            return Unauthorized("User not logged in.");
-        }
-
-        // קבלת מזהה המשתמש מה-Claim
-        int userId = int.Parse(userIdClaim.Value);
-        ratingDto.UserId = userId;
-
-        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-        await conn.OpenAsync();
-
-        using var cmd = new SqlCommand("sp_AddRecipeRating", conn)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
-        cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
-        cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
-        cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
-
-        await cmd.ExecuteNonQueryAsync();
-
-        // חישוב ממוצע הדירוגים והעדכון בטבלת המתכונים
-        await UpdateRecipeRating(ratingDto.RecipeId);
-
-        return Ok();
+        return Unauthorized("User not logged in.");
     }
 
-    // עדכון דירוג למתכון
+    int userId = int.Parse(userIdClaim.Value);
+    ratingDto.UserId = userId;
+
+    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+    await conn.OpenAsync();
+
+    using var cmd = new SqlCommand("sp_AddRecipeRating", conn)
+    {
+        CommandType = CommandType.StoredProcedure
+    };
+    cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
+    cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
+    cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
+
+    await cmd.ExecuteNonQueryAsync();
+
+    return Ok();
+}
+
+
     [HttpPut]
-    public async Task<ActionResult> UpdateRating([FromBody] RatingDTO ratingDto)
+public async Task<ActionResult> UpdateRating([FromBody] RatingDTO ratingDto)
+{
+    var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+    if (userIdClaim == null)
     {
-        // בדיקה אם המשתמש מחובר
-        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
-        if (userIdClaim == null)
-        {
-            return Unauthorized("User not logged in.");
-        }
-
-        // קבלת מזהה המשתמש מה-Claim
-        int userId = int.Parse(userIdClaim.Value);
-        ratingDto.UserId = userId;
-
-        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-        await conn.OpenAsync();
-
-        using var cmd = new SqlCommand("sp_UpdateRecipeRating", conn)
-        {
-            CommandType = CommandType.StoredProcedure
-        };
-        cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
-        cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
-        cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
-
-        await cmd.ExecuteNonQueryAsync();
-
-        // חישוב ממוצע הדירוגים והעדכון בטבלת המתכונים
-        await UpdateRecipeRating(ratingDto.RecipeId);
-
-        return Ok();
+        return Unauthorized("User not logged in.");
     }
+
+    int userId = int.Parse(userIdClaim.Value);
+    ratingDto.UserId = userId;
+
+    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+    await conn.OpenAsync();
+
+    using var cmd = new SqlCommand("sp_UpdateRecipeRating", conn)
+    {
+        CommandType = CommandType.StoredProcedure
+    };
+    cmd.Parameters.AddWithValue("@RecipeId", ratingDto.RecipeId);
+    cmd.Parameters.AddWithValue("@UserId", ratingDto.UserId);
+    cmd.Parameters.AddWithValue("@Rating", ratingDto.Rating);
+
+    await cmd.ExecuteNonQueryAsync();
+
+    return Ok();
+}
+
 
     // מחיקת דירוג למתכון
     [HttpDelete]
@@ -135,8 +125,14 @@ public class RatingsController : ControllerBase
         using var reader = await cmd.ExecuteReaderAsync();
         if (await reader.ReadAsync())
         {
-            rating.AverageRating = reader["AverageRating"] != DBNull.Value ? (double?)reader["AverageRating"] : null;
-            rating.RatingCount = (int)reader["RatingCount"];
+            rating.AverageRating = reader["AverageRating"] != DBNull.Value
+                                   ? Convert.ToDouble(reader["AverageRating"])
+                                   : null;
+
+            rating.RatingCount = reader["RatingCount"] != DBNull.Value
+                                   ? Convert.ToInt32(reader["RatingCount"])
+                                   : 0;
+
         }
 
         return Ok(rating);
@@ -157,4 +153,34 @@ public class RatingsController : ControllerBase
 
         await cmd.ExecuteNonQueryAsync();
     }
+
+    // GET /api/ratings/{recipeId}/me
+    [HttpGet("{recipeId}/me")]
+    public async Task<ActionResult<object>> GetMyRating(int recipeId)
+    {
+        // 🔒 require login
+        var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
+        if (userIdClaim == null)
+            return Unauthorized("User not logged in.");
+
+        int userId = int.Parse(userIdClaim.Value);
+
+        using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+        await conn.OpenAsync();
+
+        // single‑scalar query: does this user have a rating for this recipe?
+        using var cmd = new SqlCommand(
+            "SELECT Rating FROM dbo.RecipeRatings WHERE RecipeId = @RecipeId AND UserId = @UserId",
+            conn);
+        cmd.Parameters.AddWithValue("@RecipeId", recipeId);
+        cmd.Parameters.AddWithValue("@UserId", userId);
+
+        var result = await cmd.ExecuteScalarAsync();
+        if (result == null)
+            return NoContent();  // HTTP 204
+
+
+        return Ok(new { rating = Convert.ToInt32(result) }); // { "rating": 4 }
+    }
+
 }
