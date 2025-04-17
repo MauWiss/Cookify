@@ -9,7 +9,7 @@ export const useAuth = () => {
     const token = localStorage.getItem("token");
     if (token) {
       const decoded = jwtDecode(token);
-
+      
       const baseUser = {
         id: decoded.UserId,
         email: decoded.Email,

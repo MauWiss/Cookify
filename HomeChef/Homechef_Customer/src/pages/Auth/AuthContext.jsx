@@ -28,17 +28,20 @@ export const AuthProvider = ({ children }) => {
     if (storedToken) {
       try {
         const decoded = jwtDecode(storedToken);
-        console.log("decoded token:", decoded);
+        
+        const res = await getUserProfile();
 
-        const data = await getUserProfile();
-        console.log(data);
+        const userData = res.data.data; // גישה נכונה לנתונים עצמם
 
+        
+        console.log("data from profile:",userData);
         setUser({
-          id: decoded.UserId,
-          email: decoded.Email,
-          username: decoded.Username,
-          profileImage: `data:image/jpeg;base64,${data.data.profilePictureBase64 || ""}`,
+          id: userData.id,
+          email: userData.email,
+          username: userData.username,
+          profileImage: `data:image/jpeg;base64,${userData.profilePictureBase64 || ""}`,
         });
+
       } catch (error) {
         console.error("Failed to load user:", error);
         setUser(null);

@@ -59,7 +59,7 @@ namespace HomeChefServer.Controllers
 
 
         [HttpPost("add")]
-        public async Task<IActionResult> AddRecipe([FromBody] CreateRecipeDTO recipe)
+        public async Task<IActionResult> AddRecipe(CreateRecipeDTO recipe)
         {
             var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == "UserId");
             if (userIdClaim == null)
@@ -67,46 +67,52 @@ namespace HomeChefServer.Controllers
 
             int userId = int.Parse(userIdClaim.Value);
 
+            int newRecipeId;
+
             using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
             await conn.OpenAsync();
+
+            var ingredientsJson = JsonSerializer.Serialize(recipe.Ingredients);
 
             using var cmd = new SqlCommand("sp_AddRecipe", conn)
             {
                 CommandType = CommandType.StoredProcedure
             };
 
-            // 🧾 פרמטרים בסיסיים
+
             cmd.Parameters.AddWithValue("@Title", recipe.Title);
             cmd.Parameters.AddWithValue("@ImageUrl", recipe.ImageUrl);
             cmd.Parameters.AddWithValue("@SourceUrl", recipe.SourceUrl);
             cmd.Parameters.AddWithValue("@Servings", recipe.Servings);
             cmd.Parameters.AddWithValue("@CookingTime", recipe.CookingTime);
             cmd.Parameters.AddWithValue("@CategoryId", recipe.CategoryId);
-            cmd.Parameters.AddWithValue("@InstructionsText", recipe.InstructionsText ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@Summary", recipe.Summary ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@Cuisine", recipe.Cuisine ?? (object)DBNull.Value);
-            cmd.Parameters.AddWithValue("@Vegetarian", recipe.Vegetarian);
-            cmd.Parameters.AddWithValue("@Vegan", recipe.Vegan);
-            cmd.Parameters.AddWithValue("@GlutenFree", recipe.GlutenFree);
+
+
+
+
+
+
             cmd.Parameters.AddWithValue("@CreatedByUserId", userId);
+            cmd.Parameters.AddWithValue("@IngredientsJson", ingredientsJson);
 
-            // 🍅 Table-Valued Parameter (TVP) למצרכים
-            var ingredientsTable = new DataTable();
-            ingredientsTable.Columns.Add("IngredientId", typeof(int));
-            ingredientsTable.Columns.Add("Quantity", typeof(decimal));
-            ingredientsTable.Columns.Add("Unit", typeof(string));
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
 
-            foreach (var ing in recipe.Ingredients)
+
+
+
+
             {
-                ingredientsTable.Rows.Add(ing.IngredientId, ing.Quantity, ing.Unit);
+                newRecipeId = Convert.ToInt32(reader["RecipeId"]);
+                return Ok(new { Id = newRecipeId });
             }
 
-            var ingredientsParam = cmd.Parameters.AddWithValue("@Ingredients", ingredientsTable);
-            ingredientsParam.SqlDbType = SqlDbType.Structured;
-            ingredientsParam.TypeName = "dbo.IngredientTableType";
+            return StatusCode(500, "Failed to create recipe.");
 
-            await cmd.ExecuteNonQueryAsync();
-            return Ok(new { Message = "Recipe added successfully!" });
+
+
+
+
         }
 
         // עריכת מתכון 

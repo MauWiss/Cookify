@@ -23,8 +23,14 @@ export default function Navbar() {
   useEffect(() => {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
+    console.log("profilePictureBase64:", user?.profileImage);
+
   }, [dark]);
 
+  useEffect(() => {
+    console.log("user in navbar:", user);
+  }, [user]);
+  
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -34,6 +40,7 @@ export default function Navbar() {
         setOpen(false);
       }
     };
+    console.log(user);
 
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
@@ -109,7 +116,9 @@ export default function Navbar() {
                   className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400"
                 >
                   More
-                  <FaChevronDown size={14} />
+                  <span className="flex cursor-pointer items-center">
+                    {open ? <FaChevronUp /> : <FaChevronDown />}
+                  </span>
                 </button>
                 {open && (
                   <div className="absolute z-50 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
@@ -167,8 +176,8 @@ export default function Navbar() {
               >
                 <img
                   src={
-                    user?.profilePictureBase64
-                      ? `data:image/jpeg;base64,${user.profilePictureBase64}`
+                    user?.profileImage
+                      ? `${user.profileImage}`
                       : "/default-avatar.png"
                   }
                   alt="Profile"
