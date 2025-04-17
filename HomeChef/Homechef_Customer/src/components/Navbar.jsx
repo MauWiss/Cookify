@@ -15,6 +15,7 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
+  const moreRef = useRef(null);
   const [open, setOpen] = useState(false);
   const isHomePage = location.pathname === "/";
   const isLoggedOut = !token;
@@ -29,7 +30,11 @@ export default function Navbar() {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
         setProfileMenuOpen(false);
       }
+      if (moreRef.current && !moreRef.current.contains(e.target)) {
+        setOpen(false);
+      }
     };
+
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
@@ -60,11 +65,10 @@ export default function Navbar() {
 
         {/* Middle Links */}
         <div
-          className={`items-center gap-6 text-lg font-medium sm:flex ${
-            isLoggedOut
-              ? "ml-auto"
-              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          }`}
+          className={`items-center gap-6 text-lg font-medium sm:flex ${isLoggedOut
+            ? "ml-auto"
+            : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            }`}
         >
           <Link className={`${active("/")} no-underline`} to="/">
             Home
@@ -99,7 +103,7 @@ export default function Navbar() {
               </Link>
 
               {/* More Dropdown */}
-              <div className="relative">
+              <div className="relative" ref={moreRef}>
                 <button
                   onClick={() => setOpen((prev) => !prev)}
                   className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400"
