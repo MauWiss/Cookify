@@ -48,7 +48,7 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@UserId", userId);
 
             await conn.OpenAsync();
-            using var reader = await cmd.ExecuteReaderAsync();
+            using var reader = await cmd.ExecuteReaderAsync();  
 
             if (await reader.ReadAsync())
             {
@@ -60,6 +60,9 @@ namespace HomeChefServer.Controllers
                     Bio = reader["Bio"]?.ToString(),
                     ProfilePictureBase64 = reader["ProfilePictureBase64"]?.ToString()
                 };
+                Console.WriteLine("✅ ProfilePictureBase64:");
+                Console.WriteLine(result.ProfilePictureBase64);  // ← הדפסת ערך התמונה
+
                 return Ok(new { data = result });
             }
 

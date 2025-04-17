@@ -9,13 +9,13 @@
         public int CookingTime { get; set; }
         public int CategoryId { get; set; }
 
-        public string InstructionsText { get; set; }
-        public string Summary { get; set; }
-        public string Cuisine { get; set; }
+        // רשימת מרכיבים שמתווספים ביחד עם המתכון
 
-        public bool Vegetarian { get; set; }
-        public bool Vegan { get; set; }
-        public bool GlutenFree { get; set; }
+
+
+
+
+
 
         public List<IngredientDTO> Ingredients { get; set; }
     }
