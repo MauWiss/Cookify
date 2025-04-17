@@ -1,7 +1,25 @@
-// components/RecipeRatingBlock.jsx
 import React, { useEffect, useState } from "react";
 import { getRatingDetails } from "../api/api";
-import { FaStar } from "react-icons/fa";
+import { FaStar, FaRegStar, FaStarHalfAlt } from "react-icons/fa";
+
+
+/* ⭐ Read-only star component */
+const StarRatingDisplay = ({ value }) => {
+  return (
+    <div className="flex items-center gap-0.5 text-base text-yellow-400">
+      {[1, 2, 3, 4, 5].map((i) => {
+        if (value >= i) {
+          return <FaStar key={i} />;
+        } else if (value >= i - 0.5) {
+          return <FaStarHalfAlt key={i} />;
+        } else {
+          return <FaRegStar key={i} />;
+        }
+      })}
+    </div>
+  );
+};
+
 
 const RecipeRatingBlock = ({ recipeId }) => {
   const [ratingData, setRatingData] = useState({
@@ -15,7 +33,7 @@ const RecipeRatingBlock = ({ recipeId }) => {
         const { data } = await getRatingDetails(recipeId);
         setRatingData({
           averageRating: data.averageRating,   // number or null
-          ratingCount:   data.ratingCount,     // integer
+          ratingCount: data.ratingCount,       // integer
         });
       } catch (err) {
         console.error("Failed to load rating data", err);
@@ -25,16 +43,13 @@ const RecipeRatingBlock = ({ recipeId }) => {
     fetchData();
   }, [recipeId]);
 
-  /* ---------- fallback text ---------- */
   if (ratingData.ratingCount === 0)
-    return <div className="text-xs text-gray-400 mt-1">No ratings yet</div>;
-  /* ----------------------------------- */
+    return <div className="text-xs text-gray-400 mt-1">No ratings yet</div>;
 
-  // only runs when there IS at least one rating
   return (
-    <div className="flex items-center gap-1 text-yellow-500 text-sm mt-1">
-      <FaStar />
-      <span>
+    <div className="mt-1 flex items-center gap-2">
+      <StarRatingDisplay value={ratingData.averageRating} />
+      <span className="text-sm text-gray-700 dark:text-gray-300">
         {ratingData.averageRating.toFixed(1)} ({ratingData.ratingCount})
       </span>
     </div>

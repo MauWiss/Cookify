@@ -1,7 +1,14 @@
 import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import RecipeRatingBlock from "../components/RecipeRatingBlock"
+import RecipeRatingBlock from "../components/RecipeRatingBlock";
+import {
+  FaUser,
+  FaCalendarAlt,
+  FaGlobe,
+  FaClock,
+  FaUtensils,
+} from "react-icons/fa";
 
 const RecipeInfoSection = ({ recipe }) => {
   const navigate = useNavigate();
@@ -10,7 +17,7 @@ const RecipeInfoSection = ({ recipe }) => {
     <>
       <button
         onClick={() => navigate(-1)}
-        className="bg-card dark:bg-card-dark text-text dark:text-text-dark border-border dark:border-border-dark hover:bg-muted dark:hover:bg-muted-dark mb-6 inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-sm font-medium shadow-sm transition"
+        className="mb-6 inline-flex items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-text shadow-sm transition hover:bg-muted dark:border-border-dark dark:bg-card-dark dark:text-text-dark dark:hover:bg-muted-dark"
       >
         <FaArrowLeft className="text-md" />
         Back to Recipes
@@ -27,40 +34,53 @@ const RecipeInfoSection = ({ recipe }) => {
         </div>
 
         {/* כרטיס פרופיל */}
-        <div className="bg-profile dark:bg-profile-dark space-y-5 rounded-3xl p-6 shadow-md">
-          <h1 className="text-text dark:text-text-dark text-4xl font-bold">
+        <div className="space-y-5 rounded-3xl bg-profile p-6 shadow-md dark:bg-profile-dark">
+          <h1 className="text-4xl font-bold text-text dark:text-text-dark">
             {recipe.title}
           </h1>
 
-          <div className="text-muted dark:text-muted-dark space-y-2">
+          <div className="flex flex-wrap items-center gap-4 text-sm text-muted dark:text-muted-dark">
             {recipe.publisher && (
-              <p>
-                <strong>Published by:</strong> {recipe.publisher}
-              </p>
+              <div className="group relative flex items-center gap-2">
+                <FaUser className="text-lg" />
+                <span>{recipe.publisher}</span>
+                <span className="invisible absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:visible group-hover:opacity-100 dark:bg-gray-700">
+                  Publisher
+                </span>
+              </div>
             )}
-            <p>
-              <strong>Date:</strong>{" "}
-              {new Date(recipe.createdAt).toLocaleDateString()}
-            </p>
-            {recipe.cuisine && (
-              <p>
-                <strong>Cuisine:</strong> {recipe.cuisine}
-              </p>
-            )}
+
+            <div className="group relative flex items-center gap-2">
+              <FaCalendarAlt className="text-lg" />
+              <span>{new Date(recipe.createdAt).toLocaleDateString()}</span>
+              <span className="invisible absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:visible group-hover:opacity-100 dark:bg-gray-700">
+                Date
+              </span>
+            </div>
+
             {recipe.cookingTime > 0 && (
-              <p>
-                <strong>Cooking Time:</strong> {recipe.cookingTime} min
-              </p>
+              <div className="group relative flex items-center gap-2">
+                <FaClock className="text-lg" />
+                <span>{recipe.cookingTime} min</span>
+                <span className="invisible absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:visible group-hover:opacity-100 dark:bg-gray-700">
+                  Cooking Time
+                </span>
+              </div>
             )}
+
             {recipe.servings > 0 && (
-              <p>
-                <strong>Servings:</strong> {recipe.servings}
-              </p>
+              <div className="group relative flex items-center gap-2">
+                <FaUtensils className="text-lg" />
+                <span>{recipe.servings}</span>
+                <span className="invisible absolute -top-8 left-1/2 -translate-x-1/2 rounded bg-gray-800 px-2 py-1 text-xs text-white opacity-0 transition group-hover:visible group-hover:opacity-100 dark:bg-gray-700">
+                  Servings
+                </span>
+              </div>
             )}
           </div>
 
+          {/* Leave the rating as-is */}
           <RecipeRatingBlock recipeId={recipe.id} />
-
 
           <div className="mt-4 flex flex-wrap gap-3">
             {recipe.vegetarian && (
@@ -85,7 +105,7 @@ const RecipeInfoSection = ({ recipe }) => {
               href={recipe.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-primary dark:text-primary-dark mt-6 inline-block text-sm font-medium hover:underline"
+              className="mt-6 inline-block text-sm font-medium text-primary hover:underline dark:text-primary-dark"
             >
               View Original ↗
             </a>
@@ -112,7 +132,7 @@ const RecipeInfoSection = ({ recipe }) => {
                 }}
               />
             ) : (
-              <pre className="bg-card dark:bg-card-dark border-border dark:border-border-dark text-text dark:text-text-dark whitespace-pre-wrap rounded-xl border p-5 text-sm">
+              <pre className="whitespace-pre-wrap rounded-xl border border-border bg-card p-5 text-sm text-text dark:border-border-dark dark:bg-card-dark dark:text-text-dark">
                 {recipe.instructionsText}
               </pre>
             )}

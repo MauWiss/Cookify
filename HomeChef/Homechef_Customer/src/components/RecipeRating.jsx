@@ -48,7 +48,10 @@ const RecipeRating = ({ recipeId }) => {
 
   return (
     <div className="mt-4">
-      <p className="text-sm text-gray-700 dark:text-gray-300 mb-1">Rate here!</p>
+      <h2 className="mb-2 text-2xl font-bold text-text dark:text-text-dark">
+        Rate here!
+      </h2>
+
       <StarRating value={rating} onChange={handleChange} edit={true} />
     </div>
   );
