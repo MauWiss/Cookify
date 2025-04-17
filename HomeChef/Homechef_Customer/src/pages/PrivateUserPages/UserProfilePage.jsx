@@ -6,7 +6,7 @@ import {
   updateUserProfilePicture,
   updatePassword,
 } from "../../api/api";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../Auth/AuthContext";;
 import { Link } from "react-router-dom";
 import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
@@ -23,9 +23,10 @@ export default function UserProfilePage() {
     async function fetchData() {
       try {
         const res = await getUserProfile();
+        console.log(res);
         setProfile(res.data);
-        setBio(res.data.bio || "");
-        setProfilePictureBase64(res.data.profilePictureBase64 || "");
+        setBio(res.data.data.bio || "");
+        setProfilePictureBase64(res.data.data.profilePictureBase64 || "");
       } catch (error) {
         toast.error("❌ Failed to load profile.");
       }
@@ -95,11 +96,12 @@ export default function UserProfilePage() {
     }
   };
 
-  const imageSrc = profilePictureBase64
-    ? `data:image/jpeg;base64,${profilePictureBase64}`
-    : "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
+  const imageSrc = user?.profileImage
+  ? user.profileImage
+  : "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
 
-  if (!profile)
+
+  if (!profile && !user)
     return (
       <div className="p-10 text-center text-gray-500 dark:text-gray-300">
         Loading profile...

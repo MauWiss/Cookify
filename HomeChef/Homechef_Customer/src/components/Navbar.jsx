@@ -6,6 +6,7 @@ import { useAuth } from "../pages/Auth/AuthContext";
 import { FaBars, FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
+import { FiMoreVertical } from "react-icons/fi";
 
 export default function Navbar() {
   const location = useLocation();
@@ -30,7 +31,7 @@ export default function Navbar() {
   useEffect(() => {
     console.log("user in navbar:", user);
   }, [user]);
-  
+
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (profileRef.current && !profileRef.current.contains(e.target)) {
@@ -77,13 +78,14 @@ export default function Navbar() {
             : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
             }`}
         >
-          <Link className={`${active("/")} no-underline`} to="/">
+          <Link className={`${active("/")} no-underlinetransition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3"`} to="/">
             Home
           </Link>
           {token && (
             <>
+
               <Link
-                className={`${active("/favorites")} no-underline`}
+                className={`${active("/favorites")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
                 to="/favorites"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -92,7 +94,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link
-                className={`${active("/my-recipes")} no-underline`}
+                className={`${active("/my-recipes")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
                 to="/my-recipes"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -101,7 +103,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link
-                className={`${active("/chatbot")} no-underline`}
+                className={`${active("/chatbot")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
                 to="/chatbot"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -113,7 +115,7 @@ export default function Navbar() {
               <div className="relative" ref={moreRef}>
                 <button
                   onClick={() => setOpen((prev) => !prev)}
-                  className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400"
+                  className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400 transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3"
                 >
                   More
                   <span className="flex cursor-pointer items-center">
@@ -155,87 +157,106 @@ export default function Navbar() {
               >
                 Register
               </Link>
+              <button
+                onClick={() => setDark((prev) => !prev)}
+                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+              >
+                {dark ? (
+                  <>
+                    Light <Sun size={22} />
+                  </>
+                ) : (
+                  <>
+                    Dark <Moon size={22} />
+                  </>
+                )}
+              </button>
             </>
           )}
         </div>
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          <button
-            className="text-gray-700 dark:text-white sm:hidden"
-            onClick={() => setMenuOpen((prev) => !prev)}
-          >
-            <FaBars size={24} />
-          </button>
 
+
+
+          {/* Right side */}
           {token && (
-            <div className="relative" ref={profileRef}>
-              <button
-                onClick={() => setProfileMenuOpen((prev) => !prev)}
-                className="flex items-center gap-2"
+            <div className="flex items-center gap-4">
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 group"
               >
+                <span className="text-lg font-bold text-gray-700 transition-all duration-400 group-hover:scale-110 group-hover:text-yellow-700 dark:text-white">
+                  {user?.username}
+                </span>
                 <img
                   src={
                     user?.profileImage
-                      ? `${user.profileImage}`
+                      ? user.profileImage
                       : "/default-avatar.png"
                   }
                   alt="Profile"
-                  className="h-8 w-8 rounded-full border border-gray-300"
+                  className="w-12 h-12 rounded-full border-4 border-transparent hover:border-blue-500 transition-all duration-300"
                 />
+              </Link>
 
-                <span className="text-sm text-gray-700 transition-all duration-300 hover:scale-105 hover:text-purple-800 dark:text-white">
-                  {user?.username}
-                </span>
-                <span className="flex cursor-pointer items-center gap-1">
-                  {open ? <FaChevronUp /> : <FaChevronDown />}
-                </span>
+              <button
+                className="text-gray-700 dark:text-white sm:hidden"
+                onClick={() => setMenuOpen((prev) => !prev)}
+              >
+                <FaBars size={24} />
               </button>
 
-              {profileMenuOpen && (
-                <div className="absolute right-0 z-50 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
-                  <Link
-                    to="/profile"
-                    className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                    onClick={() => setProfileMenuOpen(false)}
-                  >
-                    Profile
-                  </Link>
-                  <button
-                    onClick={() => setDark((prev) => !prev)}
-                    className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                  >
-                    {dark ? (
-                      <>
-                        Light <Sun size={22} />
-                      </>
-                    ) : (
-                      <>
-                        Dark <Moon size={22} />
-                      </>
-                    )}
-                  </button>
-                  {token && role === "admin" && (
-                    <Link
-                      className={`${active("/admin")} flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
-                      to="/admin"
+              <div className="relative" ref={profileRef}>
+                <button
+                  onClick={() => setProfileMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2"
+                >
+                  <FiMoreVertical className="text-2xl cursor-pointer" />
+                </button>
+
+                {profileMenuOpen && (
+                  <div className="absolute right-0 z-50 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
+                    <button
+                      onClick={() => setDark((prev) => !prev)}
+                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
                     >
-                      Admin Panel
-                    </Link>
-                  )}
-                  <button
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-800"
-                  >
-                    Logout
-                  </button>
-                </div>
-              )}
+                      {dark ? (
+                        <>
+                          Light <Sun size={22} />
+                        </>
+                      ) : (
+                        <>
+                          Dark <Moon size={22} />
+                        </>
+                      )}
+                    </button>
+                    {role === "admin" && (
+                      <Link
+                        className={`${active("/admin")} flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
+                        to="/admin"
+                      >
+                        Admin Panel
+                      </Link>
+                    )}
+                    <div className="border-t border-gray-200 dark:border-gray-700 ">
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-800"
+                      >
+                        Logout
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
+
         </div>
       </div>
 
