@@ -1,22 +1,33 @@
-import React from "react";
-import ReactStars from "react-rating-stars-component";
+import React, { useState } from "react";
 
-const StarRating = ({ value = 0, onChange = () => {}, editable = true }) => {
-  const handleChange = (newValue) => {
-    onChange(newValue);
-  };
+/**
+ * A simple 5‑star rating component with hover & click support.
+ *
+ * value: number (0–5)
+ * onChange: function(newRating)
+ * edit: boolean (if false, clicking & hover are disabled)
+ */
+const StarRating = ({ value = 0, onChange = () => {}, edit = true }) => {
+  const [hoverValue, setHoverValue] = useState(0);
 
   return (
-    <div className="flex flex-col items-start text-yellow-500">
-      <ReactStars
-        count={5}
-        value={value}
-        onChange={handleChange}
-        size={28}
-        isHalf={true}
-        edit={editable}
-        activeColor="#facc15"
-      />
+    <div className="flex items-center gap-1">
+      {[1, 2, 3, 4, 5].map((i) => {
+        const fill = hoverValue >= i || (!hoverValue && value >= i);
+        return (
+          <span
+            key={i}
+            className={`select-none text-2xl cursor-pointer ${
+              fill ? "text-yellow-400" : "text-gray-300"
+            }`}
+            onClick={() => edit && onChange(i)}
+            onMouseEnter={() => edit && setHoverValue(i)}
+            onMouseLeave={() => edit && setHoverValue(0)}
+          >
+            ★
+          </span>
+        );
+      })}
     </div>
   );
 };
