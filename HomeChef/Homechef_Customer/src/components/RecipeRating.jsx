@@ -52,7 +52,12 @@ const RecipeRating = ({ recipeId }) => {
         Rate here!
       </h2>
 
-      <StarRating value={rating} onChange={handleChange} edit={true} />
+      <StarRating
+        key={rating}
+        value={rating}
+        onChange={handleChange}
+        edit={true}
+      />
     </div>
   );
 };
