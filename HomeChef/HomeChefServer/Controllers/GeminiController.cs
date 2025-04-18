@@ -1,6 +1,7 @@
 ﻿using HomeChefServer.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
+using HomeChefServer.Models.DTOs;
 
 namespace HomeChefServer.Controllers
 {
@@ -17,7 +18,7 @@ namespace HomeChefServer.Controllers
             _pexelsApiKey = config["PexelsApiKey"];
         }
 
-       
+
 
         [HttpPost("chat")]
         public async Task<IActionResult> Chat([FromBody] string userMessage)
@@ -32,7 +33,7 @@ namespace HomeChefServer.Controllers
                 return StatusCode(500, $"Gemini error: {ex.Message}");
             }
         }
-    
+
 
 
         [HttpGet("search")]
@@ -72,6 +73,36 @@ namespace HomeChefServer.Controllers
                 return StatusCode(500, $"Error fetching image from Pexels: {ex.Message}");
             }
         }
+
+        [HttpPost("extract-ingredients")]
+        public async Task<IActionResult> ExtractIngredients([FromBody] IngredientExtractRequest request)
+        {
+            try
+            {
+                var prompt = $"You are an expert recipe assistant. Extract a complete, accurate list of ingredients from the following recipe. " +
+             $"Include **estimated measurements** and **units** for all ingredients, even if the original is unclear. If needed, make a smart guess. " +
+             $"Group ingredients by sections such as *brownie base*, *mint filling*, and *chocolate topping* if applicable. " +
+             $"Each line should contain the ingredient, quantity, and unit. " +
+             $"Scale the ingredients for exactly {request.Servings} servings.\n\n" +
+             $"Summary:\n{request.Summary}\n\n" +
+             $"Instructions:\n{request.Instructions}\n\n" +
+             $"Format the result like this:\n\n" +
+             $"Brownie Base:\n- 2 tbsp flaxseed meal\n- 1/3 cup applesauce\n...\n\n" +
+             $"Mint Filling:\n- 1/2 avocado\n- 1/4 cup coconut milk\n...\n\n" +
+             $"Chocolate Topping:\n- 1/2 cup dark chocolate\n- 1 tbsp oil\n\n" +
+             $"Only return the list of ingredients. Do not include steps or extra text.";
+
+
+
+                var reply = await _geminiService.SendPromptAsync(prompt);
+                return Ok(new { ingredients = reply });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Gemini error: {ex.Message}");
+            }
+        }
+
 
 
 

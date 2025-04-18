@@ -173,4 +173,14 @@ export const fetchRecipesByCountry = async (country) => {
   return res.data;
 };
 
+// Extract ingredients from Gemini
+export const extractIngredients = async (summary, instructions, servings) => {
+  return await api.post("/gemini/extract-ingredients", {
+    summary,
+    instructions,
+    servings,
+  });
+};
+
+
 export default api;

@@ -2,6 +2,7 @@ import React from "react";
 import { FaArrowLeft } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import RecipeRatingBlock from "../components/RecipeRatingBlock";
+import IngredientExtractor from "../components/IngredientExtractor";
 import {
   FaUser,
   FaCalendarAlt,
@@ -138,6 +139,10 @@ const RecipeInfoSection = ({ recipe }) => {
             )}
           </div>
         )}
+        <IngredientExtractor
+          summary={recipe.summary}
+          instructions={recipe.instructionsText}
+        />
       </div>
     </>
   );
