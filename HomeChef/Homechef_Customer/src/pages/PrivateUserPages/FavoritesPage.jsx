@@ -7,6 +7,7 @@ import { useFavoritesData } from "../../hooks/useFavoritesData";
 import CategorySelect from "../../components/CategorySelect";
 import SearchInput from "../../components/SearchInput";
 import { useNavigate } from "react-router-dom";
+import RecipeRatingBlock from "../../components/RecipeRatingBlock";
 
 export default function FavoritesPage() {
   const navigate = useNavigate();
@@ -126,6 +127,7 @@ export default function FavoritesPage() {
                     <FaUtensils /> Serves {recipe.servings || "?"}
                   </span>
                 </div>
+                <RecipeRatingBlock recipeId={recipe.recipeId} />
               </div>
             </div>
           ))}
