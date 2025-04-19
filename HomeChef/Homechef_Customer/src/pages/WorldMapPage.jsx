@@ -1,27 +1,26 @@
-import Globe from "react-globe.gl";
+import Globe from "react-globe.gl"; // אנימציה של כדור הארץ
 import { useEffect, useRef, useState } from "react";
 import { fetchRecipesByCountry } from "../api/api";
-import { Dialog } from "@headlessui/react";
+import { Dialog } from "@headlessui/react"; // חלון קופץ
 import { toast } from "react-toastify";
-import * as topojson from "topojson-client";
-import Flag from "react-world-flags";
-import countries from "i18n-iso-countries";
-import enLocale from "i18n-iso-countries/langs/en.json";
+import * as topojson from "topojson-client"; // הצגת מידע על הכוכב
+import Flag from "react-world-flags"; // דגלים של מדינות
+import countries from "i18n-iso-countries"; // פונקציות המרה
+import enLocale from "i18n-iso-countries/langs/en.json"; //נתונים -שמות מדינות באנגלית
 
-countries.registerLocale(enLocale); // רישום אנגלית
+countries.registerLocale(enLocale); // טעינת שמות מדינות באנגלית להמרה במהשך
 
 export default function WorldMapPage() {
-  const globeEl = useRef();
-  const [countriesData, setCountriesData] = useState([]);
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [dish, setDish] = useState(null);
-  const [isOpen, setIsOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-
+  const globeEl = useRef(); // הכדור עצמו
+  const [countriesData, setCountriesData] = useState([]); // נתוני המדינות
+  const [selectedCountry, setSelectedCountry] = useState(null); // המדינה שנבחרה
+  const [dish, setDish] = useState(null); // המנה הלאומית
+  const [isOpen, setIsOpen] = useState(false); // האם החלון פתוח
+  const [loading, setLoading] = useState(false); // האם טעינה מתבצעת
   const getCountryCode = (countryName) => {
     const code = countries.getAlpha2Code(countryName?.trim(), "en");
-    return code || "UN"; // fallback
-  };
+    return code || "UN";
+  }; // המרת שם מדינה לקוד שלה
 
   useEffect(() => {
     fetch("https://unpkg.com/world-atlas@2.0.2/countries-110m.json")
@@ -33,13 +32,13 @@ export default function WorldMapPage() {
         ).features;
         setCountriesData(features);
       });
-  }, []);
+  }, []); // שליפת נתוני המדינות כדי לרנדר על הכוכב
 
   useEffect(() => {
     if (globeEl.current) {
       globeEl.current.pointOfView({ altitude: 2.2 }, 1000);
     }
-  }, [countriesData]);
+  }, [countriesData]); // הגדרת זווית הכדור לאחר שהנתונים נטענו
 
   const handleCountryClick = async (country) => {
     const name = country.properties.name;
@@ -55,7 +54,7 @@ export default function WorldMapPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }; // לחיצה על מדינה - פתיחת חלון קופץ עם המנה הלאומית שלה
 
   const handleZoomIn = () => {
     if (!globeEl.current) return;

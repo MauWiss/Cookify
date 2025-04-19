@@ -22,7 +22,7 @@ import WorldRecipes from "./pages/WorldMapPage";
 export default function App() {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     return localStorage.getItem("theme") === "dark";
-  });
+  }); // Initialize dark mode based on localStorage
 
   useEffect(() => {
     const root = document.documentElement;
@@ -41,9 +41,8 @@ export default function App() {
         <Navbar
           toggleDark={() => setIsDarkMode(!isDarkMode)}
           isDark={isDarkMode}
-        />
-        <ToastContainer position="top-right" autoClose={3000} />
-
+        />{" "}
+        <ToastContainer position="top-right" autoClose={2000} />
         <Routes>
           <Route path="/" element={<Homepage />} />
           <Route path="/recipes/:id" element={<RecipeProfilePage />} />
