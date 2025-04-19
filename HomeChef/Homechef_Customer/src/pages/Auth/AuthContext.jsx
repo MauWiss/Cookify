@@ -1,10 +1,7 @@
 // src/pages/Auth/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
-import {
-  getUserProfile,
-
-} from "../../api/api";
+import { getUserProfile } from "../../api/api";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
@@ -13,8 +10,6 @@ export const AuthProvider = ({ children }) => {
   const [role, setRole] = useState(localStorage.getItem("role")); // תפקיד
 
   useEffect(() => {
-
-
     loadUser();
 
     window.addEventListener("storage", loadUser);
@@ -23,13 +18,19 @@ export const AuthProvider = ({ children }) => {
 
   const loadUser = async () => {
     const storedToken = localStorage.getItem("token");
+    if (!storedToken) {
+      setUser(null);
+      return; // אין טוקן בכלל - לא נשלח בקשה מיותרת
+    }
+
     setToken(storedToken);
 
-    if (storedToken) {
-      try {
-        const decoded = jwtDecode(storedToken);
-        
-        const res = await getUserProfile();
+    try {
+      const decoded = jwtDecode(storedToken);
+      console.log("decoded token:", decoded);
+
+      const res = await getUserProfile();
+      const userData = res.data.data;
 
         const userData = res.data.data; // גישה נכונה לנתונים עצמם
 
@@ -51,13 +52,12 @@ export const AuthProvider = ({ children }) => {
       setUser(null);
     }
   };
+
   const login = (newToken, newRole) => {
     localStorage.setItem("token", newToken);
     localStorage.setItem("role", newRole);
     setToken(newToken);
     setRole(newRole);
-
-
 
     try {
       const decoded = jwtDecode(newToken);
