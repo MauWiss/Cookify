@@ -1,17 +1,16 @@
-// src/pages/Auth/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode";
 import { getUserProfile } from "../../api/api";
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [user, setUser] = useState(null); // משתמש
-  const [role, setRole] = useState(localStorage.getItem("role")); // תפקיד
+  const [user, setUser] = useState(null);
+  const [role, setRole] = useState(localStorage.getItem("role"));
 
   useEffect(() => {
     loadUser();
-
     window.addEventListener("storage", loadUser);
     return () => window.removeEventListener("storage", loadUser);
   }, []);
@@ -20,7 +19,7 @@ export const AuthProvider = ({ children }) => {
     const storedToken = localStorage.getItem("token");
     if (!storedToken) {
       setUser(null);
-      return; // אין טוקן בכלל - לא נשלח בקשה מיותרת
+      return;
     }
 
     setToken(storedToken);
@@ -32,23 +31,25 @@ export const AuthProvider = ({ children }) => {
       const res = await getUserProfile();
       const userData = res.data.data;
 
-        const userData = res.data.data; // גישה נכונה לנתונים עצמם
+      console.log("data from profile:", userData);
 
-        
-        console.log("data from profile:",userData);
-        setUser({
-          id: userData.id,
-          email: userData.email,
-          username: userData.username,
-          profileImage: `data:image/jpeg;base64,${userData.profilePictureBase64 || ""}`,
-          gender: userData.gender,
-        });
+      // נבדוק אם יש תמונה אמיתית (ולא רק prefix של base64)
+      const hasValidImage =
+        userData.profilePictureBase64 &&
+        userData.profilePictureBase64.trim() !== "" &&
+        userData.profilePictureBase64 !== "data:image/jpeg;base64,";
 
-      } catch (error) {
-        console.error("Failed to load user:", error);
-        setUser(null);
-      }
-    } else {
+      setUser({
+        id: userData.id,
+        email: userData.email,
+        username: userData.username,
+        gender: userData.gender,
+        profileImage: hasValidImage
+          ? `data:image/jpeg;base64,${userData.profilePictureBase64}`
+          : null,
+      });
+    } catch (error) {
+      console.error("Failed to load user:", error);
       setUser(null);
     }
   };

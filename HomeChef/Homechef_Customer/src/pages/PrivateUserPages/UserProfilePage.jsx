@@ -113,7 +113,7 @@ export default function UserProfilePage() {
       toast.error(err.response?.data || "❌ Failed to update password");
     }
   };
-    const getDefaultImage = () => {
+  const getDefaultImage = () => {
     if (user?.gender === "male") return "/images/avatar-male.png";
     if (user?.gender === "female") return "/images/avatar-female.png";
     return "/images/avatar-default.png";
@@ -216,6 +216,7 @@ export default function UserProfilePage() {
             type="date"
             value={birthDate}
             onChange={(e) => setBirthDate(e.target.value)}
+            max={new Date().toISOString().split("T")[0]} // ⬅️ מגביל ליום הנוכחי ומטה
             className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
           />
         </div>
