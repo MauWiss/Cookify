@@ -146,7 +146,7 @@ export default function ChefBot() {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-          placeholder="e.g. Suggest a pasta recipe with tuna and lemon"
+          placeholder="e.g. Suggest a pasta recipe with mushrooms and cream"
           className="flex-1 rounded-xl border p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-gray-700 dark:bg-gray-900"
         />
         <button
