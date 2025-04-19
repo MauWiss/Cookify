@@ -40,6 +40,7 @@ export const AuthProvider = ({ children }) => {
           email: userData.email,
           username: userData.username,
           profileImage: `data:image/jpeg;base64,${userData.profilePictureBase64 || ""}`,
+          gender: userData.gender,
         });
 
       } catch (error) {
@@ -76,7 +77,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, role, login, logout }}>
+    <AuthContext.Provider value={{ token, user, role, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

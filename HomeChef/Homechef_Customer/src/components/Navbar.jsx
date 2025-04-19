@@ -7,6 +7,8 @@ import { FaBars, FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiMoreVertical } from "react-icons/fi";
+import defaultProfileImage from "../images/female-chef-avatar-icon-vector-32095494.jpg";
+
 
 export default function Navbar() {
   const location = useLocation();
@@ -49,6 +51,12 @@ export default function Navbar() {
     };
   }, []);
 
+  const getDefaultImage = () => {
+    if (user?.gender === "male") return "/images/avatar-male.png";
+    if (user?.gender === "female") return "/images/avatar-female.png";
+    return "/images/avatar-default.png";
+  };
+  
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully 👋");
@@ -192,13 +200,16 @@ export default function Navbar() {
                 </span>
                 <img
                   src={
-                    user?.profileImage
+                    user?.profileImage &&
+                      user.profileImage.trim() !== "" &&
+                      user.profileImage !== "data:image/jpeg;base64,"
                       ? user.profileImage
-                      : "/default-avatar.png"
+                      : getDefaultImage()
                   }
                   alt="Profile"
                   className="w-12 h-12 rounded-full border-4 border-transparent hover:border-blue-500 transition-all duration-300"
                 />
+
               </Link>
 
               <button

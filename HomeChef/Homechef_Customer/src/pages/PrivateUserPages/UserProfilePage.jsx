@@ -6,10 +6,12 @@ import {
   updateUserProfilePicture,
   updatePassword,
 } from "../../api/api";
-import { useAuth } from "../Auth/AuthContext";;
+import { useAuth } from "../Auth/AuthContext.jsx";;
 import { Link } from "react-router-dom";
 import { FaHeart, FaUserCircle } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
+import defaultProfileImage from "../../images/female-chef-avatar-icon-vector-32095494.jpg";
+
 
 export default function UserProfilePage() {
   const { user, setUser } = useAuth();
@@ -18,6 +20,9 @@ export default function UserProfilePage() {
   const [profilePictureBase64, setProfilePictureBase64] = useState("");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [gender, setGender] = useState("");
+  const [birthDate, setBirthDate] = useState("");
+
 
   useEffect(() => {
     async function fetchData() {
@@ -27,6 +32,10 @@ export default function UserProfilePage() {
         setProfile(res.data);
         setBio(res.data.data.bio || "");
         setProfilePictureBase64(res.data.data.profilePictureBase64 || "");
+        setBio(res.data.data.bio || "");
+        setGender(res.data.data.gender || "");
+        setBirthDate(res.data.data.birthDate || "");
+
       } catch (error) {
         toast.error("❌ Failed to load profile.");
       }
@@ -47,6 +56,7 @@ export default function UserProfilePage() {
     reader.readAsDataURL(file);
   };
 
+
   const handleSavePicture = async () => {
     if (!profilePictureBase64) {
       toast.warning("⚠️ Please upload a picture first.");
@@ -58,7 +68,7 @@ export default function UserProfilePage() {
 
       setUser((prev) => ({
         ...prev,
-        profilePictureBase64,
+        profileImage: `data:image/jpeg;base64,${profilePictureBase64}`,
       }));
 
       toast.success("✅ Profile picture updated!");
@@ -70,7 +80,15 @@ export default function UserProfilePage() {
 
   const handleSaveBio = async () => {
     try {
-      await updateUserProfile({ bio });
+      const payload = {};
+
+      if (bio) payload.bio = bio;
+      if (gender) payload.gender = gender;
+      if (birthDate) payload.birthDate = birthDate;
+
+      await updateUserProfile(payload);
+      console.log(user);
+
       toast.success("✅ Bio updated!");
     } catch {
       toast.error("❌ Failed to update bio");
@@ -95,10 +113,15 @@ export default function UserProfilePage() {
       toast.error(err.response?.data || "❌ Failed to update password");
     }
   };
+    const getDefaultImage = () => {
+    if (user?.gender === "male") return "/images/avatar-male.png";
+    if (user?.gender === "female") return "/images/avatar-female.png";
+    return "/images/avatar-default.png";
+  };
 
   const imageSrc = user?.profileImage
-  ? user.profileImage
-  : "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
+    ? user.profileImage
+    : "";
 
 
   if (!profile && !user)
@@ -114,17 +137,24 @@ export default function UserProfilePage() {
         <FaUserCircle /> My Profile
       </h1>
 
-      <p className="text-center text-gray-600 dark:text-gray-300">
+      <p className="text-center  text-2xl text-gray-600 dark:text-gray-300">
         Logged in as: <strong>{user?.username}</strong>
       </p>
 
       {/* Profile Picture */}
       <div className="space-y-4 rounded-xl bg-white p-6 text-center shadow dark:bg-zinc-800">
         <img
-          src={imageSrc}
+          src={
+            user?.profileImage &&
+              user.profileImage.trim() !== "" &&
+              user.profileImage !== "data:image/jpeg;base64,"
+              ? user.profileImage
+              : getDefaultImage()
+          }
           alt="Profile"
-          className="mx-auto h-32 w-32 rounded-full border-4 border-blue-500 object-cover shadow"
+          className="mx-auto h-32 w-32 rounded-full border-4 border-blue-500 object-cover shadow transition-all duration-300"
         />
+
         <div className="flex flex-col items-center gap-3">
           <label className="cursor-pointer text-blue-600 hover:underline dark:text-blue-400">
             Change Picture
@@ -144,24 +174,64 @@ export default function UserProfilePage() {
         </div>
       </div>
 
-      {/* Bio */}
-      <div className="space-y-4 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
-        <textarea
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          placeholder="Your bio..."
-          className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
-        />
+
+      {/* Bio + Gender + Birth Date */}
+      <div className="space-y-4 rounded-xl bg-white p-6 text-left shadow dark:bg-zinc-800">
+        {/* Bio */}
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            Bio
+          </label>
+          <textarea
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
+            placeholder="Your bio..."
+            className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
+          />
+        </div>
+
+        {/* Gender */}
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            Gender
+          </label>
+          <select
+            value={gender}
+            onChange={(e) => setGender(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
+          >
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+
+        {/* Birth Date */}
+        <div className="space-y-1">
+          <label className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+            Birth Date
+          </label>
+          <input
+            type="date"
+            value={birthDate}
+            onChange={(e) => setBirthDate(e.target.value)}
+            className="w-full rounded border border-gray-300 p-3 dark:border-gray-600 dark:bg-zinc-900 dark:text-white"
+          />
+        </div>
+
+        {/* Save Button */}
         <button
           onClick={handleSaveBio}
-          className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          className="w-full rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
-          Save Bio
+          Save Profile
         </button>
       </div>
 
+
       {/* Password */}
-      <div className="space-y-4 rounded-xl bg-white p-6 shadow dark:bg-zinc-800">
+      <div className="space-y-4 rounded-xl bg-white p-6 text-center shadow dark:bg-zinc-800">
         <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-400">
           🔐 Change Password
         </h2>
@@ -181,14 +251,14 @@ export default function UserProfilePage() {
         />
         <button
           onClick={handleChangePassword}
-          className="w-full rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+          className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
         >
           Change Password
         </button>
       </div>
 
       {/* Shortcuts */}
-      <div className="flex flex-col gap-4 md:flex-row">
+      <div className="flex flex-col gap-4 md:flex-row py-6">
         <Link
           to="/favorites"
           className="flex-1 rounded border border-blue-500 bg-blue-50 px-4 py-2 text-center text-blue-600 hover:bg-blue-100 dark:border-blue-400 dark:bg-zinc-900 dark:text-blue-400 dark:hover:bg-zinc-700"

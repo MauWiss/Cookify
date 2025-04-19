@@ -48,7 +48,7 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@UserId", userId);
 
             await conn.OpenAsync();
-            using var reader = await cmd.ExecuteReaderAsync();  
+            using var reader = await cmd.ExecuteReaderAsync();
 
             if (await reader.ReadAsync())
             {
@@ -58,16 +58,17 @@ namespace HomeChefServer.Controllers
                     Username = reader["Username"].ToString(),
                     Email = reader["Email"].ToString(),
                     Bio = reader["Bio"]?.ToString(),
-                    ProfilePictureBase64 = reader["ProfilePictureBase64"]?.ToString()
+                    ProfilePictureBase64 = reader["ProfilePictureBase64"]?.ToString(),
+                    Gender = reader["Gender"]?.ToString(),
+                    BirthDate = reader["BirthDate"] != DBNull.Value ? ((DateTime)reader["BirthDate"]).ToString("yyyy-MM-dd") : null
                 };
-                Console.WriteLine("✅ ProfilePictureBase64:");
-                Console.WriteLine(result.ProfilePictureBase64);  // ← הדפסת ערך התמונה
 
                 return Ok(new { data = result });
             }
 
             return NotFound("User not found.");
         }
+
 
         [HttpPut("update")]
         public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileDto dto)
@@ -81,12 +82,16 @@ namespace HomeChefServer.Controllers
             cmd.Parameters.AddWithValue("@UserId", userId);
             cmd.Parameters.AddWithValue("@Bio", (object?)dto.Bio ?? DBNull.Value);
             cmd.Parameters.AddWithValue("@ProfilePictureBase64", (object?)dto.ProfilePictureBase64 ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@Gender", (object?)dto.Gender ?? DBNull.Value);
+            cmd.Parameters.AddWithValue("@BirthDate", (object?)dto.BirthDate ?? DBNull.Value);
+
 
             await conn.OpenAsync();
             await cmd.ExecuteNonQueryAsync();
 
             return Ok("Profile updated successfully.");
         }
+
         [HttpPut("update-picture")]
         public async Task<IActionResult> UpdateProfilePicture([FromBody] UpdateProfileDto dto)
         {
@@ -104,7 +109,6 @@ namespace HomeChefServer.Controllers
 
             return Ok("✅ Profile picture updated.");
         }
-
 
 
         [HttpPut("change-password")]
