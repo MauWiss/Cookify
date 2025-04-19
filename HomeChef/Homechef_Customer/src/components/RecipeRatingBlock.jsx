@@ -21,19 +21,24 @@ const StarRatingDisplay = ({ value }) => {
 };
 
 
-const RecipeRatingBlock = ({ recipeId }) => {
+const RecipeRatingBlock = ({ recipeId, override }) => {
   const [ratingData, setRatingData] = useState({
     averageRating: null,
     ratingCount: 0,
   });
 
   useEffect(() => {
+    if (override) {
+      setRatingData(override);
+      return;
+    }
+
     const fetchData = async () => {
       try {
         const { data } = await getRatingDetails(recipeId);
         setRatingData({
-          averageRating: data.averageRating,   // number or null
-          ratingCount: data.ratingCount,       // integer
+          averageRating: data.averageRating,
+          ratingCount: data.ratingCount,
         });
       } catch (err) {
         console.error("Failed to load rating data", err);
@@ -41,7 +46,8 @@ const RecipeRatingBlock = ({ recipeId }) => {
     };
 
     fetchData();
-  }, [recipeId]);
+  }, [recipeId, override]);
+
 
   if (ratingData.ratingCount === 0)
     return <div className="text-xs text-gray-400 mt-1">No ratings yet</div>;

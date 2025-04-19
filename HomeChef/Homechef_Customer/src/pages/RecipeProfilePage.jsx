@@ -7,8 +7,6 @@ import RecipeReviews from "../components/RecipeReviews";
 import { fetchRecipeProfile } from "../api/api";
 import RecipeRating from "../components/RecipeRating";
 
-
-
 const RecipeProfilePage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -17,12 +15,12 @@ const RecipeProfilePage = () => {
   const [recipe, setRecipe] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [ratingSummary, setRatingSummary] = useState(null);
 
   const [moreRecipes, setMoreRecipes] = useState([]);
   const [morePage, setMorePage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [moreLoading, setMoreLoading] = useState(false);
-
 
   useEffect(() => {
     const loadData = async () => {
@@ -71,16 +69,14 @@ const RecipeProfilePage = () => {
   return (
     <div className="mx-auto mt-12 max-w-6xl rounded-2xl bg-white px-6 py-8 shadow-xl dark:bg-gray-900">
       <ToastContainer />
-  
-      <RecipeInfoSection recipe={recipe} />
-  
-      {/* ⭐ interactive rating here */}
-      <RecipeRating recipeId={id} />
-  
+
+      <RecipeInfoSection recipe={recipe} ratingSummary={ratingSummary} />
+      <RecipeRating recipeId={id} setRatingSummary={setRatingSummary} />
+
       {/* 📝 user reviews below */}
       <RecipeReviews recipeId={id} />
     </div>
   );
-}
+};
 
 export default RecipeProfilePage;

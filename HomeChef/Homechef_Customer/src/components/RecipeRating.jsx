@@ -2,10 +2,13 @@ import React, { useState, useEffect } from "react";
 import StarRating from "./StarRating";
 import { postRating, updateRating, fetchUserRating } from "../api/api";
 import { toast } from "react-toastify";
+import { getRatingDetails } from "../api/api"; 
 
-const RecipeRating = ({ recipeId }) => {
+
+const RecipeRating = ({ recipeId, setRatingSummary }) => {
   const [rating, setRating] = useState(0);
   const [hasRated, setHasRated] = useState(false);
+  
 
   useEffect(() => {
     fetchUserRating(recipeId)
@@ -40,6 +43,9 @@ const RecipeRating = ({ recipeId }) => {
       }
       setRating(newRating);
       setHasRated(true);
+      const { data } = await getRatingDetails(recipeId);
+      setRatingSummary(data); // <-- this is the prop from RecipeProfilePage
+  
     } catch (err) {
       console.error("Error submitting rating", err);
       toast.error("Failed to submit rating");

@@ -11,8 +11,9 @@ import {
   FaUtensils,
 } from "react-icons/fa";
 
-const RecipeInfoSection = ({ recipe }) => {
+const RecipeInfoSection = ({ recipe, ratingSummary }) => {
   const navigate = useNavigate();
+  
 
   return (
     <>
@@ -81,7 +82,7 @@ const RecipeInfoSection = ({ recipe }) => {
           </div>
 
           {/* Leave the rating as-is */}
-          <RecipeRatingBlock recipeId={recipe.id} />
+          <RecipeRatingBlock recipeId={recipe.id} override={ratingSummary} />
 
           <div className="mt-4 flex flex-wrap gap-3">
             {recipe.vegetarian && (
