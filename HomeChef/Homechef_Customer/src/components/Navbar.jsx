@@ -61,7 +61,7 @@ export default function Navbar() {
       : "text-gray-800 hover:text-blue-500 dark:text-white dark:hover:text-blue-400 transition";
 
   return (
-    <nav className="bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
+    <nav className="relative z-50 bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
       <div className="relative flex w-full items-center justify-between">
         {/* Logo */}
         <img
