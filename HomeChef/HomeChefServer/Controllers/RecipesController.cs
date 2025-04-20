@@ -188,7 +188,7 @@ namespace HomeChefServer.Controllers
                     ingredients.Add(new IngredientDTO
                     {
                         IngredientId = (int)reader["IngredientId"],
-                        Quantity = float.Parse(reader["Quantity"].ToString()),
+                        Quantity = decimal.Parse(reader["Quantity"].ToString()),
                         Unit = reader["Unit"].ToString()
                     });
                 }
