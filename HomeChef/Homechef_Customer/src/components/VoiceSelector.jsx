@@ -1,13 +1,6 @@
 import React from "react";
 import { FaVolumeMute } from "react-icons/fa";
 
-/**
- * קומפוננטה לבחירת קול + כפתור עצירה
- * @param {Object} props
- * @param {Array} props.voices - רשימת הקולות
- * @param {string} props.selectedVoice - הקול הנבחר כרגע
- * @param {Function} props.onChange - שינוי קול נבחר
- */
 export default function VoiceSelector({ voices, selectedVoice, onChange }) {
   return (
     <div className="mb-4 text-center">
