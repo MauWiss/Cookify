@@ -36,20 +36,47 @@ namespace HomeChefServer.Controllers
 
         }
 
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRecipe(int id)
+[HttpDelete("{id}")]
+public async Task<IActionResult> DeleteRecipe(int id)
+{
+    using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
+    await conn.OpenAsync();
+
+    using var tx = conn.BeginTransaction();
+
+    try
+    {
+        // 1. Delete related ratings
+        using (var deleteRatings = new SqlCommand("DELETE FROM RecipeRatings WHERE RecipeId = @Id", conn, tx))
         {
-            using var conn = new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
-            await conn.OpenAsync();
-
-            using var cmd = new SqlCommand("DELETE FROM NewRecipes WHERE Id = @Id", conn);
-            cmd.Parameters.AddWithValue("@Id", id);
-
-            var rowsAffected = await cmd.ExecuteNonQueryAsync();
-            if (rowsAffected == 0) return NotFound();
-
-            return NoContent(); // 204
+            deleteRatings.Parameters.AddWithValue("@Id", id);
+            await deleteRatings.ExecuteNonQueryAsync();
         }
+
+        // 2. Delete the recipe itself
+        using (var deleteRecipe = new SqlCommand("DELETE FROM NewRecipes WHERE Id = @Id", conn, tx))
+        {
+            deleteRecipe.Parameters.AddWithValue("@Id", id);
+            var rowsAffected = await deleteRecipe.ExecuteNonQueryAsync();
+
+            if (rowsAffected == 0)
+            {
+                await tx.RollbackAsync();
+                return NotFound();
+            }
+        }
+
+        await tx.CommitAsync();
+        return NoContent(); // 204
+    }
+    catch (Exception ex)
+    {
+        await tx.RollbackAsync();
+        Console.Error.WriteLine("❌ Error deleting recipe: " + ex.Message);
+        return StatusCode(500, "Failed to delete recipe");
+    }
+}
+
 
 
 

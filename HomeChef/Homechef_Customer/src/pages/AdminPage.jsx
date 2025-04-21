@@ -1,37 +1,42 @@
+// src/pages/AdminPage.jsx
 import { useEffect, useState } from "react";
 import DataTable from "react-data-table-component";
-import api from "../api/api";
-import { fetchRecipes, deleteRecipe } from "../api/api"; // ✔️ אם יש פונקציה בשם הזה
-import { toast } from "react-toastify";
-import { FaTrash } from "react-icons/fa";
+import api, { deleteRecipe } from "../api/api";
 import { useRecipesData } from "../hooks/useRecipesData";
+import { FaTrash } from "react-icons/fa";
+import { toast } from "react-toastify";
 
 export default function AdminPage() {
   const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
 
-  const [loading, setLoading] = useState(true);
-  const { page, setPage, loadRecipes, totalCount, recipes } = useRecipesData();
-
+  const {
+    recipes,
+    totalCount,
+    page,
+    setPage,
+    loadRecipes
+  } = useRecipesData();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const usersRes = await api.get("/admin/users");
-        setUsers(usersRes.data);
-      } catch (err) {
-        console.error("Failed to load users:", err); // ✅ עכשיו err קיים
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadRecipes("", null, page);
+    loadRecipes("", null, page); // initial recipe load
     fetchUsers();
-  }, [])
+  }, [page]);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await api.get("/admin/users");
+      setUsers(res.data);
+    } catch (err) {
+      console.error("Failed to load users:", err);
+      toast.error("Failed to load users");
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    loadRecipes("", null, newPage);
   };
 
   const handleDeleteRecipe = async (id) => {
@@ -39,67 +44,67 @@ export default function AdminPage() {
 
     try {
       await deleteRecipe(id);
-      setRecipes((prev) => prev.filter(r => r.recipeId !== id)); // הסרה מה-state
-      toast.success("Recipe deleted successfully!");
+      toast.success("Recipe deleted!");
+      loadRecipes("", null, page); // reload current page
     } catch (err) {
       console.error(err);
-      toast.error("Failed to delete recipe.");
+      toast.error("Failed to delete recipe");
     }
   };
 
-
-
-  if (loading) return <div>Loading admin data...</div>;
-
-  // עמודות לטבלת משתמשים
   const userColumns = [
-    { name: "Email", selector: row => row.email, sortable: true },
-    { name: "Username", selector: row => row.username, sortable: true },
-    { name: "Is Admin", selector: row => (row.isAdmin ? "Yes" : "No") },
-    { name: "Is Active", selector: row => (row.isActive ? "Yes" : "No") },
+    { name: "Email", selector: (row) => row.email, sortable: true },
+    { name: "Username", selector: (row) => row.username, sortable: true },
+    {
+      name: "Is Admin",
+      selector: (row) => (row.isAdmin ? "Yes" : "No"),
+      sortable: true
+    },
+    {
+      name: "Is Active",
+      selector: (row) => (row.isActive ? "Yes" : "No"),
+      sortable: true
+    }
   ];
 
-  // עמודות לטבלת מתכונים
   const recipeColumns = [
-    { name: "Title", selector: row => row.title, sortable: true },
-    { name: "Category", selector: row => row.categoryName },
-    { name: "Cooking Time (min)", selector: row => row.cookingTime },
-    { name: "Servings", selector: row => row.servings },
+    { name: "Title", selector: (row) => row.title, sortable: true },
+    { name: "Category", selector: (row) => row.categoryName },
+    { name: "Cooking Time", selector: (row) => `${row.cookingTime} min` },
+    { name: "Servings", selector: (row) => row.servings },
     {
       name: "Actions",
-      cell: row => (
-        <div style={{ display: "flex", gap: "0.5rem" }}>
-          <button
-            onClick={() => handleDeleteRecipe(row.recipeId)}
-            className="text-red-600 hover:text-red-800"
-          >
-            <FaTrash />
-          </button>
-        </div>
+      cell: (row) => (
+        <button
+          onClick={() => handleDeleteRecipe(row.recipeId)}
+          className="text-red-600 hover:text-red-800"
+        >
+          <FaTrash />
+        </button>
       ),
       ignoreRowClick: true,
-      allowOverflow: true, // ✅ נשאר רק בעמודה – לא עובר לדום
+      allowOverflow: true
     }
-
   ];
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Admin Dashboard</h1>
+      <h1 className="mb-6 text-2xl font-bold">Admin Dashboard</h1>
 
       <section className="mb-10">
-        <h2 className="text-xl font-semibold mb-3">Users</h2>
+        <h2 className="mb-3 text-xl font-semibold">Users</h2>
         <DataTable
           columns={userColumns}
           data={users}
+          progressPending={loadingUsers}
           pagination
-          highlightOnHover
           striped
+          highlightOnHover
         />
       </section>
 
       <section>
-        <h2 className="text-xl font-semibold mb-3">Recipes</h2>
+        <h2 className="mb-3 text-xl font-semibold">Recipes</h2>
         <DataTable
           columns={recipeColumns}
           data={recipes}
@@ -107,10 +112,10 @@ export default function AdminPage() {
           paginationServer
           paginationTotalRows={totalCount}
           onChangePage={handlePageChange}
+          striped
+          highlightOnHover
         />
-
       </section>
-
     </div>
   );
 }

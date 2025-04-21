@@ -14,9 +14,11 @@ import {
 import { useNavigate } from "react-router-dom";
 import RecipeRatingBlock from "../../components/RecipeRatingBlock";
 
+
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
   const [editing, setEditing] = useState(null);
+  
 
   /* load once, and whenever we call refresh() */
   const refresh = () => {
