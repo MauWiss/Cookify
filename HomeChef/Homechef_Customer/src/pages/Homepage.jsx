@@ -115,7 +115,11 @@ export default function Homepage() {
               </button>
 
               <div className="space-y-2 p-4">
-                <h3 className="hover:text-primary dark:hover:text-primary-dark cursor-pointer text-lg font-semibold transition">
+                <h3 className="hover:text-primary dark:hover:text-primary-dark cursor-pointer text-lg font-semibold transition"
+                                onClick={() => navigate(`/recipes/${recipe.recipeId}`)}
+                                src={recipe.imageUrl}
+                                alt={recipe.title}
+                >
                   {recipe.title}
                 </h3>
 
