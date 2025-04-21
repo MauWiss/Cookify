@@ -42,7 +42,7 @@ public class RecipeCreateDto
     public bool GlutenFree { get; set; }
 
     /* ---------- ingredients (never null) ---------- */
-    public List<IngredientLineDto> Ingredients { get; set; } = new();   // ⬅ FIX: default list
+
 }
 
 // ------------------------------------------------------------------
@@ -57,5 +57,4 @@ public class CreateRecipeDto
     public int CookingTime { get; set; }
     public int CategoryId { get; set; }
 
-    public List<IngredientLineDto> Ingredients { get; set; } = new();   // ⬅ same fix
 }

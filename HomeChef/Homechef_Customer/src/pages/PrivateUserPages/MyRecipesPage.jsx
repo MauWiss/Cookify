@@ -4,6 +4,7 @@ import api from "../../api/api";
 import RecipeWizard from "../../components/AddRecipeModal";
 import { toast } from "react-toastify";
 import { FaTrash, FaPen } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
@@ -17,7 +18,7 @@ export default function MyRecipesPage() {
       .catch((e) => console.error("Load recipes failed", e));
   };
   useEffect(() => {
-    refresh();            // ✅ call inside an arrow, return nothing
+    refresh(); // ✅ call inside an arrow, return nothing
   }, []);
 
   /* delete handler */
@@ -32,6 +33,7 @@ export default function MyRecipesPage() {
       toast.error("Delete failed");
     }
   };
+  const navigate = useNavigate();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -47,10 +49,16 @@ export default function MyRecipesPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
-            <div key={r.recipeId} className="relative overflow-hidden rounded-xl border shadow">
-              <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
-                <img src={r.imageUrl} alt={r.title} className="h-48 w-full object-cover" />
-              </a>
+            <div
+              key={r.recipeId}
+              className="relative overflow-hidden rounded-xl border shadow"
+            >
+              <img
+                onClick={() => navigate(`/recipes/${r.recipeId}`)}
+                src={r.imageUrl}
+                alt={r.title}
+                className="h-48 w-full cursor-pointer object-cover transition hover:opacity-90"
+              />
 
               <div className="space-y-1 p-4">
                 <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
