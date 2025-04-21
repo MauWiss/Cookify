@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.SqlClient;
 using System.Text.Json;
-using static HomeChef.Server.Models.DTOs.RecipeCreateDto;
 
 
 namespace HomeChefServer.Controllers
@@ -116,59 +115,6 @@ namespace HomeChefServer.Controllers
             };
             headReader.Close();
 
-
-            const string ingSql = @"
-    SELECT  ri.IngredientId,
-            i.Name,
-            ri.Quantity,
-            ri.Unit
-      FROM  NewRecipeIngredients ri
-      JOIN  NewIngredients       i ON i.Id = ri.IngredientId
-     WHERE  ri.RecipeId = @Rid
-     ORDER BY i.Name";
-
-            await using var ingCmd = new SqlCommand(ingSql, conn);
-            ingCmd.Parameters.AddWithValue("@Rid", id);
-
-            await using var ir = await ingCmd.ExecuteReaderAsync();
-
-            // build a brand-new List<IngredientLineDto>
-            var ingredientLines = new List<IngredientLineDto>();
-
-            while (await ir.ReadAsync())
-            {
-                // get the column ordinals once per row
-                int idxId = ir.GetOrdinal("IngredientId");
-                int idxName = ir.GetOrdinal("Name");
-                int idxQty = ir.GetOrdinal("Quantity");
-                int idxUnit = ir.GetOrdinal("Unit");
-
-                // IngredientId is an INT in the DB → int
-                int ingId = ir.GetInt32(idxId);
-
-                // Quantity is FLOAT in SQL → use GetDouble then cast
-                double rawQty = ir.GetDouble(idxQty);
-                float qty = (float)rawQty;
-
-                // now create your DTO line
-                var line = new IngredientLineDto
-                {
-                    IngredientId = ingId,
-                    Name = ir.GetString(idxName),
-                    Quantity = (decimal)qty,
-                    Unit = ir.IsDBNull(idxUnit)
-                                     ? string.Empty
-                                     : ir.GetString(idxUnit)
-                };
-
-                ingredientLines.Add(line);
-            }
-
-            ir.Close();
-
-            // finally assign into your recipe DTO
-            dto.Ingredients = ingredientLines;
-
             return Ok(dto);
         }
 
@@ -186,9 +132,6 @@ namespace HomeChefServer.Controllers
             if (recipe.CategoryId <= 0)
                 return BadRequest("Category is required.");
 
-            if (recipe.Ingredients == null || recipe.Ingredients.Count == 0)
-                return BadRequest("At least one ingredient is required.");
-
             /* 2) ─── open connection ------------------------------------ */
             await using var conn =
                 new SqlConnection(_configuration.GetConnectionString("DefaultConnection"));
@@ -203,53 +146,28 @@ namespace HomeChefServer.Controllers
             /* 3) ─── start a transaction -------------------------------- */
             await using var trx = await conn.BeginTransactionAsync();
 
+
             try
             {
-                /* 3a) ensure each ingredient exists, remember its id ---- */
-                var nameToId = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-
-                foreach (var line in recipe.Ingredients)
+                string publisher;
+                await using (var getUserCmd = new SqlCommand("SELECT Username FROM Users WHERE Id = @Id", conn, (SqlTransaction)trx))
                 {
-                    /* skip dups coming from the client */
-                    if (nameToId.ContainsKey(line.Name)) continue;
-
-                    if (line.IngredientId > 0)          // client sent a valid id
-                    {
-                        nameToId[line.Name] = (int)line.IngredientId;
-                        continue;
-                    }
-
-                    /* look‑up by name */
-                    var look = new SqlCommand("SELECT Id FROM NewIngredients WHERE Name=@N",
-                                              conn, (SqlTransaction)trx);
-                    look.Parameters.AddWithValue("@N", line.Name);
-                    var found = await look.ExecuteScalarAsync();
-
-                    if (found != null)
-                    {
-                        nameToId[line.Name] = (int)found;
-                        continue;
-                    }
-
-                    /* insert new ingredient */
-                    var ins = new SqlCommand(
-                        "INSERT INTO NewIngredients(Name) OUTPUT INSERTED.Id VALUES(@N)",
-                        conn, (SqlTransaction)trx);
-                    ins.Parameters.AddWithValue("@N", line.Name);
-                    int newId = (int)await ins.ExecuteScalarAsync();
-                    nameToId[line.Name] = newId;
+                    getUserCmd.Parameters.AddWithValue("@Id", userId);
+                    var result = await getUserCmd.ExecuteScalarAsync();
+                    publisher = result?.ToString() ?? "Unknown";
                 }
+
 
                 /* 3b) insert recipe ------------------------------------ */
                 var addRecipe = new SqlCommand(@"
 INSERT INTO NewRecipes
       (Title, ImageUrl, SourceUrl, Servings, CookingTime, CategoryId,
        CreatedAt, CreatedByUserId, InstructionsText, Summary, Cuisine,
-       Vegetarian, Vegan, GlutenFree)
+       Vegetarian, Vegan, GlutenFree, Publisher)
 OUTPUT INSERTED.Id
 VALUES (@Title,@Img,@Src,@Srv,@Cook,@Cat,
         GETUTCDATE(),@User,@Instr,@Sum,@Cui,
-        @Veg,@Vegan,@GF);",
+        @Veg,@Vegan,@GF,@Publisher);",
                     conn, (SqlTransaction)trx);
 
                 addRecipe.Parameters.AddWithValue("@Title", recipe.Title);
@@ -265,23 +183,9 @@ VALUES (@Title,@Img,@Src,@Srv,@Cook,@Cat,
                 addRecipe.Parameters.AddWithValue("@Veg", recipe.Vegetarian);
                 addRecipe.Parameters.AddWithValue("@Vegan", recipe.Vegan);
                 addRecipe.Parameters.AddWithValue("@GF", recipe.GlutenFree);
+                addRecipe.Parameters.AddWithValue("@Publisher", publisher);
 
                 int recipeId = (int)await addRecipe.ExecuteScalarAsync();
-
-                /* 3c) insert ingredient lines -------------------------- */
-                const string relSql = @"
-INSERT INTO NewRecipeIngredients (RecipeId, IngredientId, Quantity, Unit)
-VALUES (@Rid,@IngId,@Qty,@Unit);";
-
-                foreach (var line in recipe.Ingredients)
-                {
-                    var rel = new SqlCommand(relSql, conn, (SqlTransaction)trx);
-                    rel.Parameters.AddWithValue("@Rid", recipeId);
-                    rel.Parameters.AddWithValue("@IngId", nameToId[line.Name]);
-                    rel.Parameters.AddWithValue("@Qty", line.Quantity);
-                    rel.Parameters.AddWithValue("@Unit", line.Unit);
-                    await rel.ExecuteNonQueryAsync();
-                }
 
                 await trx.CommitAsync();
                 return Ok(new { Id = recipeId });
@@ -360,34 +264,6 @@ VALUES (@Rid,@IngId,@Qty,@Unit);";
                     upd.Parameters.AddWithValue("@GlutenFree", recipe.GlutenFree);
                     upd.Parameters.AddWithValue("@UserId", userId);
                     await upd.ExecuteNonQueryAsync();
-                }
-
-                // 5. Delete old ingredient rows
-                await using (var del = new SqlCommand(
-                    "DELETE FROM NewRecipeIngredients WHERE RecipeId = @RecipeId", conn, tx))
-                {
-                    del.Parameters.AddWithValue("@RecipeId", recipe.RecipeId);
-                    await del.ExecuteNonQueryAsync();
-                }
-
-                // 6. Insert new ingredients
-                foreach (var ing in recipe.Ingredients)
-                {
-                    const string insertSql = @"
-                INSERT INTO NewRecipeIngredients
-                  (RecipeId, IngredientId, Quantity, Unit)
-                VALUES
-                  (@RecipeId, @IngredientId, @Quantity, @Unit);
-            ";
-
-                    await using (var ins = new SqlCommand(insertSql, conn, tx))
-                    {
-                        ins.Parameters.AddWithValue("@RecipeId", recipe.RecipeId);
-                        ins.Parameters.AddWithValue("@IngredientId", ing.IngredientId);
-                        ins.Parameters.AddWithValue("@Quantity", ing.Quantity);
-                        ins.Parameters.AddWithValue("@Unit", (object)ing.Unit ?? DBNull.Value);
-                        await ins.ExecuteNonQueryAsync();
-                    }
                 }
 
                 // 7. Commit transaction

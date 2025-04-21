@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useAuth } from "../hooks/useAuth";
-import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import { generateGeminiReply, fetchPexelsImage } from "../api/api";
 import { FaMicrophone, FaStop } from "react-icons/fa";
@@ -8,8 +6,6 @@ import ChatMessage from "../components/ChatMessage";
 import VoiceSelector from "../components/VoiceSelector";
 
 export default function ChefBot() {
-  const { token } = useAuth();
-  const navigate = useNavigate();
   const [messages, setMessages] = useState([
     {
       sender: "bot",

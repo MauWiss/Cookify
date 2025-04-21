@@ -3,7 +3,16 @@ import { useState, useEffect } from "react";
 import api from "../../api/api";
 import RecipeWizard from "../../components/AddRecipeModal";
 import { toast } from "react-toastify";
-import { FaTrash, FaPen } from "react-icons/fa";
+import {
+  FaClock,
+  FaUtensils,
+  FaHeart,
+  FaRegHeart,
+  FaPen,
+  FaTrash,
+} from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
+import RecipeRatingBlock from "../../components/RecipeRatingBlock";
 
 export default function MyRecipesPage() {
   const [recipes, setRecipes] = useState([]);
@@ -17,7 +26,7 @@ export default function MyRecipesPage() {
       .catch((e) => console.error("Load recipes failed", e));
   };
   useEffect(() => {
-    refresh();            // ✅ call inside an arrow, return nothing
+    refresh(); // ✅ call inside an arrow, return nothing
   }, []);
 
   /* delete handler */
@@ -32,6 +41,7 @@ export default function MyRecipesPage() {
       toast.error("Delete failed");
     }
   };
+  const navigate = useNavigate();
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-8">
@@ -47,18 +57,38 @@ export default function MyRecipesPage() {
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((r) => (
-            <div key={r.recipeId} className="relative overflow-hidden rounded-xl border shadow">
-              <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
-                <img src={r.imageUrl} alt={r.title} className="h-48 w-full object-cover" />
-              </a>
+            <div
+              key={r.recipeId}
+              className="relative overflow-hidden rounded-xl border border-border bg-card shadow transition duration-300 hover:shadow-lg dark:border-border-dark dark:bg-card-dark"
+            >
+              <img
+                onClick={() => navigate(`/recipes/${r.recipeId}`)}
+                src={r.imageUrl}
+                alt={r.title}
+                className="h-48 w-full cursor-pointer object-cover transition hover:opacity-90"
+              />
 
-              <div className="space-y-1 p-4">
-                <a href={r.sourceUrl} target="_blank" rel="noopener noreferrer">
-                  <h3 className="truncate font-semibold">{r.title}</h3>
-                </a>
-                <p className="text-sm text-gray-500">{r.categoryName}</p>
-                <div className="text-xs text-gray-500">
-                  🕒 {r.cookingTime} min • 🍽 {r.servings}
+              <div className="space-y-2 p-4">
+                <h3
+                  onClick={() => navigate(`/recipes/${r.recipeId}`)}
+                  className="cursor-pointer text-base font-semibold text-white hover:text-primary dark:hover:text-primary-dark"
+                >
+                  {r.title}
+                </h3>
+
+                <RecipeRatingBlock recipeId={r.recipeId} />
+
+                <p className="text-sm text-muted dark:text-muted-dark">
+                  {r.categoryName}
+                </p>
+
+                <div className="mt-1 flex items-center gap-4 text-sm text-muted dark:text-muted-dark">
+                  <span className="flex items-center gap-1">
+                    <FaClock /> {r.cookingTime} min
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <FaUtensils /> Serves {r.servings}
+                  </span>
                 </div>
               </div>
 
