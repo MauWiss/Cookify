@@ -20,5 +20,5 @@ public class UpdateRecipeDTO
     public bool Vegan { get; set; }
     public bool GlutenFree { get; set; }
 
-    public List<IngredientDTO> Ingredients { get; set; }
+   
 }

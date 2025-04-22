@@ -48,12 +48,6 @@ export default function Navbar() {
     };
   }, []);
 
-  const getDefaultImage = () => {
-    if (user?.gender === "male") return "/images/avatar-male.png";
-    if (user?.gender === "female") return "/images/avatar-female.png";
-    return "/images/avatar-default.png";
-  };
-
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully 👋");
@@ -198,7 +192,7 @@ export default function Navbar() {
                     user.profileImage.trim() !== "" &&
                     user.profileImage !== "data:image/jpeg;base64,"
                       ? user.profileImage
-                      : getDefaultImage()
+                      : "/cgroup82/tar1/images/default-avatar.jpg"
                   }
                   alt="Profile"
                   className="h-12 w-12 rounded-full border-4 border-transparent transition-all duration-300 hover:border-blue-500"
@@ -333,7 +327,7 @@ export default function Navbar() {
                 <img
                   src={
                     user?.profileImage ||
-                    "/cgroup82/tar1/images/female-chef-avatar-icon-vector-32095494.jpg"
+                    "/cgroup82/tar1/images/default-avatar.jpg"
                   }
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
