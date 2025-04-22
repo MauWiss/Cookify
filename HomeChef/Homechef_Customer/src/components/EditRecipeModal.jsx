@@ -16,7 +16,6 @@ export default function EditRecipeModal({
   const [servings, setServings] = useState("");
   const [cookingTime, setCookingTime] = useState("");
   const [categoryId, setCategoryId] = useState("");
-  const [ingredients, setIngredients] = useState([]);
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
@@ -30,16 +29,9 @@ export default function EditRecipeModal({
         setServings(r.servings);
         setCookingTime(r.cookingTime);
         setCategoryId(r.categoryId);
-        setIngredients(r.ingredients);
       });
     }
   }, [open, recipeId]);
-
-  const handleIngredientChange = (index, field, value) => {
-    setIngredients((prev) =>
-      prev.map((ing, i) => (i === index ? { ...ing, [field]: value } : ing)),
-    );
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -52,7 +44,6 @@ export default function EditRecipeModal({
         servings: parseInt(servings),
         cookingTime: parseInt(cookingTime),
         categoryId: parseInt(categoryId),
-        ingredients,
       };
 
       await api.put("/myrecipes/update", updated);
@@ -148,52 +139,6 @@ export default function EditRecipeModal({
                 </option>
               ))}
             </select>
-
-            {ingredients.map((ingredient, index) => (
-              <div key={index} className="flex gap-2">
-                <input
-                  value={ingredient.name}
-                  onChange={(e) =>
-                    handleIngredientChange(index, "name", e.target.value)
-                  }
-                  className="w-full rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-                  placeholder="Ingredient Name"
-                  required
-                />
-                <input
-                  value={ingredient.quantity}
-                  onChange={(e) =>
-                    handleIngredientChange(index, "quantity", e.target.value)
-                  }
-                  type="number"
-                  className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-                  placeholder="Qty"
-                  required
-                />
-                <input
-                  value={ingredient.unit}
-                  onChange={(e) =>
-                    handleIngredientChange(index, "unit", e.target.value)
-                  }
-                  className="w-1/4 rounded border px-3 py-2 dark:bg-gray-800 dark:text-white"
-                  placeholder="Unit"
-                  required
-                />
-              </div>
-            ))}
-
-            <button
-              type="button"
-              onClick={() =>
-                setIngredients((prev) => [
-                  ...prev,
-                  { name: "", quantity: "", unit: "" },
-                ])
-              }
-              className="text-sm text-blue-600 hover:underline"
-            >
-              + Add Ingredient
-            </button>
 
             <button
               type="submit"
