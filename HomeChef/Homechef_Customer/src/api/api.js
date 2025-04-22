@@ -8,7 +8,7 @@ import axios from "axios";
       base axios instance
       ------------------------------------------------------------------ */
 const api = axios.create({
-  baseURL: "http://194.90.158.74/cgroup82/prod/api",
+  baseURL: "https://proj.ruppin.ac.il/cgroup82/prod/api",
   headers: {
     "Content-Type": "application/json",
   },
