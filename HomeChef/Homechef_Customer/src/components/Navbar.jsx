@@ -7,8 +7,6 @@ import { FaBars, FaHeart } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
 import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiMoreVertical } from "react-icons/fi";
-import defaultProfileImage from "../images/female-chef-avatar-icon-vector-32095494.jpg";
-
 
 export default function Navbar() {
   const location = useLocation();
@@ -27,7 +25,6 @@ export default function Navbar() {
     document.documentElement.classList.toggle("dark", dark);
     localStorage.setItem("theme", dark ? "dark" : "light");
     console.log("profilePictureBase64:", user?.profileImage);
-
   }, [dark]);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export default function Navbar() {
     if (user?.gender === "female") return "/images/avatar-female.png";
     return "/images/avatar-default.png";
   };
-  
+
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully 👋");
@@ -73,7 +70,7 @@ export default function Navbar() {
       <div className="relative flex w-full items-center justify-between">
         {/* Logo */}
         <img
-          src="../src/images/Logo-bowl.png"
+          src="/cgroup82/tar1/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
           title="logo"
@@ -81,19 +78,22 @@ export default function Navbar() {
 
         {/* Middle Links */}
         <div
-          className={`items-center gap-6 text-lg font-medium sm:flex ${isLoggedOut
-            ? "ml-auto"
-            : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-            }`}
+          className={`items-center gap-6 text-lg font-medium sm:flex ${
+            isLoggedOut
+              ? "ml-auto"
+              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+          }`}
         >
-          <Link className={`${active("/")} no-underlinetransition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3"`} to="/">
+          <Link
+            className={`${active("/")} no-underlinetransition px-3" transform font-semibold duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
+            to="/"
+          >
             Home
           </Link>
           {token && (
             <>
-
               <Link
-                className={`${active("/favorites")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
+                className={`${active("/favorites")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
                 to="/favorites"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -102,7 +102,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link
-                className={`${active("/my-recipes")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
+                className={`${active("/my-recipes")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
                 to="/my-recipes"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -111,7 +111,7 @@ export default function Navbar() {
                 </div>
               </Link>
               <Link
-                className={`${active("/chatbot")} no-underline transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3`}
+                className={`${active("/chatbot")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
                 to="/chatbot"
               >
                 <div className="flex items-center gap-2 whitespace-nowrap">
@@ -123,7 +123,7 @@ export default function Navbar() {
               <div className="relative" ref={moreRef}>
                 <button
                   onClick={() => setOpen((prev) => !prev)}
-                  className="flex items-center gap-2 whitespace-nowrap hover:text-blue-500 dark:hover:text-blue-400 transition duration-300 ease-in-out transform hover:scale-105 hover:text-blue-600 font-semibold px-3"
+                  className="flex transform items-center gap-2 whitespace-nowrap px-3 font-semibold transition duration-300 ease-in-out hover:scale-105 hover:text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
                 >
                   More
                   <span className="flex cursor-pointer items-center">
@@ -185,31 +185,24 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-
-
-
           {/* Right side */}
           {token && (
             <div className="flex items-center gap-4">
-              <Link
-                to="/profile"
-                className="flex items-center gap-2 group"
-              >
-                <span className="text-lg font-bold text-gray-700 transition-all duration-400 group-hover:scale-110 group-hover:text-yellow-700 dark:text-white">
+              <Link to="/profile" className="group flex items-center gap-2">
+                <span className="duration-400 text-lg font-bold text-gray-700 transition-all group-hover:scale-110 group-hover:text-yellow-700 dark:text-white">
                   {user?.username}
                 </span>
                 <img
                   src={
                     user?.profileImage &&
-                      user.profileImage.trim() !== "" &&
-                      user.profileImage !== "data:image/jpeg;base64,"
+                    user.profileImage.trim() !== "" &&
+                    user.profileImage !== "data:image/jpeg;base64,"
                       ? user.profileImage
                       : getDefaultImage()
                   }
                   alt="Profile"
-                  className="w-12 h-12 rounded-full border-4 border-transparent hover:border-blue-500 transition-all duration-300"
+                  className="h-12 w-12 rounded-full border-4 border-transparent transition-all duration-300 hover:border-blue-500"
                 />
-
               </Link>
 
               <button
@@ -224,7 +217,7 @@ export default function Navbar() {
                   onClick={() => setProfileMenuOpen((prev) => !prev)}
                   className="flex items-center gap-2"
                 >
-                  <FiMoreVertical className="text-2xl cursor-pointer" />
+                  <FiMoreVertical className="cursor-pointer text-2xl" />
                 </button>
 
                 {profileMenuOpen && (
@@ -251,7 +244,7 @@ export default function Navbar() {
                         Admin Panel
                       </Link>
                     )}
-                    <div className="border-t border-gray-200 dark:border-gray-700 ">
+                    <div className="border-t border-gray-200 dark:border-gray-700">
                       <button
                         onClick={() => {
                           setProfileMenuOpen(false);
@@ -267,7 +260,6 @@ export default function Navbar() {
               </div>
             </div>
           )}
-
         </div>
       </div>
 
@@ -339,7 +331,10 @@ export default function Navbar() {
             <div className="flex flex-col gap-2 border-t border-gray-300 pt-3">
               <div className="flex items-center gap-3 px-4">
                 <img
-                  src={user?.profileImage || "/default-avatar.png"}
+                  src={
+                    user?.profileImage ||
+                    "/cgroup82/tar1/images/default-avatar.png"
+                  }
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
                 />

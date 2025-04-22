@@ -12,7 +12,7 @@ import {
   FaTrophy,
   FaQuestionCircle,
   FaRedo,
-  FaTimesCircle
+  FaTimesCircle,
 } from "react-icons/fa";
 import { useAuth } from "../hooks/useAuth";
 
@@ -29,7 +29,7 @@ export default function TriviaGame() {
   const [isMuted, setIsMuted] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const timerRef = useRef(null);
-  const audioRef = useRef(new Audio("/audio/TriviaSound.mp3"));
+  const audioRef = useRef(new Audio("/cgroup82/tar1/audio/TriviaSound.mp3"));
 
   const fetchQuestion = async () => {
     try {
@@ -108,7 +108,8 @@ export default function TriviaGame() {
     if (showAnswer || gameOver) return;
     setSelected(option);
     setShowAnswer(true);
-    const isCorrect = option[0].toUpperCase() === questionData.answer.toUpperCase();
+    const isCorrect =
+      option[0].toUpperCase() === questionData.answer.toUpperCase();
     if (isCorrect) {
       confetti();
       setScore((prev) => prev + 10);
@@ -146,12 +147,13 @@ export default function TriviaGame() {
     );
   }
 
-  const isCorrect = selected && selected[0].toUpperCase() === questionData.answer.toUpperCase();
+  const isCorrect =
+    selected && selected[0].toUpperCase() === questionData.answer.toUpperCase();
   const correctText = questionData.correctText;
 
   return (
-    <div className="relative z-0 isolate mx-auto max-w-2xl p-6 text-gray-900 dark:text-white">
-      <div className="mb-4 flex items-center justify-between z-10 relative">
+    <div className="relative isolate z-0 mx-auto max-w-2xl p-6 text-gray-900 dark:text-white">
+      <div className="relative z-10 mb-4 flex items-center justify-between">
         <h1 className="mx-auto mb-4 text-center text-4xl font-extrabold text-blue-600">
           Trivia Time!
         </h1>
@@ -167,15 +169,15 @@ export default function TriviaGame() {
         </div>
       </div>
 
-      <div className="mb-2 text-right text-lg font-bold text-red-500 flex items-center justify-end gap-2">
+      <div className="mb-2 flex items-center justify-end gap-2 text-right text-lg font-bold text-red-500">
         <FaClock /> {timer}s
       </div>
 
-      <div className="text-md mb-2 text-right font-semibold text-blue-600 flex items-center justify-end gap-2">
+      <div className="text-md mb-2 flex items-center justify-end gap-2 text-right font-semibold text-blue-600">
         <FaStar className="text-yellow-400" /> Score: {score}
       </div>
 
-      <div className="mb-4 text-xl font-semibold flex items-center gap-2">
+      <div className="mb-4 flex items-center gap-2 text-xl font-semibold">
         <FaQuestionCircle className="text-blue-500" /> {questionData.question}
       </div>
 
@@ -191,8 +193,8 @@ export default function TriviaGame() {
                 ? "bg-green-500 text-white"
                 : "bg-red-500 text-white"
               : isThisCorrect
-              ? "bg-green-100 dark:bg-green-800"
-              : "bg-gray-200 dark:bg-gray-700"
+                ? "bg-green-100 dark:bg-green-800"
+                : "bg-gray-200 dark:bg-gray-700"
             : "bg-gray-200 dark:bg-gray-700 hover:bg-blue-500 hover:text-white";
           return (
             <button
@@ -208,7 +210,7 @@ export default function TriviaGame() {
 
       {showAnswer && (
         <div className="mt-6 rounded-xl bg-yellow-100 p-4 text-gray-800 dark:bg-yellow-900 dark:text-white">
-          <strong className="mb-2 block text-lg flex items-center gap-2">
+          <strong className="mb-2 block flex items-center gap-2 text-lg">
             {isCorrect ? (
               <>
                 <FaStar className="text-green-500" /> Correct!
@@ -249,11 +251,12 @@ export default function TriviaGame() {
       {gameOver && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white">
           <div className="text-center">
-            <h2 className="mb-4 animate-pulse text-4xl font-extrabold flex items-center justify-center gap-2">
+            <h2 className="mb-4 flex animate-pulse items-center justify-center gap-2 text-4xl font-extrabold">
               <FaTimesCircle className="text-red-400" /> Game Over!
             </h2>
             <p className="mb-6 text-lg">
-              Your final score: <span className="font-bold text-green-400">{score}</span>
+              Your final score:{" "}
+              <span className="font-bold text-green-400">{score}</span>
             </p>
             <button
               onClick={() => {
