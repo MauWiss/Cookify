@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
 export default defineConfig({
+  base: "/cgroup82/tar1/", // <<< זו השורה הקריטית שנחוצה כדי שיטעין נכון את כל הקבצים!
+
   plugins: [
     react(),
     VitePWA({
