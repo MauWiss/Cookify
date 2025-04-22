@@ -70,7 +70,7 @@ export default function Navbar() {
       <div className="relative flex w-full items-center justify-between">
         {/* Logo */}
         <img
-          src="/cgroup82/tar1/Logo-bowl.png"
+          src="/cgroup82/tar1/images/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
           title="logo"
@@ -333,7 +333,7 @@ export default function Navbar() {
                 <img
                   src={
                     user?.profileImage ||
-                    "/cgroup82/tar1/images/default-avatar.png"
+                    "/cgroup82/tar1/images/female-chef-avatar-icon-vector-32095494.jpg"
                   }
                   alt="Avatar"
                   className="h-8 w-8 rounded-full border border-gray-300"
