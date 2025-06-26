@@ -1,53 +1,41 @@
+// src/components/Navbar.jsx
+import React, { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate, Link } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
 import { Moon, Sun } from "lucide-react";
 import { toast } from "react-toastify";
 import { useAuth } from "../pages/Auth/AuthContext";
-import { FaBars, FaHeart } from "react-icons/fa";
+import { FaBars, FaHeart, FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { GiCook } from "react-icons/gi";
-import { FaChevronDown, FaChevronUp } from "react-icons/fa";
 import { FiMoreVertical } from "react-icons/fi";
+import cognitoConfig from "../cognitoConfig";
 
 export default function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { token, logout, role, user } = useAuth();
+  const { user, login: contextLogin, logout } = useAuth();
+  const token = user?.idToken;
   const [dark, setDark] = useState(localStorage.getItem("theme") === "dark");
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const profileRef = useRef(null);
   const moreRef = useRef(null);
-  const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
   const isHomePage = location.pathname === "/";
   const isLoggedOut = !token;
 
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("theme", dark ? "dark" : "light");
-    console.log("profilePictureBase64:", user?.profileImage);
-  }, [dark]);
+  // raw login redirect
+  const login = () => {
+    const { domain, clientId, redirectUri, responseType, scope } = cognitoConfig;
+    const authUrl =
+      `https://${domain}/login?` +
+      `response_type=${encodeURIComponent(responseType)}` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent(scope)}`;
+    window.location.href = authUrl;
+  };
 
-  useEffect(() => {
-    console.log("user in navbar:", user);
-  }, [user]);
-
-  useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (profileRef.current && !profileRef.current.contains(e.target)) {
-        setProfileMenuOpen(false);
-      }
-      if (moreRef.current && !moreRef.current.contains(e.target)) {
-        setOpen(false);
-      }
-    };
-    console.log(user);
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
+  // logout via context
   const handleLogout = () => {
     logout();
     toast.success("Logged out successfully 👋");
@@ -59,12 +47,30 @@ export default function Navbar() {
       ? "text-blue-500 font-semibold underline underline-offset-4"
       : "text-gray-800 hover:text-blue-500 dark:text-white dark:hover:text-blue-400 transition";
 
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("theme", dark ? "dark" : "light");
+  }, [dark]);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (profileRef.current && !profileRef.current.contains(e.target)) {
+        setProfileMenuOpen(false);
+      }
+      if (moreRef.current && !moreRef.current.contains(e.target)) {
+        setMoreOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
     <nav className="relative z-50 bg-gray-100 px-6 py-4 shadow-md dark:bg-gray-900">
       <div className="relative flex w-full items-center justify-between">
         {/* Logo */}
         <img
-          src="/cgroup82/tar1/images/Logo-bowl.png"
+          src="/images/Logo-bowl.png"
           alt="Logo"
           className="h-10 w-auto"
           title="logo"
@@ -73,70 +79,61 @@ export default function Navbar() {
         {/* Middle Links */}
         <div
           className={`items-center gap-6 text-lg font-medium sm:flex ${
-            isLoggedOut
-              ? "ml-auto"
-              : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            isLoggedOut ? "ml-auto" : "absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
           }`}
         >
-          <Link
-            className={`${active("/")} no-underlinetransition px-3" transform font-semibold duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
-            to="/"
-          >
+          <Link className={`${active("/")} px-3 font-semibold`} to="/">
             Home
           </Link>
+
           {token && (
             <>
               <Link
-                className={`${active("/favorites")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
+                className={`${active("/favorites")} px-3 font-semibold`}
                 to="/favorites"
               >
-                <div className="flex items-center gap-2 whitespace-nowrap">
+                <div className="flex items-center gap-2">
                   <FaHeart className="text-red-500" />
                   Favorites
                 </div>
               </Link>
               <Link
-                className={`${active("/my-recipes")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
+                className={`${active("/my-recipes")} px-3 font-semibold`}
                 to="/my-recipes"
               >
-                <div className="flex items-center gap-2 whitespace-nowrap">
+                <div className="flex items-center gap-2">
                   <GiCook className="text-orange-500" />
                   My Recipes
                 </div>
               </Link>
               <Link
-                className={`${active("/chatbot")} transform px-3 font-semibold no-underline transition duration-300 ease-in-out hover:scale-105 hover:text-blue-600`}
+                className={`${active("/chatbot")} px-3 font-semibold`}
                 to="/chatbot"
               >
-                <div className="flex items-center gap-2 whitespace-nowrap">
-                  ChefBot
-                </div>
+                ChefBot
               </Link>
 
               {/* More Dropdown */}
               <div className="relative" ref={moreRef}>
                 <button
-                  onClick={() => setOpen((prev) => !prev)}
-                  className="flex transform items-center gap-2 whitespace-nowrap px-3 font-semibold transition duration-300 ease-in-out hover:scale-105 hover:text-blue-500 hover:text-blue-600 dark:hover:text-blue-400"
+                  onClick={() => setMoreOpen((o) => !o)}
+                  className="flex items-center gap-2 px-3 font-semibold"
                 >
-                  More
-                  <span className="flex cursor-pointer items-center">
-                    {open ? <FaChevronUp /> : <FaChevronDown />}
-                  </span>
+                  More {moreOpen ? <FaChevronUp /> : <FaChevronDown />}
                 </button>
-                {open && (
+                {moreOpen && (
                   <div className="absolute z-50 mt-2 w-48 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
                     <Link
                       to="/trivia"
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                      onClick={() => setMoreOpen(false)}
+                      className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       🧠 Trivia Game
                     </Link>
                     <Link
                       to="/worldrecipes"
-                      onClick={() => setOpen(false)}
-                      className="block px-4 py-2 text-sm text-gray-700 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                      onClick={() => setMoreOpen(false)}
+                      className="block px-4 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700"
                     >
                       🌍 World Recipes
                     </Link>
@@ -145,31 +142,26 @@ export default function Navbar() {
               </div>
             </>
           )}
+
           {!token && (
             <>
-              <Link
-                className={`${active("/auth/login")} no-underline`}
-                to="/auth/login"
-              >
-                Login
-              </Link>
-              <Link
-                className={`${active("/auth/register")} no-underline`}
-                to="/auth/register"
-              >
+              <button onClick={login} className="px-3 font-semibold text-blue-600">
+                התחברות
+              </button>
+              <Link className={`${active("/auth/register")} px-3`} to="/auth/register">
                 Register
               </Link>
               <button
-                onClick={() => setDark((prev) => !prev)}
-                className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
+                onClick={() => setDark((d) => !d)}
+                className="flex items-center gap-2 px-3"
               >
                 {dark ? (
                   <>
-                    Light <Sun size={22} />
+                    Light <Sun size={20} />
                   </>
                 ) : (
                   <>
-                    Dark <Moon size={22} />
+                    Dark <Moon size={20} />
                   </>
                 )}
               </button>
@@ -179,79 +171,31 @@ export default function Navbar() {
 
         {/* Right side */}
         <div className="flex items-center gap-4">
-          {/* Right side */}
           {token && (
             <div className="flex items-center gap-4">
-              <Link to="/profile" className="group flex items-center gap-2">
-                <span className="duration-400 text-lg font-bold text-gray-700 transition-all group-hover:scale-110 group-hover:text-yellow-700 dark:text-white">
+              <Link to="/profile" className="flex items-center gap-2">
+                <span className="text-lg font-bold text-gray-700 dark:text-white">
                   {user?.username}
                 </span>
                 <img
-                  src={
-                    user?.profileImage &&
-                    user.profileImage.trim() !== "" &&
-                    user.profileImage !== "data:image/jpeg;base64,"
-                      ? user.profileImage
-                      : "/cgroup82/tar1/images/default-avatar.jpg"
-                  }
+                  src={user?.profileImage || "/images/default-avatar.jpg"}
                   alt="Profile"
-                  className="h-12 w-12 rounded-full border-4 border-transparent transition-all duration-300 hover:border-blue-500"
+                  className="h-10 w-10 rounded-full border-2 border-transparent hover:border-blue-500"
                 />
               </Link>
 
               <button
-                className="text-gray-700 dark:text-white sm:hidden"
-                onClick={() => setMenuOpen((prev) => !prev)}
+                onClick={handleLogout}
+                className="text-red-600"
+              >
+                Logout
+              </button>
+              <button
+                className="sm:hidden"
+                onClick={() => setMenuOpen((m) => !m)}
               >
                 <FaBars size={24} />
               </button>
-
-              <div className="relative" ref={profileRef}>
-                <button
-                  onClick={() => setProfileMenuOpen((prev) => !prev)}
-                  className="flex items-center gap-2"
-                >
-                  <FiMoreVertical className="cursor-pointer text-2xl" />
-                </button>
-
-                {profileMenuOpen && (
-                  <div className="absolute right-0 z-50 mt-2 w-40 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-gray-800">
-                    <button
-                      onClick={() => setDark((prev) => !prev)}
-                      className="flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700"
-                    >
-                      {dark ? (
-                        <>
-                          Light <Sun size={22} />
-                        </>
-                      ) : (
-                        <>
-                          Dark <Moon size={22} />
-                        </>
-                      )}
-                    </button>
-                    {role === "admin" && (
-                      <Link
-                        className={`${active("/admin")} flex w-full items-center gap-2 px-4 py-2 text-left text-sm text-gray-800 no-underline hover:bg-gray-100 dark:text-white dark:hover:bg-gray-700`}
-                        to="/admin"
-                      >
-                        Admin Panel
-                      </Link>
-                    )}
-                    <div className="border-t border-gray-200 dark:border-gray-700">
-                      <button
-                        onClick={() => {
-                          setProfileMenuOpen(false);
-                          handleLogout();
-                        }}
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-800"
-                      >
-                        Logout
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
             </div>
           )}
         </div>
@@ -259,101 +203,42 @@ export default function Navbar() {
 
       {/* Mobile Menu */}
       {menuOpen && (
-        <div className="mt-4 flex flex-col gap-4 text-lg font-medium sm:hidden">
+        <div className="mt-4 flex flex-col gap-4 sm:hidden">
           <Link className={active("/")} to="/">
             Home
           </Link>
-          {token && role === "admin" && (
-            <Link to="/admin" className="text-yellow-400">
-              Admin Panel
-            </Link>
-          )}
-          {token && (
+          {token ? (
             <>
               <Link className={active("/favorites")} to="/favorites">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  Favorites <FaHeart className="text-red-500" />
-                </div>
+                Favorites
               </Link>
               <Link className={active("/my-recipes")} to="/my-recipes">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  My Recipes <GiCook className="text-orange-500" />
-                </div>
+                My Recipes
               </Link>
               <Link className={active("/chatbot")} to="/chatbot">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  ChefBot 🤖
-                </div>
+                ChefBot
               </Link>
               <Link className={active("/trivia")} to="/trivia">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  Trivia Game 🧠
-                </div>
+                Trivia
               </Link>
               <Link className={active("/worldrecipes")} to="/worldrecipes">
-                <div className="flex items-center gap-2 whitespace-nowrap text-base">
-                  National Dish 🌍
-                </div>
+                World Recipes
               </Link>
+              <button onClick={handleLogout} className="text-red-600">
+                Logout
+              </button>
             </>
-          )}
-          {!token ? (
+          ) : (
             <>
-              <Link className={active("/auth/login")} to="/auth/login">
-                Login
-              </Link>
+              <button onClick={login}>Login</button>
               <Link className={active("/auth/register")} to="/auth/register">
                 Register
               </Link>
             </>
-          ) : (
-            <button
-              onClick={handleLogout}
-              title="Logout"
-              className="px-4 py-2 text-left text-red-600 hover:underline"
-            >
-              Logout
-            </button>
           )}
-          <button
-            onClick={() => setDark((prev) => !prev)}
-            className="text-gray-700 dark:text-white"
-          >
-            {dark ? <Sun size={22} /> : <Moon size={22} />}
+          <button onClick={() => setDark((d) => !d)}>
+            {dark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
-          {token && (
-            <div className="flex flex-col gap-2 border-t border-gray-300 pt-3">
-              <div className="flex items-center gap-3 px-4">
-                <img
-                  src={
-                    user?.profileImage ||
-                    "/cgroup82/tar1/images/default-avatar.jpg"
-                  }
-                  alt="Avatar"
-                  className="h-8 w-8 rounded-full border border-gray-300"
-                />
-                <span className="text-sm text-gray-700 dark:text-white">
-                  {user?.username}
-                </span>
-              </div>
-              <Link
-                to="/profile"
-                onClick={() => setMenuOpen(false)}
-                className="px-4 py-2 text-sm text-gray-800 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700"
-              >
-                Profile
-              </Link>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  handleLogout();
-                }}
-                className="px-4 py-2 text-left text-sm text-red-600 hover:bg-red-100 dark:text-red-400 dark:hover:bg-red-800"
-              >
-                Logout
-              </button>
-            </div>
-          )}
         </div>
       )}
     </nav>

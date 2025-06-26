@@ -1,84 +1,66 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
-import { getUserProfile } from "../../api/api";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import cognitoConfig from "../../cognitoConfig";
 
-const AuthContext = createContext();
+const AuthContext = createContext({
+  user: null,
+  login: () => {},
+  logout: () => {}
+});
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState(localStorage.getItem("role"));
 
+  // 1) קוד החזרה מ-Cognito → החלפה ב-tokens
   useEffect(() => {
-    loadUser();
-    window.addEventListener("storage", loadUser);
-    return () => window.removeEventListener("storage", loadUser);
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
+    if (code) {
+      fetch(`https://${cognitoConfig.domain}/oauth2/token`, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body:
+          `grant_type=authorization_code` +
+          `&client_id=${cognitoConfig.clientId}` +
+          `&code=${code}` +
+          `&redirect_uri=${encodeURIComponent(cognitoConfig.redirectUri)}`
+      })
+        .then(res => res.json())
+        .then(data => {
+          localStorage.setItem("idToken", data.id_token);
+          setUser({ idToken: data.id_token });
+          // ננקה את הקוד מה־URL כדי שלא נטפל בו שוב
+          window.history.replaceState({}, "", "/");
+        })
+        .catch(console.error);
+    } else {
+      // אם אין קוד, נטען מה־localStorage
+      const token = localStorage.getItem("idToken");
+      if (token) setUser({ idToken: token });
+      console.log(token)
+    }
   }, []);
 
-  const loadUser = async () => {
-    const storedToken = localStorage.getItem("token");
-    if (!storedToken) {
-      setUser(null);
-      return;
-    }
+  // login/raw redirect
+  const login = () => {
+    const { domain, clientId, redirectUri, responseType, scope } = cognitoConfig;
+    const authUrl =
+      `https://${domain}/login?` +
+      `response_type=${encodeURIComponent(responseType)}` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent(scope)}`;
 
-    setToken(storedToken);
-
-    try {
-      const decoded = jwtDecode(storedToken);
-      console.log("decoded token:", decoded);
-
-      const res = await getUserProfile();
-      const userData = res.data.data;
-
-      console.log("data from profile:", userData);
-
-      // נבדוק אם יש תמונה אמיתית (ולא רק prefix של base64)
-      const hasValidImage =
-        userData.profilePictureBase64 &&
-        userData.profilePictureBase64.trim() !== "" &&
-        userData.profilePictureBase64 !== "data:image/jpeg;base64,";
-
-      setUser({
-        id: userData.id,
-        email: userData.email,
-        username: userData.username,
-        gender: userData.gender,
-        profileImage: hasValidImage
-          ? `data:image/jpeg;base64,${userData.profilePictureBase64}`
-          : null,
-      });
-    } catch (error) {
-      console.error("Failed to load user:", error);
-      setUser(null);
-    }
+    window.location.href = authUrl;
   };
 
-  const login = (newToken, newRole) => {
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("role", newRole);
-    setToken(newToken);
-    setRole(newRole);
-
-    try {
-      const decoded = jwtDecode(newToken);
-      console.log("decoded token:", decoded);
-      loadUser();
-    } catch {
-      setUser(null);
-    }
-  };
-
+  // התנתקות
   const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setToken(null);
+    localStorage.removeItem("idToken");
     setUser(null);
-    setRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, role, login, logout, setUser }}>
+    <AuthContext.Provider value={{ user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

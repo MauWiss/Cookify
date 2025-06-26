@@ -29,7 +29,7 @@ export default function TriviaGame() {
   const [isMuted, setIsMuted] = useState(false);
   const [correctAnswers, setCorrectAnswers] = useState(0);
   const timerRef = useRef(null);
-  const audioRef = useRef(new Audio("/cgroup82/tar1/audio/TriviaSound.mp3"));
+  const audioRef = useRef(new Audio("/audio/TriviaSound.mp3"));
 
   const fetchQuestion = async () => {
     try {

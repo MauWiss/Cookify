@@ -97,8 +97,12 @@ export default function LoginPage() {
             >
               Register here
             </Link>
+
+            
           </p>
         </form>
+
+        <button onClick={Auth.federatedSignIn()}>התחברות</button>
       </div>
     </div>
   );
